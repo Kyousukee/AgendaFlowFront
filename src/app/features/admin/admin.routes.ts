@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { LayoutComponent } from './components/layout/layout.component';
+import { HomeComponent } from './pages/home/home.component';
 import { HorariosComponent } from './pages/horarios/horarios.component';
 import { EmpleadosComponent } from './pages/empleados/empleados.component';
 import { ServiciosComponent } from './pages/servicios/servicios.component';
@@ -10,7 +11,8 @@ export const routes: Routes = [
     path: 'admin',
     component: LayoutComponent,
     children: [
-      { path: '', redirectTo: 'horarios', pathMatch: 'full' },
+      { path: '', redirectTo: 'home', pathMatch: 'full' },
+      { path: 'home', component: HomeComponent },
       { path: 'horarios', component: HorariosComponent },
       { path: 'empleados', component: EmpleadosComponent },
       { path: 'servicios', component: ServiciosComponent },

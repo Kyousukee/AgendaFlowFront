@@ -1,0 +1,75 @@
+<div class="horarios-page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Agenda del dia</h1>
+      <p class="page-subtitle">Vista general de citas y disponibilidad</p>
+    </div>
+    <div class="page-actions">
+      <button class="btn btn--outline">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <span class="date-label">{{ selectedDay() }}</span>
+      <button class="btn btn--outline">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <div class="horarios-grid">
+    <div class="servicios-panel">
+      <h3 class="panel-title">Servicios</h3>
+      <div class="servicios-list">
+        @for (servicio of servicios; track servicio.id) {
+          <div class="servicio-item">
+            <div class="servicio-color" [style.background]="servicio.color"></div>
+            <div class="servicio-info">
+              <span class="servicio-nombre">{{ servicio.nombre }}</span>
+              <span class="servicio-duracion">{{ servicio.duracion }} min</span>
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="resumen">
+        <h3 class="panel-title">Resumen del dia</h3>
+        <div class="resumen-stats">
+          <div class="stat">
+            <span class="stat-value stat-value--ocupado">{{ totalOcupados }}</span>
+            <span class="stat-label">Citas agendadas</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value stat-value--disponible">{{ totalDisponibles }}</span>
+            <span class="stat-label">Slots libres</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="timeline-panel">
+      <mat-card class="timeline-card">
+        <div class="timeline">
+          @for (slot of slots; track slot.hora) {
+            <div class="slot" [class.slot--ocupado]="slot.estado === 'ocupado'" [class.slot--disponible]="slot.estado === 'disponible'">
+              <div class="slot__hora">
+                <span class="slot__hora-inicio">{{ slot.hora }}</span>
+                <span class="slot__hora-fin">{{ slot.horaFin }}</span>
+              </div>
+              <div class="slot__bar">
+                @if (slot.estado === 'ocupado' && slot.servicio) {
+                  <div class="slot__contenido" [style.borderLeftColor]="slot.servicio.color">
+                    <span class="slot__servicio" [style.color]="slot.servicio.color">{{ slot.servicio.nombre }}</span>
+                    <span class="slot__cliente">{{ slot.cliente }}</span>
+                  </div>
+                } @else {
+                  <div class="slot__contenido slot__contenido--vacio">
+                    <span class="slot__disponible-text">Disponible</span>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </mat-card>
+    </div>
+  </div>
+</div>

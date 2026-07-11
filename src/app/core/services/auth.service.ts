@@ -20,7 +20,7 @@ export class AuthService {
       localStorage.setItem(this.STORAGE_KEY, 'true');
     }
     this.isLoggedIn.set(true);
-    this.router.navigate(['/admin/horarios']);
+    this.router.navigate(['/admin/home']);
   }
 
   logout(): void {

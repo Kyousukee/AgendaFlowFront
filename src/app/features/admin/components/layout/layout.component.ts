@@ -16,6 +16,7 @@ export class LayoutComponent {
   auth = inject(AuthService);
 
   navItems = [
+    { label: 'Inicio', icon: 'dashboard', route: '/admin/home' },
     { label: 'Horarios', icon: 'schedule', route: '/admin/horarios' },
     { label: 'Empleados', icon: 'people', route: '/admin/empleados' },
     { label: 'Servicios', icon: 'content_cut', route: '/admin/servicios' },
