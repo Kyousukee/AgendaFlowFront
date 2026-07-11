@@ -1,0 +1,38 @@
+<nav class="navbar">
+  <div class="navbar__container">
+    <a href="/" class="navbar__logo">
+      <img src="logo.png" alt="AgendaFlow" class="navbar__logo-img" />
+    </a>
+
+    <div class="navbar__links">
+      <a href="#features" class="navbar__link">Funciones</a>
+      <a href="#how-it-works" class="navbar__link">Como Funciona</a>
+      <a href="#testimonials" class="navbar__link">Testimonios</a>
+      <a href="#pricing" class="navbar__link">Precios</a>
+    </div>
+
+    <div class="navbar__actions">
+      <a routerLink="/login" class="btn btn--ghost">Iniciar Sesion</a>
+      <a routerLink="/register" class="btn btn--primary">Comenzar</a>
+    </div>
+
+    <button class="navbar__hamburger" (click)="toggleMenu()" [attr.aria-label]="menuLabel">
+      <span class="navbar__hamburger-line" [class.open]="mobileMenuOpen()"></span>
+      <span class="navbar__hamburger-line" [class.open]="mobileMenuOpen()"></span>
+      <span class="navbar__hamburger-line" [class.open]="mobileMenuOpen()"></span>
+    </button>
+  </div>
+
+  @if (mobileMenuOpen()) {
+    <div class="navbar__mobile">
+      <a href="#features" class="navbar__mobile-link" (click)="toggleMenu()">Funciones</a>
+      <a href="#how-it-works" class="navbar__mobile-link" (click)="toggleMenu()">Como Funciona</a>
+      <a href="#testimonials" class="navbar__mobile-link" (click)="toggleMenu()">Testimonios</a>
+      <a href="#pricing" class="navbar__mobile-link" (click)="toggleMenu()">Precios</a>
+      <div class="navbar__mobile-actions">
+        <a routerLink="/login" class="btn btn--ghost btn--full">Iniciar Sesion</a>
+        <a routerLink="/register" class="btn btn--primary btn--full">Comenzar</a>
+      </div>
+    </div>
+  }
+</nav>

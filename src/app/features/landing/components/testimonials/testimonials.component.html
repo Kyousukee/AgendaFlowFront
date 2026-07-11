@@ -1,0 +1,30 @@
+<section class="testimonials" id="testimonials">
+  <div class="testimonials__container">
+    <div class="testimonials__header">
+      <span class="testimonials__label">Testimonios</span>
+      <h2 class="testimonials__title">Amado por negocios<br /><span class="testimonials__title-accent">como el tuyo.</span></h2>
+    </div>
+
+    <div class="testimonials__grid">
+      @for (item of testimonials; track item.author) {
+        <div class="testimonial-card">
+          <div class="testimonial-card__stars">
+            @for (star of [1, 2, 3, 4, 5]; track star) {
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="#C9A84C">
+                <path d="M8 0l2.47 4.96L16 5.76l-4 3.88.94 5.46L8 12.66l-4.94 2.44L4 9.64 0 5.76l5.53-.8z"/>
+              </svg>
+            }
+          </div>
+          <p class="testimonial-card__quote">"{{ item.quote }}"</p>
+          <div class="testimonial-card__author">
+            <div class="testimonial-card__avatar" [style.background]="item.color">{{ item.initials }}</div>
+            <div>
+              <div class="testimonial-card__name">{{ item.author }}</div>
+              <div class="testimonial-card__role">{{ item.role }}</div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</section>

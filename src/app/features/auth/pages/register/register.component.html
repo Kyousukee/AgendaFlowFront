@@ -1,0 +1,87 @@
+<div class="auth">
+  <div class="auth__left">
+    <div class="auth__brand">
+      <a routerLink="/" class="auth__logo">
+        <img src="logo.png" alt="AgendaFlow" class="auth__logo-img" />
+      </a>
+    </div>
+    <div class="auth__promo">
+      <h1 class="auth__promo-title">Unete a AgendaFlow.</h1>
+      <p class="auth__promo-text">Crea tu cuenta gratis y empieza a gestionar tus citas en minutos.</p>
+    </div>
+  </div>
+
+  <div class="auth__right">
+    <div class="auth__card">
+      <h2 class="auth__title">Crear Cuenta</h2>
+      <p class="auth__subtitle">Completa los datos para empezar tu prueba gratis.</p>
+
+      <form class="auth__form">
+        <div class="form-group">
+          <label class="form-label" for="businessName">Nombre del negocio</label>
+          <input
+            id="businessName"
+            type="text"
+            class="form-input"
+            placeholder="Ej: Barberia Los Barones"
+            [ngModel]="businessName()"
+            (ngModelChange)="businessName.set($event)"
+            name="businessName"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="email">Correo electronico</label>
+          <input
+            id="email"
+            type="email"
+            class="form-input"
+            placeholder="tu@email.com"
+            [ngModel]="email()"
+            (ngModelChange)="email.set($event)"
+            name="email"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password">Contrasena</label>
+          <div class="form-input-wrapper">
+            <input
+              id="password"
+              [type]="showPassword() ? 'text' : 'password'"
+              class="form-input form-input--password"
+              placeholder="Minimo 8 caracteres"
+              [ngModel]="password()"
+              (ngModelChange)="password.set($event)"
+              name="password"
+            />
+            <button type="button" class="form-input-toggle" (click)="togglePassword()">
+              @if (showPassword()) {
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/>
+                  <line x1="1" y1="1" x2="23" y2="23"/>
+                </svg>
+              } @else {
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              }
+            </button>
+          </div>
+        </div>
+
+        <label class="form-checkbox">
+          <input type="checkbox" name="terms" required />
+          <span>Acepto los <a href="#" class="form-link">terminos y condiciones</a></span>
+        </label>
+
+        <button type="submit" class="btn btn--primary btn--full">Crear Cuenta Gratis</button>
+      </form>
+
+      <p class="auth__footer-text">
+        Ya tienes una cuenta? <a routerLink="/login" class="form-link">Inicia sesion aqui</a>
+      </p>
+    </div>
+  </div>
+</div>

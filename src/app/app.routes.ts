@@ -1,3 +1,14 @@
 import { Routes } from '@angular/router';
 
-export const routes: Routes = [];
+export const routes: Routes = [
+  {
+    path: '',
+    loadChildren: () =>
+      import('./features/landing/landing.routes').then((m) => m.routes),
+  },
+  {
+    path: '',
+    loadChildren: () =>
+      import('./features/auth/auth.routes').then((m) => m.routes),
+  },
+];

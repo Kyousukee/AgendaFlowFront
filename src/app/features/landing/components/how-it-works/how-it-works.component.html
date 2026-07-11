@@ -1,0 +1,27 @@
+<section class="how-it-works" id="how-it-works">
+  <div class="how-it-works__container">
+    <div class="how-it-works__header">
+      <span class="how-it-works__label">Como Funciona</span>
+      <h2 class="how-it-works__title">Listo en menos de<br /><span class="how-it-works__title-accent">cuatro pasos.</span></h2>
+    </div>
+
+    <div class="steps">
+      @for (step of steps; track step.number; let i = $index) {
+        <div class="step">
+          <div class="step__number">{{ step.number }}</div>
+          @if (i < steps.length - 1) {
+            <div class="step__connector">
+              <svg width="2" height="100%" viewBox="0 0 2 80" preserveAspectRatio="none">
+                <line x1="1" y1="0" x2="1" y2="80" stroke="#2A2A2A" stroke-width="2" stroke-dasharray="4 4"/>
+              </svg>
+            </div>
+          }
+          <div class="step__content">
+            <h3 class="step__title">{{ step.title }}</h3>
+            <p class="step__description">{{ step.description }}</p>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</section>
