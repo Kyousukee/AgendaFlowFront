@@ -1,0 +1,73 @@
+<div class="empleados-page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Empleados</h1>
+      <p class="page-subtitle">Gestion de tu equipo de trabajo</p>
+    </div>
+    <button class="btn btn--primary" (click)="abrirDialogo()">
+      <mat-icon>person_add</mat-icon>
+      Agregar empleado
+    </button>
+  </div>
+
+  @if (cargando()) {
+    <div class="loading-state">
+      <mat-icon class="loading-icon">hourglass_empty</mat-icon>
+      <span>Cargando empleados...</span>
+    </div>
+  } @else if (empleados().length === 0) {
+    <div class="empty-state">
+      <mat-icon class="empty-icon">people_outline</mat-icon>
+      <h3 class="empty-title">Sin empleados</h3>
+      <p class="empty-text">Agrega tu primer empleado para comenzar a gestionar tu equipo.</p>
+      <button class="btn btn--primary" (click)="abrirDialogo()">
+        <mat-icon>person_add</mat-icon>
+        Agregar empleado
+      </button>
+    </div>
+  } @else {
+    <div class="empleados-grid">
+      @for (empleado of empleados(); track empleado.id) {
+        <mat-card class="empleado-card">
+          <div class="empleado-header">
+            <div class="empleado-avatar">
+              <span>{{ getIniciales(empleado.nombre, empleado.apellido) }}</span>
+            </div>
+            <div class="empleado-info">
+              <span class="empleado-nombre">{{ empleado.nombre }} {{ empleado.apellido }}</span>
+              @if (empleado.email) {
+                <span class="empleado-email">{{ empleado.email }}</span>
+              }
+            </div>
+          </div>
+
+          @if (empleado.descripcion) {
+            <p class="empleado-desc">{{ empleado.descripcion }}</p>
+          }
+
+          <div class="empleado-meta">
+            @if (empleado.telefono) {
+              <div class="meta-item">
+                <mat-icon>phone</mat-icon>
+                <span>{{ empleado.telefono }}</span>
+              </div>
+            }
+          </div>
+
+          <div class="empleado-actions">
+            <button class="action-btn" (click)="editarEmpleado(empleado)" matTooltip="Editar">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button
+              class="action-btn action-btn--danger"
+              (click)="eliminarEmpleado(empleado)"
+              matTooltip="Eliminar"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </mat-card>
+      }
+    </div>
+  }
+</div>
