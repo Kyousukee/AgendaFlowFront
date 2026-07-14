@@ -16,6 +16,10 @@
       <h2 class="auth__title">Iniciar Sesion</h2>
       <p class="auth__subtitle">Ingresa tus credenciales para acceder a tu cuenta.</p>
 
+      @if (errorMessage()) {
+        <div class="form-error-banner">{{ errorMessage() }}</div>
+      }
+
       <form class="auth__form" [formGroup]="form" (ngSubmit)="onSubmit()">
         <div class="form-group">
           <label class="form-label" for="email">Correo electronico</label>
@@ -25,6 +29,9 @@
             class="form-input"
             placeholder="tu&#64;email.com"
             formControlName="email"
+            [class.form-input--error]="
+              form.get('email')?.invalid && (form.get('email')?.dirty || form.get('email')?.touched)
+            "
           />
         </div>
 
@@ -37,6 +44,10 @@
               class="form-input form-input--password"
               placeholder="Ingresa tu contrasena"
               formControlName="password"
+              [class.form-input--error]="
+                form.get('password')?.invalid &&
+                (form.get('password')?.dirty || form.get('password')?.touched)
+              "
             />
             <button type="button" class="form-input-toggle" (click)="togglePassword()">
               @if (showPassword()) {
@@ -82,7 +93,9 @@
           <a href="#" class="form-link">Olvidaste tu contrasena?</a>
         </div>
 
-        <button type="submit" class="btn btn--primary btn--full">Iniciar Sesion</button>
+        <button type="submit" class="btn btn--primary btn--full" [disabled]="isLoading()">
+          {{ isLoading() ? 'Ingresando...' : 'Iniciar Sesion' }}
+        </button>
       </form>
 
       <p class="auth__footer-text">

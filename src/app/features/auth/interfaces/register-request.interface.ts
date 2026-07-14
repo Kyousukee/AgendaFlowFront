@@ -1,3 +1,5 @@
+import { AuthResponse } from '../../../core/interfaces/auth-response.interface';
+
 export interface RegisterEmpresaRequest {
   nombre: string;
   nombreComercial?: string;
@@ -30,14 +32,4 @@ export interface RegisterRequest {
   sucursal: RegisterSucursalRequest;
 }
 
-export interface RegisterResponse {
-  usuario: {
-    id: number;
-    nombre: string;
-    apellido?: string;
-    email: string;
-    empresaId: number;
-    rolId: number;
-  };
-  token: string;
-}
+export type RegisterResponse = AuthResponse;

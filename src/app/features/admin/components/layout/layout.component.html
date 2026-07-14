@@ -6,13 +6,35 @@
       </a>
     </div>
 
+    @if (auth.sucursales().length > 0) {
+      <div class="sidebar__sucursal">
+        <div class="sucursal-info">
+          <mat-icon class="sucursal-icon">store</mat-icon>
+          <div class="sucursal-text">
+            <span class="sucursal-label">Sucursal</span>
+            @if (auth.esAdmin() && auth.sucursales().length > 1) {
+              <select
+                class="sucursal-select"
+                [value]="auth.sucursalActual()?.id"
+                (change)="cambiarSucursal($event)"
+              >
+                @for (suc of auth.sucursales(); track suc.id) {
+                  <option [value]="suc.id">{{ suc.nombre || 'Sucursal ' + suc.id }}</option>
+                }
+              </select>
+            } @else {
+              <span class="sucursal-nombre">{{
+                auth.sucursalActual()?.nombre || 'Sin asignar'
+              }}</span>
+            }
+          </div>
+        </div>
+      </div>
+    }
+
     <nav class="sidebar__nav">
       @for (item of navItems; track item.route) {
-        <a
-          class="sidebar__link"
-          [routerLink]="item.route"
-          routerLinkActive="sidebar__link--active"
-        >
+        <a class="sidebar__link" [routerLink]="item.route" routerLinkActive="sidebar__link--active">
           <mat-icon>{{ item.icon }}</mat-icon>
           <span>{{ item.label }}</span>
         </a>
@@ -20,6 +42,12 @@
     </nav>
 
     <div class="sidebar__footer">
+      <div class="sidebar__user">
+        <span class="user-name"
+          >{{ auth.currentUser()?.nombre }} {{ auth.currentUser()?.apellido }}</span
+        >
+        <span class="user-email">{{ auth.currentUser()?.email }}</span>
+      </div>
       <button class="sidebar__logout" (click)="auth.logout()">
         <mat-icon>logout</mat-icon>
         <span>Cerrar Sesion</span>

@@ -8,7 +8,6 @@ import {
   AbstractControl,
   ValidationErrors,
 } from '@angular/forms';
-import { RegisterService } from '../../services/register.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { MapPickerComponent } from '../../../../shared/components/map-picker/map-picker.component';
 import { GeocodingService } from '../../../../shared/services/geocoding.service';
@@ -22,7 +21,6 @@ import { GeocodingService } from '../../../../shared/services/geocoding.service'
 })
 export class RegisterComponent {
   private fb = inject(FormBuilder);
-  private registerService = inject(RegisterService);
   private authService = inject(AuthService);
   private geocodingService = inject(GeocodingService);
 
@@ -138,43 +136,16 @@ export class RegisterComponent {
 
     this.isLoading.set(true);
 
-    this.registerService
-      .register({
-        empresa: {
-          nombre: business.empresaNombre,
-          nombreComercial: business.nombreComercial || undefined,
-          email: business.empresaEmail || undefined,
-          telefono: business.telefono || undefined,
-        },
-        usuario: {
-          nombre: account.nombre,
-          apellido: account.apellido || undefined,
-          email: account.email,
-          password: account.password,
-          telefono: business.telefono || undefined,
-        },
-        sucursal: {
-          nombre: branch.sucursalNombre || undefined,
-          direccion: branch.direccion || undefined,
-          comuna: branch.comuna || undefined,
-          ciudad: branch.ciudad || undefined,
-          region: branch.region || undefined,
-          pais: branch.pais || undefined,
-          latitud: branch.latitud ?? undefined,
-          longitud: branch.longitud ?? undefined,
-        },
-      })
-      .subscribe({
-        next: (res) => {
-          this.authService.setSession(res.token, res.usuario);
-          this.isLoading.set(false);
-        },
-        error: (err) => {
-          this.isLoading.set(false);
-          this.errorMessage.set(
-            err.error?.message || 'Error al crear la cuenta. Intenta de nuevo.',
-          );
-        },
-      });
+    setTimeout(() => {
+      this.authService.register(
+        account.nombre,
+        account.apellido || '',
+        account.email,
+        account.password,
+        business.empresaNombre,
+        branch.sucursalNombre || '',
+      );
+      this.isLoading.set(false);
+    }, 600);
   }
 }

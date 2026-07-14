@@ -15,6 +15,8 @@ export class LoginComponent {
   private auth = inject(AuthService);
 
   showPassword = signal(false);
+  isLoading = signal(false);
+  errorMessage = signal('');
 
   form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -26,8 +28,16 @@ export class LoginComponent {
   }
 
   onSubmit(): void {
-    if (this.form.valid) {
-      this.auth.login();
+    if (this.form.valid && !this.isLoading()) {
+      this.errorMessage.set('');
+      this.isLoading.set(true);
+
+      const { email, password } = this.form.getRawValue();
+
+      setTimeout(() => {
+        this.auth.login(email, password);
+        this.isLoading.set(false);
+      }, 600);
     }
   }
 }

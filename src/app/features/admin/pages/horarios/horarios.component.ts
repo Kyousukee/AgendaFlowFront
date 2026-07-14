@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, effect, inject, OnInit, signal } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -82,6 +82,19 @@ export class HorariosComponent implements OnInit {
     '21:00',
   ];
 
+  private lastSucursalId = 0;
+
+  constructor() {
+    effect(() => {
+      const suc = this.authService.sucursalActual();
+      const sucursalId = suc?.id ?? 0;
+      if (sucursalId && sucursalId !== this.lastSucursalId) {
+        this.lastSucursalId = sucursalId;
+        this.cargarHorarios();
+      }
+    });
+  }
+
   get diasActivos(): number {
     return this.horarios.filter((d) => d.activo).length;
   }
@@ -91,7 +104,7 @@ export class HorariosComponent implements OnInit {
   }
 
   cargarHorarios(): void {
-    const sucursalId = this.authService.currentUser()?.empresaId;
+    const sucursalId = this.authService.sucursalActual()?.id;
     if (!sucursalId) {
       this.horarios = this.obtenerHorariosPorDefecto();
       this.cargando.set(false);
@@ -112,7 +125,7 @@ export class HorariosComponent implements OnInit {
   }
 
   guardar(): void {
-    const sucursalId = this.authService.currentUser()?.empresaId;
+    const sucursalId = this.authService.sucursalActual()?.id;
     if (!sucursalId) return;
 
     this.guardando.set(true);
