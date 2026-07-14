@@ -50,7 +50,15 @@ export class AuthService {
   }
 
   login(): void {
-    this.router.navigate(['/admin/home']);
+    const mockUser: UserData = {
+      id: 1,
+      nombre: 'Usuario',
+      apellido: 'Demo',
+      email: 'demo@agendaflow.cl',
+      empresaId: 1,
+      rolId: 1,
+    };
+    this.setSession('mock-token', mockUser);
   }
 
   logout(): void {
