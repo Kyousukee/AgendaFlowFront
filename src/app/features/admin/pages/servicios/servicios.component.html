@@ -1,0 +1,74 @@
+<div class="servicios-page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Servicios</h1>
+      <p class="page-subtitle">Catalogo de servicios que ofreces</p>
+    </div>
+    <button class="btn btn--primary" (click)="abrirDialogo()">
+      <mat-icon>add</mat-icon>
+      Agregar servicio
+    </button>
+  </div>
+
+  @if (cargando()) {
+    <div class="loading-state">
+      <mat-icon class="loading-icon">hourglass_empty</mat-icon>
+      <span>Cargando servicios...</span>
+    </div>
+  } @else if (servicios().length === 0) {
+    <div class="empty-state">
+      <mat-icon class="empty-icon">content_cut</mat-icon>
+      <h3 class="empty-title">Sin servicios</h3>
+      <p class="empty-text">
+        Agrega tu primer servicio para que tus clientes puedan agendar citas.
+      </p>
+      <button class="btn btn--primary" (click)="abrirDialogo()">
+        <mat-icon>add</mat-icon>
+        Agregar servicio
+      </button>
+    </div>
+  } @else {
+    <div class="servicios-grid">
+      @for (servicio of servicios(); track servicio.id) {
+        <mat-card class="servicio-card">
+          <div class="servicio-color-bar" [style.background]="servicio.color || '#C9A84C'"></div>
+          <div class="servicio-body">
+            <div class="servicio-header">
+              <div class="servicio-info">
+                <span class="servicio-nombre">{{ servicio.nombre }}</span>
+                @if (servicio.descripcion) {
+                  <span class="servicio-desc">{{ servicio.descripcion }}</span>
+                }
+              </div>
+              <span class="servicio-precio">{{ formatearPrecio(servicio.precio) }}</span>
+            </div>
+
+            <div class="servicio-meta">
+              <div class="meta-chip">
+                <mat-icon>schedule</mat-icon>
+                <span>{{ servicio.duracionMinutos }} min</span>
+              </div>
+              <div class="meta-chip">
+                <div class="meta-color-dot" [style.background]="servicio.color || '#C9A84C'"></div>
+                <span>Color</span>
+              </div>
+            </div>
+
+            <div class="servicio-actions">
+              <button class="action-btn" (click)="editarServicio(servicio)" matTooltip="Editar">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button
+                class="action-btn action-btn--danger"
+                (click)="eliminarServicio(servicio)"
+                matTooltip="Eliminar"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+        </mat-card>
+      }
+    </div>
+  }
+</div>
