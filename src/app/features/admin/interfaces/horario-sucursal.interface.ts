@@ -1,7 +1,7 @@
 export interface HorarioSucursal {
   id: number;
   sucursalId: number;
-  diaSemana: string;
+  diaSemana: number;
   horaInicio: string;
   horaFin: string;
   abierto: boolean;

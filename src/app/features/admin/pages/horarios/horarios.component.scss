@@ -2,6 +2,34 @@
   max-width: 1200px;
 }
 
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 4rem 2rem;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+
+  .loading-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+    color: var(--gold);
+    animation: spin 1.2s linear infinite;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .page-header {
   display: flex;
   align-items: center;
@@ -46,6 +74,11 @@
 
     &:hover {
       background: var(--gold-light);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
     }
   }
 }
