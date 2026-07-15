@@ -1,0 +1,57 @@
+import { Component, inject } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
+import { Reserva } from '../../../../core/interfaces/reserva.interface';
+
+@Component({
+  selector: 'app-reserva-detail-dialog',
+  standalone: true,
+  imports: [MatDialogModule, MatIconModule],
+  templateUrl: './reserva-detail-dialog.component.html',
+  styleUrl: './reserva-detail-dialog.component.scss',
+})
+export class ReservaDetailDialogComponent {
+  data = inject<Reserva>(MAT_DIALOG_DATA);
+
+  getNombreCliente(): string {
+    const c = this.data.cliente;
+    return [c.nombre, c.apellido].filter(Boolean).join(' ') || 'Sin nombre';
+  }
+
+  getNombreEmpleado(): string {
+    const e = this.data.empleado;
+    return [e.nombre, e.apellido].filter(Boolean).join(' ') || 'Sin nombre';
+  }
+
+  getNombreSucursal(): string {
+    const s = this.data.sucursal;
+    const partes = [s.nombre, s.comuna, s.ciudad].filter(Boolean);
+    return partes.join(', ') || 'Sin ubicacion';
+  }
+
+  getNombreServicio(): string {
+    return this.data.servicio.nombre || 'Sin servicio';
+  }
+
+  formatearPrecio(precio: number): string {
+    return new Intl.NumberFormat('es-CL', {
+      style: 'currency',
+      currency: 'CLP',
+      maximumFractionDigits: 0,
+    }).format(precio);
+  }
+
+  formatearFecha(fecha: string): string {
+    return new Date(fecha + 'T00:00:00').toLocaleDateString('es-CL', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  }
+
+  formatearHora(hora: string): string {
+    const [h, m] = hora.split(':');
+    return `${h}:${m}`;
+  }
+}

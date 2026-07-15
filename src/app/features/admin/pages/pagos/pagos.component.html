@@ -1,0 +1,161 @@
+<div class="pagos-page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Pagos</h1>
+      <p class="page-subtitle">Historial de pagos y servicios contratados</p>
+    </div>
+  </div>
+
+  <div class="filters-bar">
+    <div class="search-box">
+      <mat-icon>search</mat-icon>
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Buscar por cliente, servicio o codigo..."
+        [ngModel]="busqueda()"
+        (ngModelChange)="busqueda.set($event)"
+      />
+      @if (busqueda()) {
+        <button class="search-clear" (click)="busqueda.set('')">
+          <mat-icon>close</mat-icon>
+        </button>
+      }
+    </div>
+
+    <div class="filter-group">
+      <select
+        class="filter-select"
+        [ngModel]="filtroEstado()"
+        (ngModelChange)="filtroEstado.set($event)"
+      >
+        <option value="">Todos los estados</option>
+        @for (estado of estadosUnicos(); track estado) {
+          <option [value]="estado">{{ estado }}</option>
+        }
+      </select>
+
+      <div class="filter-date">
+        <label class="filter-date-label">Desde</label>
+        <input
+          type="date"
+          class="filter-date-input"
+          [ngModel]="filtroFechaDesde()"
+          (ngModelChange)="filtroFechaDesde.set($event)"
+        />
+      </div>
+
+      <div class="filter-date">
+        <label class="filter-date-label">Hasta</label>
+        <input
+          type="date"
+          class="filter-date-input"
+          [ngModel]="filtroFechaHasta()"
+          (ngModelChange)="filtroFechaHasta.set($event)"
+        />
+      </div>
+
+      @if (busqueda() || filtroEstado() || filtroFechaDesde() || filtroFechaHasta()) {
+        <button class="filter-clear" (click)="limpiarFiltros()">
+          <mat-icon>filter_alt_off</mat-icon>
+          Limpiar
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (cargando()) {
+    <div class="loading-state">
+      <mat-icon class="loading-icon">hourglass_empty</mat-icon>
+      <span>Cargando pagos...</span>
+    </div>
+  } @else if (pagos().length === 0) {
+    <div class="empty-state">
+      <mat-icon class="empty-icon">payments</mat-icon>
+      <h3 class="empty-title">Sin pagos registrados</h3>
+      <p class="empty-text">
+        Aun no hay pagos registrados en el sistema.
+      </p>
+    </div>
+  } @else if (pagosFiltrados().length === 0) {
+    <div class="empty-state">
+      <mat-icon class="empty-icon">search_off</mat-icon>
+      <h3 class="empty-title">Sin resultados</h3>
+      <p class="empty-text">
+        No se encontraron pagos con los filtros aplicados.
+      </p>
+      <button class="btn btn--outline" (click)="limpiarFiltros()">
+        <mat-icon>filter_alt_off</mat-icon>
+        Limpiar filtros
+      </button>
+    </div>
+  } @else {
+    <div class="table-container">
+      <table class="pagos-table">
+        <thead>
+          <tr>
+            <th class="th-id">#</th>
+            <th>Fecha</th>
+            <th>Cliente</th>
+            <th>Servicio</th>
+            <th>Empleado</th>
+            <th>Sucursal</th>
+            <th class="th-monto">Monto</th>
+            <th>Metodo</th>
+            <th>Estado</th>
+            <th class="th-acciones">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (pago of pagosFiltrados(); track pago.id) {
+            <tr>
+              <td class="td-id">{{ pago.id }}</td>
+              <td>
+                <div class="td-fecha">
+                  <span class="fecha-main">{{ formatearFecha(pago.fechaPago) }}</span>
+                  <span class="fecha-hora">{{ formatearHora(pago.fechaPago) }}</span>
+                </div>
+              </td>
+              <td>
+                <span class="td-cliente">{{ getNombreCliente(pago) }}</span>
+              </td>
+              <td>
+                <span class="td-servicio">{{ getNombreServicio(pago) }}</span>
+              </td>
+              <td>
+                <span>{{ getNombreEmpleado(pago) }}</span>
+              </td>
+              <td>
+                <span class="td-sucursal">{{ getNombreSucursal(pago) }}</span>
+              </td>
+              <td class="td-monto">{{ formatearPrecio(pago.monto) }}</td>
+              <td>
+                <span class="td-metodo">{{ pago.metodoPago }}</span>
+              </td>
+              <td>
+                <span class="estado-badge" [attr.data-estado]="getEstadoClase(pago.estado.nombre)">
+                  {{ pago.estado.nombre }}
+                </span>
+              </td>
+              <td class="td-acciones">
+                <button
+                  class="btn btn--outline btn--sm"
+                  (click)="verReserva(pago)"
+                >
+                  <mat-icon>visibility</mat-icon>
+                  Ver reserva
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-footer">
+      <span class="result-count">
+        {{ pagosFiltrados().length }} de {{ pagos().length }} pagos
+      </span>
+    </div>
+  }
+</div>
