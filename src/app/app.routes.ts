@@ -13,6 +13,11 @@ export const routes: Routes = [
       import('./features/auth/auth.routes').then((m) => m.routes),
   },
   {
+    path: 'reservar',
+    loadChildren: () =>
+      import('./features/reservar/reservar.routes').then((m) => m.routes),
+  },
+  {
     path: '',
     canActivate: [authGuard],
     loadChildren: () =>

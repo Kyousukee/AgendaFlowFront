@@ -1,7 +1,8 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { AuthService } from '../../../../core/services/auth.service';
 
 interface Service {
   id: number;
@@ -26,7 +27,10 @@ interface Slot {
   styleUrl: './home.component.scss',
 })
 export class HomeComponent {
+  private authService = inject(AuthService);
+
   selectedDay = signal('Lunes 14 de Julio');
+  linkCopiado = signal(false);
 
   servicios: Service[] = [
     { id: 1, nombre: 'Corte de pelo', duracion: 30, color: '#C9A84C' },
@@ -62,5 +66,25 @@ export class HomeComponent {
 
   get totalDisponibles(): number {
     return this.slots.filter((s) => s.estado === 'disponible').length;
+  }
+
+  getLinkReserva(): string {
+    const empresa = this.authService.empresa();
+    const sucursal = this.authService.sucursalActual();
+    if (!empresa || !sucursal) return '';
+    const base = typeof window !== 'undefined' ? window.location.origin : '';
+    return `${base}/reservar/${empresa.slug}/${sucursal.id}`;
+  }
+
+  copiarLink(): void {
+    const link = this.getLinkReserva();
+    if (!link) return;
+
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(link).then(() => {
+        this.linkCopiado.set(true);
+        setTimeout(() => this.linkCopiado.set(false), 2500);
+      });
+    }
   }
 }

@@ -15,6 +15,27 @@
     </div>
   </div>
 
+  @if (getLinkReserva()) {
+    <div class="link-card">
+      <div class="link-card__info">
+        <mat-icon class="link-card__icon">link</mat-icon>
+        <div class="link-card__text">
+          <span class="link-card__title">Link de reserva para clientes</span>
+          <span class="link-card__url">{{ getLinkReserva() }}</span>
+        </div>
+      </div>
+      <button class="btn-copy" (click)="copiarLink()">
+        @if (linkCopiado()) {
+          <mat-icon>check</mat-icon>
+          <span>Copiado</span>
+        } @else {
+          <mat-icon>content_copy</mat-icon>
+          <span>Copiar link</span>
+        }
+      </button>
+    </div>
+  }
+
   <div class="horarios-grid">
     <div class="servicios-panel">
       <h3 class="panel-title">Servicios</h3>
