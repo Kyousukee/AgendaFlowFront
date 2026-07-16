@@ -1,0 +1,216 @@
+<div class="config-page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Configuracion de la empresa</h1>
+      <p class="page-subtitle">Preferencias y comportamiento del sistema de reservas</p>
+    </div>
+    <button
+      class="btn btn--primary"
+      (click)="guardar()"
+      [disabled]="guardando() || cargando()"
+    >
+      @if (guardando()) {
+        <mat-icon class="spin">hourglass_empty</mat-icon>
+        Guardando...
+      } @else if (guardado()) {
+        <mat-icon>check</mat-icon>
+        Guardado
+      } @else {
+        <mat-icon>save</mat-icon>
+        Guardar cambios
+      }
+    </button>
+  </div>
+
+  @if (cargando()) {
+    <div class="loading-state">
+      <mat-icon class="loading-icon">hourglass_empty</mat-icon>
+      <span>Cargando configuracion...</span>
+    </div>
+  } @else {
+    <form class="config-form" [formGroup]="form" (ngSubmit)="guardar()">
+      <div class="config-grid">
+        <div class="config-card">
+          <div class="config-card__header">
+            <mat-icon class="config-card__icon">payments</mat-icon>
+            <div>
+              <h2 class="config-card__title">Pagos anticipados</h2>
+              <p class="config-card__desc">Configura el cobro anticipado de reservas</p>
+            </div>
+          </div>
+
+          <div class="config-card__body">
+            <div class="config-toggle">
+              <label class="toggle-label">
+                <span class="toggle-text">
+                  <span class="toggle-title">Permitir pago anticipado</span>
+                  <span class="toggle-desc">Cobrar un porcentaje o monto fijo al agendar</span>
+                </span>
+                <input
+                  type="checkbox"
+                  class="toggle-input"
+                  formControlName="permitePagoAnticipado"
+                />
+                <span class="toggle-switch"></span>
+              </label>
+            </div>
+
+            @if (form.get('permitePagoAnticipado')?.value) {
+              <div class="config-row">
+                <div class="config-field">
+                  <label class="config-label">Tipo de anticipo</label>
+                  <select class="config-select" formControlName="tipoAnticipo">
+                    <option value="Porcentaje">Porcentaje (%)</option>
+                    <option value="Monto fijo">Monto fijo ($)</option>
+                  </select>
+                </div>
+                <div class="config-field">
+                  <label class="config-label">
+                    {{ form.get('tipoAnticipo')?.value === 'Porcentaje' ? 'Porcentaje' : 'Monto' }}
+                  </label>
+                  <div class="config-input-with-prefix">
+                    <span class="config-prefix">
+                      {{ form.get('tipoAnticipo')?.value === 'Porcentaje' ? '%' : '$' }}
+                    </span>
+                    <input
+                      type="number"
+                      class="config-input config-input--prefixed"
+                      formControlName="montoAnticipo"
+                      min="0"
+                    />
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="config-card">
+          <div class="config-card__header">
+            <mat-icon class="config-card__icon">event</mat-icon>
+            <div>
+              <h2 class="config-card__title">Reservas</h2>
+              <p class="config-card__desc">Configura los tiempos y restricciones</p>
+            </div>
+          </div>
+
+          <div class="config-card__body">
+            <div class="config-row">
+              <div class="config-field">
+                <label class="config-label">Tiempo maximo de cancelacion</label>
+                <div class="config-input-with-suffix">
+                  <input
+                    type="number"
+                    class="config-input config-input--suffixed"
+                    formControlName="tiempoCancelacionHoras"
+                    min="0"
+                  />
+                  <span class="config-suffix">horas</span>
+                </div>
+                <span class="config-hint">Tiempo antes del servicio para cancelar sin penalizacion</span>
+              </div>
+              <div class="config-field">
+                <label class="config-label">Duracion minima de reserva</label>
+                <div class="config-input-with-suffix">
+                  <input
+                    type="number"
+                    class="config-input config-input--suffixed"
+                    formControlName="tiempoReservaMinutos"
+                    min="5"
+                    step="5"
+                  />
+                  <span class="config-suffix">minutos</span>
+                </div>
+                <span class="config-hint">Intervalo minimo para agendar citas</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="config-card">
+          <div class="config-card__header">
+            <mat-icon class="config-card__icon">tune</mat-icon>
+            <div>
+              <h2 class="config-card__title">Experiencia del cliente</h2>
+              <p class="config-card__desc">Opciones que ve el cliente al reservar</p>
+            </div>
+          </div>
+
+          <div class="config-card__body">
+            <div class="config-toggle">
+              <label class="toggle-label">
+                <span class="toggle-text">
+                  <span class="toggle-title">Permitir seleccion de empleado</span>
+                  <span class="toggle-desc">El cliente puede elegir quien lo atiende</span>
+                </span>
+                <input
+                  type="checkbox"
+                  class="toggle-input"
+                  formControlName="permiteSeleccionEmpleado"
+                />
+                <span class="toggle-switch"></span>
+              </label>
+            </div>
+
+            <div class="config-toggle">
+              <label class="toggle-label">
+                <span class="toggle-text">
+                  <span class="toggle-title">Mostrar precios</span>
+                  <span class="toggle-desc">Visible en el proceso de reserva</span>
+                </span>
+                <input
+                  type="checkbox"
+                  class="toggle-input"
+                  formControlName="mostrarPrecios"
+                />
+                <span class="toggle-switch"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="config-card">
+          <div class="config-card__header">
+            <mat-icon class="config-card__icon">notifications</mat-icon>
+            <div>
+              <h2 class="config-card__title">Notificaciones</h2>
+              <p class="config-card__desc">Canales de confirmacion y recordatorios</p>
+            </div>
+          </div>
+
+          <div class="config-card__body">
+            <div class="config-toggle">
+              <label class="toggle-label">
+                <span class="toggle-text">
+                  <span class="toggle-title">Enviar correo electronico</span>
+                  <span class="toggle-desc">Confirmaciones y recordatorios por email</span>
+                </span>
+                <input
+                  type="checkbox"
+                  class="toggle-input"
+                  formControlName="enviarCorreo"
+                />
+                <span class="toggle-switch"></span>
+              </label>
+            </div>
+
+            <div class="config-toggle">
+              <label class="toggle-label">
+                <span class="toggle-text">
+                  <span class="toggle-title">Enviar WhatsApp</span>
+                  <span class="toggle-desc">Mensajes automaticos por WhatsApp</span>
+                </span>
+                <input
+                  type="checkbox"
+                  class="toggle-input"
+                  formControlName="enviarWhatsapp"
+                />
+                <span class="toggle-switch"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  }
+</div>

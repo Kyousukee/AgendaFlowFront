@@ -29,7 +29,12 @@ export class LayoutComponent {
     { label: 'Horarios', icon: 'schedule', route: '/admin/horarios' },
     { label: 'Empleados', icon: 'people', route: '/admin/empleados' },
     { label: 'Servicios', icon: 'content_cut', route: '/admin/servicios' },
+    { label: 'Bloqueos', icon: 'event_busy', route: '/admin/bloqueos' },
     { label: 'Pagos', icon: 'payments', route: '/admin/pagos' },
+  ];
+
+  adminNavItems = [
+    { label: 'Configuracion', icon: 'settings', route: '/admin/configuracion' },
   ];
 
   cambiarSucursal(event: Event): void {

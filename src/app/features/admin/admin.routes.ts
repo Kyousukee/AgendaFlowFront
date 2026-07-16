@@ -5,6 +5,8 @@ import { HorariosComponent } from './pages/horarios/horarios.component';
 import { EmpleadosComponent } from './pages/empleados/empleados.component';
 import { ServiciosComponent } from './pages/servicios/servicios.component';
 import { PagosComponent } from './pages/pagos/pagos.component';
+import { BloqueosComponent } from './pages/bloqueos/bloqueos.component';
+import { ConfiguracionComponent } from './pages/configuracion/configuracion.component';
 
 export const routes: Routes = [
   {
@@ -17,6 +19,8 @@ export const routes: Routes = [
       { path: 'empleados', component: EmpleadosComponent },
       { path: 'servicios', component: ServiciosComponent },
       { path: 'pagos', component: PagosComponent },
+      { path: 'bloqueos', component: BloqueosComponent },
+      { path: 'configuracion', component: ConfiguracionComponent },
     ],
   },
 ];

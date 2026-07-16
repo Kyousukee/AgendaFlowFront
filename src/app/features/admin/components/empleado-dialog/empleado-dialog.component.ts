@@ -4,10 +4,17 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Empleado } from '../../../../core/interfaces/empleado.interface';
+import { Servicio } from '../../../../core/interfaces/servicio.interface';
 
 export interface EmpleadoDialogData {
   empleado?: Empleado;
   sucursalId: number;
+  serviciosDisponibles?: Servicio[];
+  servicioIds?: number[];
+}
+
+export interface EmpleadoDialogResult extends Empleado {
+  servicioIds: number[];
 }
 
 @Component({
@@ -88,6 +95,27 @@ export interface EmpleadoDialogData {
             rows="3"
           ></textarea>
         </div>
+
+        @if (data.serviciosDisponibles && data.serviciosDisponibles.length > 0) {
+          <div class="form-group">
+            <label class="form-label">Servicios asignados</label>
+            <div class="servicios-checklist">
+              @for (servicio of data.serviciosDisponibles; track servicio.id) {
+                <label class="servicio-check">
+                  <input
+                    type="checkbox"
+                    class="servicio-checkbox"
+                    [checked]="isServicioSeleccionado(servicio.id)"
+                    (change)="toggleServicio(servicio.id)"
+                  />
+                  <span class="servicio-color" [style.background]="servicio.color || '#C9A84C'"></span>
+                  <span class="servicio-nombre">{{ servicio.nombre }}</span>
+                  <span class="servicio-duracion">{{ servicio.duracionMinutos }} min</span>
+                </label>
+              }
+            </div>
+          </div>
+        }
 
         <div class="dialog__actions">
           <button type="button" class="btn btn--secondary" (click)="cerrar()">Cancelar</button>
@@ -209,6 +237,57 @@ export interface EmpleadoDialogData {
       color: #ef4444;
     }
 
+    .servicios-checklist {
+      display: flex;
+      flex-direction: column;
+      gap: 0.375rem;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.5rem;
+      max-height: 180px;
+      overflow-y: auto;
+    }
+
+    .servicio-check {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.625rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.1s ease;
+
+      &:hover {
+        background: var(--bg-surface-hover);
+      }
+    }
+
+    .servicio-checkbox {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--gold);
+      cursor: pointer;
+    }
+
+    .servicio-color {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .servicio-nombre {
+      font-size: 0.8125rem;
+      color: var(--text-primary);
+      flex: 1;
+    }
+
+    .servicio-duracion {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
     .btn {
       display: inline-flex;
       align-items: center;
@@ -256,6 +335,7 @@ export class EmpleadoDialogComponent implements OnInit {
   data = inject<EmpleadoDialogData>(MAT_DIALOG_DATA);
 
   guardando = signal(false);
+  servicioIds = signal<number[]>([]);
 
   form = this.fb.nonNullable.group({
     nombre: ['', [Validators.required]],
@@ -275,6 +355,22 @@ export class EmpleadoDialogComponent implements OnInit {
         descripcion: this.data.empleado.descripcion || '',
       });
     }
+    if (this.data.servicioIds) {
+      this.servicioIds.set([...this.data.servicioIds]);
+    }
+  }
+
+  isServicioSeleccionado(servicioId: number): boolean {
+    return this.servicioIds().includes(servicioId);
+  }
+
+  toggleServicio(servicioId: number): void {
+    const actual = this.servicioIds();
+    if (actual.includes(servicioId)) {
+      this.servicioIds.set(actual.filter((id) => id !== servicioId));
+    } else {
+      this.servicioIds.set([...actual, servicioId]);
+    }
   }
 
   fieldError(field: string): boolean {
@@ -292,7 +388,7 @@ export class EmpleadoDialogComponent implements OnInit {
     this.guardando.set(true);
     const formValue = this.form.getRawValue();
 
-    const resultado: Empleado = {
+    const resultado: EmpleadoDialogResult = {
       id: this.data.empleado?.id ?? 0,
       sucursalId: this.data.sucursalId,
       nombre: formValue.nombre,
@@ -303,6 +399,7 @@ export class EmpleadoDialogComponent implements OnInit {
       descripcion: formValue.descripcion || undefined,
       activo: true,
       fechaCreacion: this.data.empleado?.fechaCreacion || new Date().toISOString(),
+      servicioIds: this.servicioIds(),
     };
 
     setTimeout(() => {

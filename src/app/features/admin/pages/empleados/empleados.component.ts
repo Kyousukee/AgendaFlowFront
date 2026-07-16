@@ -5,10 +5,14 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { AuthService } from '../../../../core/services/auth.service';
 import { EmpleadosService } from '../../services/empleados.service';
+import { ServiciosService } from '../../services/servicios.service';
+import { ServiciosEmpleadosService } from '../../services/servicios-empleados.service';
 import { Empleado } from '../../../../core/interfaces/empleado.interface';
+import { Servicio } from '../../../../core/interfaces/servicio.interface';
 import {
   EmpleadoDialogComponent,
   EmpleadoDialogData,
+  EmpleadoDialogResult,
 } from '../../components/empleado-dialog/empleado-dialog.component';
 
 @Component({
@@ -21,9 +25,13 @@ import {
 export class EmpleadosComponent {
   private authService = inject(AuthService);
   private empleadosService = inject(EmpleadosService);
+  private serviciosService = inject(ServiciosService);
+  private serviciosEmpleadosService = inject(ServiciosEmpleadosService);
   private dialog = inject(MatDialog);
 
   empleados = signal<Empleado[]>([]);
+  servicios = signal<Servicio[]>([]);
+  servicioIdsMap = signal<Record<number, number[]>>({});
   cargando = signal(true);
   private lastSucursalId = 0;
 
@@ -33,12 +41,13 @@ export class EmpleadosComponent {
       const sucursalId = suc?.id ?? 0;
       if (sucursalId && sucursalId !== this.lastSucursalId) {
         this.lastSucursalId = sucursalId;
-        this.cargarEmpleados();
+        this.cargarDatos();
       }
     });
   }
 
-  cargarEmpleados(): void {
+  cargarDatos(): void {
+    const empresaId = this.authService.empresa()?.id;
     const sucursalId = this.authService.sucursalActual()?.id;
     if (!sucursalId) {
       this.empleados.set([]);
@@ -47,10 +56,29 @@ export class EmpleadosComponent {
     }
 
     this.cargando.set(true);
+
+    this.serviciosService.getByEmpresa(empresaId!).subscribe({
+      next: (data) => this.servicios.set(data),
+      error: () => this.servicios.set([]),
+    });
+
     this.empleadosService.getBySucursal(sucursalId).subscribe({
-      next: (data) => {
-        this.empleados.set(data);
-        this.cargando.set(false);
+      next: (empleados) => {
+        this.empleados.set(empleados);
+        const empleadoIds = empleados.map((e) => e.id);
+        this.serviciosEmpleadosService.getBySucursal(sucursalId, empleadoIds).subscribe({
+          next: (se) => {
+            const map: Record<number, number[]> = {};
+            for (const e of empleadoIds) {
+              map[e] = se.filter((s) => s.empleadoId === e).map((s) => s.servicioId);
+            }
+            this.servicioIdsMap.set(map);
+            this.cargando.set(false);
+          },
+          error: () => {
+            this.cargando.set(false);
+          },
+        });
       },
       error: () => {
         this.empleados.set([]);
@@ -64,14 +92,25 @@ export class EmpleadosComponent {
     if (!sucursalId) return;
 
     const dialogRef = this.dialog.open(EmpleadoDialogComponent, {
-      data: { sucursalId } as EmpleadoDialogData,
+      data: {
+        sucursalId,
+        serviciosDisponibles: this.servicios(),
+        servicioIds: [],
+      } as EmpleadoDialogData,
       panelClass: 'dialog-panel',
     });
 
-    dialogRef.afterClosed().subscribe((resultado) => {
+    dialogRef.afterClosed().subscribe((resultado: EmpleadoDialogResult | undefined) => {
       if (resultado) {
-        this.empleadosService.crear(resultado).subscribe(() => {
-          this.cargarEmpleados();
+        const { servicioIds, ...empleado } = resultado;
+        this.empleadosService.crear(empleado).subscribe(() => {
+          if (empleado.id && servicioIds.length > 0) {
+            this.serviciosEmpleadosService.save(empleado.id, servicioIds).subscribe(() => {
+              this.cargarDatos();
+            });
+          } else {
+            this.cargarDatos();
+          }
         });
       }
     });
@@ -82,14 +121,22 @@ export class EmpleadosComponent {
     if (!sucursalId) return;
 
     const dialogRef = this.dialog.open(EmpleadoDialogComponent, {
-      data: { empleado, sucursalId } as EmpleadoDialogData,
+      data: {
+        empleado,
+        sucursalId,
+        serviciosDisponibles: this.servicios(),
+        servicioIds: this.servicioIdsMap()[empleado.id] || [],
+      } as EmpleadoDialogData,
       panelClass: 'dialog-panel',
     });
 
-    dialogRef.afterClosed().subscribe((resultado) => {
+    dialogRef.afterClosed().subscribe((resultado: EmpleadoDialogResult | undefined) => {
       if (resultado) {
-        this.empleadosService.actualizar(resultado).subscribe(() => {
-          this.cargarEmpleados();
+        const { servicioIds, ...empleadoData } = resultado;
+        this.empleadosService.actualizar(empleadoData).subscribe(() => {
+          this.serviciosEmpleadosService.save(empleadoData.id, servicioIds).subscribe(() => {
+            this.cargarDatos();
+          });
         });
       }
     });
@@ -98,7 +145,7 @@ export class EmpleadosComponent {
   eliminarEmpleado(empleado: Empleado): void {
     if (!empleado.id) return;
     this.empleadosService.eliminar(empleado.id).subscribe(() => {
-      this.cargarEmpleados();
+      this.cargarDatos();
     });
   }
 
@@ -106,5 +153,13 @@ export class EmpleadosComponent {
     const n = nombre?.charAt(0) || '';
     const a = apellido?.charAt(0) || '';
     return (n + a).toUpperCase() || '?';
+  }
+
+  getServiciosAsignados(empleadoId: number): string {
+    const ids = this.servicioIdsMap()[empleadoId] || [];
+    const nombres = this.servicios()
+      .filter((s) => ids.includes(s.id))
+      .map((s) => s.nombre);
+    return nombres.join(', ') || 'Sin servicios';
   }
 }

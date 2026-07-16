@@ -42,6 +42,12 @@
     gap: 0.25rem;
   }
 
+  &__divider {
+    height: 1px;
+    background: var(--border);
+    margin: 0.5rem 0.25rem;
+  }
+
   &__link {
     display: flex;
     align-items: center;
