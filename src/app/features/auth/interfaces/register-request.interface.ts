@@ -1,35 +1,18 @@
-import { AuthResponse } from '../../../core/interfaces/auth-response.interface';
-
-export interface RegisterEmpresaRequest {
+export interface RegisterRequest {
   nombre: string;
-  nombreComercial?: string;
-  email?: string;
-  telefono?: string;
-}
-
-export interface RegisterUsuarioRequest {
-  nombre: string;
-  apellido?: string;
+  apellido: string;
   email: string;
   password: string;
+  empresaNombre: string;
+  nombreComercial?: string;
+  empresaEmail?: string;
   telefono?: string;
-}
-
-export interface RegisterSucursalRequest {
-  nombre?: string;
+  sucursalNombre?: string;
   direccion?: string;
   comuna?: string;
   ciudad?: string;
   region?: string;
   pais?: string;
-  latitud?: number;
-  longitud?: number;
+  latitud?: number | null;
+  longitud?: number | null;
 }
-
-export interface RegisterRequest {
-  empresa: RegisterEmpresaRequest;
-  usuario: RegisterUsuarioRequest;
-  sucursal: RegisterSucursalRequest;
-}
-
-export type RegisterResponse = AuthResponse;

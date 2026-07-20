@@ -1,5 +1,6 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { ReservarPublicService } from '../../services/reservar-public.service';
 import { Empresa } from '../../../../core/interfaces/empresa.interface';
 import { Sucursal } from '../../../../core/interfaces/sucursal.interface';
@@ -34,6 +35,7 @@ export class ReservarPageComponent implements OnInit {
   cargando = signal(true);
   reservaConfirmada = signal(false);
   reservaCodigo = signal('');
+  error = signal('');
 
   ngOnInit(): void {
     const slug = this.route.snapshot.paramMap.get('empresaSlug') || '';
@@ -41,45 +43,77 @@ export class ReservarPageComponent implements OnInit {
 
     if (!slug || !sucursalId) {
       this.cargando.set(false);
+      this.error.set('Link de reserva invalido.');
       return;
     }
 
-    this.reservarService.getEmpresaBySlug(slug).subscribe((empresa) => {
-      if (!empresa) {
+    this.reservarService.getEmpresaBySlug(slug).subscribe({
+      next: (empresa) => {
+        console.log('Empresa por slug:', slug, empresa);
+        if (!empresa) {
+          this.cargando.set(false);
+          this.error.set('Empresa no encontrada.');
+          return;
+        }
+        this.empresa.set(empresa);
+        this.cargarSucursal(sucursalId);
+      },
+      error: (err) => {
+        console.error('Error al buscar empresa:', err);
         this.cargando.set(false);
-        return;
-      }
-      this.empresa.set(empresa);
+        this.error.set('Error al cargar la empresa.');
+      },
+    });
+  }
 
-      this.reservarService.getSucursal(sucursalId).subscribe((sucursal) => {
+  private cargarSucursal(sucursalId: number): void {
+    this.reservarService.getSucursal(sucursalId).subscribe({
+      next: (sucursal) => {
+        console.log('Sucursal:', sucursalId, sucursal);
         if (!sucursal) {
           this.cargando.set(false);
+          this.error.set('Sucursal no encontrada.');
           return;
         }
         this.sucursal.set(sucursal);
+        this.cargarDatos(sucursalId);
+      },
+      error: () => {
+        this.cargando.set(false);
+        this.error.set('Error al cargar la sucursal.');
+      },
+    });
+  }
 
-        this.reservarService.getServiciosByEmpresa(empresa.id).subscribe((servicios) => {
-          this.servicios.set(servicios);
-        });
+  private cargarDatos(sucursalId: number): void {
+    const empresaId = this.empresa()!.id;
 
-        this.reservarService.getEmpleadosBySucursal(sucursalId).subscribe((empleados) => {
-          this.empleados.set(empleados);
-
-          const empleadoIds = empleados.map((e) => e.id);
-          this.reservarService.getBloqueosBySucursal(empleadoIds).subscribe((bloqueos) => {
-            this.bloqueos.set(bloqueos);
-          });
-        });
-
-        this.reservarService.getHorariosBySucursal(sucursalId).subscribe((horarios) => {
-          this.horarios.set(horarios);
-        });
-
-        this.reservarService.getServiciosEmpleados(sucursalId).subscribe((se) => {
-          this.serviciosEmpleados.set(se);
-          this.cargando.set(false);
-        });
-      });
+    forkJoin({
+      servicios: this.reservarService.getServiciosByEmpresa(empresaId),
+      empleados: this.reservarService.getEmpleadosBySucursal(sucursalId),
+      horarios: this.reservarService.getHorariosBySucursal(sucursalId),
+      bloqueos: this.reservarService.getBloqueosBySucursal(sucursalId),
+      serviciosEmpleados: this.reservarService.getServiciosEmpleados(sucursalId),
+    }).subscribe({
+      next: (data) => {
+        console.log('Servicios:', data.servicios);
+        console.log('Empleados:', data.empleados);
+        console.log('Horarios:', data.horarios);
+        console.log('Bloqueos:', data.bloqueos);
+        console.log('ServiciosEmpleados:', data.serviciosEmpleados);
+        console.log('ServiciosEmpleados:', data.serviciosEmpleados);
+        this.servicios.set(data.servicios);
+        this.empleados.set(data.empleados);
+        this.horarios.set(data.horarios);
+        this.bloqueos.set(data.bloqueos);
+        this.serviciosEmpleados.set(data.serviciosEmpleados);
+        this.cargando.set(false);
+      },
+      error: (err) => {
+        console.error('Error en forkJoin reservar:', err);
+        this.cargando.set(false);
+        this.error.set('Error al cargar los datos de la sucursal.');
+      },
     });
   }
 

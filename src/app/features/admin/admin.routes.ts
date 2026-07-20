@@ -7,6 +7,7 @@ import { ServiciosComponent } from './pages/servicios/servicios.component';
 import { PagosComponent } from './pages/pagos/pagos.component';
 import { BloqueosComponent } from './pages/bloqueos/bloqueos.component';
 import { ConfiguracionComponent } from './pages/configuracion/configuracion.component';
+import { SucursalesComponent } from './pages/sucursales/sucursales.component';
 
 export const routes: Routes = [
   {
@@ -20,6 +21,7 @@ export const routes: Routes = [
       { path: 'servicios', component: ServiciosComponent },
       { path: 'pagos', component: PagosComponent },
       { path: 'bloqueos', component: BloqueosComponent },
+      { path: 'sucursales', component: SucursalesComponent },
       { path: 'configuracion', component: ConfiguracionComponent },
     ],
   },

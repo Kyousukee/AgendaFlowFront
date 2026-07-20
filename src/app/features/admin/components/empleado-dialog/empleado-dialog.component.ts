@@ -13,9 +13,11 @@ export interface EmpleadoDialogData {
   servicioIds?: number[];
 }
 
-export interface EmpleadoDialogResult extends Empleado {
+export type EmpleadoDialogResult = Omit<Empleado, 'id' | 'fechaCreacion' | 'foto' | 'descripcion' | 'sucursalId' | 'serviciosEmpleados'> & {
   servicioIds: number[];
-}
+  nombre: string;
+  sucursalId: number;
+};
 
 @Component({
   selector: 'app-empleado-dialog',
@@ -389,16 +391,12 @@ export class EmpleadoDialogComponent implements OnInit {
     const formValue = this.form.getRawValue();
 
     const resultado: EmpleadoDialogResult = {
-      id: this.data.empleado?.id ?? 0,
       sucursalId: this.data.sucursalId,
       nombre: formValue.nombre,
       apellido: formValue.apellido || undefined,
       email: formValue.email || undefined,
       telefono: formValue.telefono || undefined,
-      foto: this.data.empleado?.foto || '',
-      descripcion: formValue.descripcion || undefined,
       activo: true,
-      fechaCreacion: this.data.empleado?.fechaCreacion || new Date().toISOString(),
       servicioIds: this.servicioIds(),
     };
 

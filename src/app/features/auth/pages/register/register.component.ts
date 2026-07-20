@@ -9,6 +9,7 @@ import {
   ValidationErrors,
 } from '@angular/forms';
 import { AuthService } from '../../../../core/services/auth.service';
+import { RegisterRequest } from '../../interfaces/register-request.interface';
 import { MapPickerComponent } from '../../../../shared/components/map-picker/map-picker.component';
 import { GeocodingService } from '../../../../shared/services/geocoding.service';
 
@@ -136,16 +137,33 @@ export class RegisterComponent {
 
     this.isLoading.set(true);
 
-    setTimeout(() => {
-      this.authService.register(
-        account.nombre,
-        account.apellido || '',
-        account.email,
-        account.password,
-        business.empresaNombre,
-        branch.sucursalNombre || '',
-      );
-      this.isLoading.set(false);
-    }, 600);
+    const payload: RegisterRequest = {
+      nombre: account.nombre,
+      apellido: account.apellido || '',
+      email: account.email,
+      password: account.password,
+      empresaNombre: business.empresaNombre,
+      nombreComercial: business.nombreComercial || undefined,
+      empresaEmail: business.empresaEmail || undefined,
+      telefono: business.telefono || undefined,
+      sucursalNombre: branch.sucursalNombre || undefined,
+      direccion: branch.direccion || undefined,
+      comuna: branch.comuna || undefined,
+      ciudad: branch.ciudad || undefined,
+      region: branch.region || undefined,
+      pais: branch.pais || undefined,
+      latitud: branch.latitud,
+      longitud: branch.longitud,
+    };
+
+    this.authService.register(payload).subscribe({
+      next: () => {
+        this.isLoading.set(false);
+      },
+      error: (err: Error) => {
+        this.errorMessage.set(err.message);
+        this.isLoading.set(false);
+      },
+    });
   }
 }

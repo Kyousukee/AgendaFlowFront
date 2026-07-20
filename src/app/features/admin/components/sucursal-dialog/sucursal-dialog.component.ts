@@ -3,23 +3,36 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { CreateBloqueoDto } from '../../services/bloqueos.service';
-import { Empleado } from '../../../../core/interfaces/empleado.interface';
+import { Sucursal } from '../../../../core/interfaces/sucursal.interface';
+import { MapPickerComponent } from '../../../../shared/components/map-picker/map-picker.component';
+import { GeocodingService } from '../../../../shared/services/geocoding.service';
 
-export interface BloqueoDialogData {
-  bloqueo?: { empleadoId: number; fecha: string; horaInicio: string; horaFin: string; motivo?: string };
-  empleadoId?: number;
-  empleados: Empleado[];
+export interface SucursalDialogData {
+  sucursal?: Sucursal;
+}
+
+export interface SucursalDialogResult {
+  id?: number;
+  nombre: string;
+  direccion?: string;
+  comuna?: string;
+  ciudad?: string;
+  region?: string;
+  pais?: string;
+  latitud?: number | null;
+  longitud?: number | null;
+  telefono?: string;
+  activo: boolean;
 }
 
 @Component({
-  selector: 'app-bloqueo-dialog',
+  selector: 'app-sucursal-dialog',
   standalone: true,
-  imports: [ReactiveFormsModule, MatIconModule, MatButtonModule, MatDialogModule],
+  imports: [ReactiveFormsModule, MatIconModule, MatButtonModule, MatDialogModule, MapPickerComponent],
   template: `
     <div class="dialog">
       <div class="dialog__header">
-        <h2 class="dialog__title">{{ data.bloqueo ? 'Editar' : 'Nuevo' }} bloqueo</h2>
+        <h2 class="dialog__title">{{ data.sucursal ? 'Editar' : 'Crear' }} sucursal</h2>
         <button class="dialog__close" (click)="cerrar()">
           <mat-icon>close</mat-icon>
         </button>
@@ -27,90 +40,71 @@ export interface BloqueoDialogData {
 
       <form class="dialog__form" [formGroup]="form" (ngSubmit)="onSubmit()">
         <div class="form-group">
-          <label class="form-label" for="empleado">Empleado *</label>
-          <select
-            id="empleado"
+          <label class="form-label" for="nombre">Nombre *</label>
+          <input
+            id="nombre"
+            type="text"
             class="form-input"
-            formControlName="empleadoId"
-            [class.form-input--error]="fieldError('empleadoId')"
-          >
-            <option value="">Seleccionar empleado</option>
-            @for (emp of data.empleados; track emp.id) {
-              <option [value]="emp.id">{{ emp.nombre }} {{ emp.apellido }}</option>
-            }
-          </select>
-          @if (fieldError('empleadoId')) {
-            <span class="form-error">Selecciona un empleado.</span>
+            placeholder="Nombre de la sucursal"
+            formControlName="nombre"
+            [class.form-input--error]="fieldError('nombre')"
+          />
+          @if (fieldError('nombre')) {
+            <span class="form-error">El nombre es requerido.</span>
           }
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="fecha">Fecha *</label>
+          <label class="form-label" for="direccion">Direccion</label>
           <input
-            id="fecha"
-            type="date"
+            id="direccion"
+            type="text"
             class="form-input"
-            formControlName="fecha"
-            [class.form-input--error]="fieldError('fecha')"
+            placeholder="Av. Principal 123"
+            formControlName="direccion"
           />
-          @if (fieldError('fecha')) {
-            <span class="form-error">La fecha es requerida.</span>
-          }
         </div>
 
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label" for="horaInicio">Hora inicio *</label>
-            <select
-              id="horaInicio"
-              class="form-input"
-              formControlName="horaInicio"
-              [class.form-input--error]="fieldError('horaInicio')"
-            >
-              <option value="">Seleccionar</option>
-              @for (hora of horas; track hora) {
-                <option [value]="hora">{{ hora }}</option>
-              }
-            </select>
-            @if (fieldError('horaInicio')) {
-              <span class="form-error">Requerido.</span>
-            }
+            <label class="form-label" for="comuna">Comuna</label>
+            <input id="comuna" type="text" class="form-input" formControlName="comuna" />
           </div>
           <div class="form-group">
-            <label class="form-label" for="horaFin">Hora fin *</label>
-            <select
-              id="horaFin"
-              class="form-input"
-              formControlName="horaFin"
-              [class.form-input--error]="fieldError('horaFin')"
-            >
-              <option value="">Seleccionar</option>
-              @for (hora of horas; track hora) {
-                <option [value]="hora">{{ hora }}</option>
-              }
-            </select>
-            @if (fieldError('horaFin')) {
-              <span class="form-error">Requerido.</span>
-            }
+            <label class="form-label" for="ciudad">Ciudad</label>
+            <input id="ciudad" type="text" class="form-input" formControlName="ciudad" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="region">Region</label>
+            <input id="region" type="text" class="form-input" formControlName="region" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="telefono">Telefono</label>
+            <input id="telefono" type="tel" class="form-input" formControlName="telefono" />
           </div>
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="motivo">Motivo</label>
-          <input
-            id="motivo"
-            type="text"
-            class="form-input"
-            placeholder="Ej: Reunion personal, descanso medico..."
-            formControlName="motivo"
-            maxlength="300"
+          <label class="form-label" for="pais">Pais</label>
+          <input id="pais" type="text" class="form-input" formControlName="pais" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Ubicacion en el mapa</label>
+          <app-map-picker
+            [lat]="mapLat()"
+            [lng]="mapLng()"
+            (locationChange)="onMapLocationChange($event)"
           />
         </div>
 
         <div class="dialog__actions">
           <button type="button" class="btn btn--secondary" (click)="cerrar()">Cancelar</button>
           <button type="submit" class="btn btn--primary" [disabled]="form.invalid || guardando()">
-            {{ guardando() ? 'Guardando...' : data.bloqueo ? 'Actualizar' : 'Crear bloqueo' }}
+            {{ guardando() ? 'Guardando...' : data.sucursal ? 'Actualizar' : 'Crear' }}
           </button>
         </div>
       </form>
@@ -119,7 +113,7 @@ export interface BloqueoDialogData {
   styles: `
     .dialog {
       padding: 0;
-      min-width: 440px;
+      min-width: 480px;
     }
 
     .dialog__header {
@@ -203,28 +197,10 @@ export interface BloqueoDialogData {
       transition: border-color 0.15s ease;
       outline: none;
       box-sizing: border-box;
-      appearance: none;
 
       &:focus {
         border-color: var(--gold);
       }
-    }
-
-    select.form-input {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%236b7280' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 0.75rem center;
-      padding-right: 2rem;
-      cursor: pointer;
-
-      option {
-        background: var(--bg-surface);
-        color: var(--text-primary);
-      }
-    }
-
-    input[type='date'].form-input {
-      color-scheme: dark;
     }
 
     .form-input::placeholder {
@@ -281,32 +257,57 @@ export interface BloqueoDialogData {
     }
   `,
 })
-export class BloqueoDialogComponent implements OnInit {
+export class SucursalDialogComponent implements OnInit {
   private fb = inject(FormBuilder);
-  private dialogRef = inject(MatDialogRef<BloqueoDialogComponent>);
-  data = inject<BloqueoDialogData>(MAT_DIALOG_DATA);
+  private dialogRef = inject(MatDialogRef<SucursalDialogComponent>);
+  private geocodingService = inject(GeocodingService);
+  data = inject<SucursalDialogData>(MAT_DIALOG_DATA);
 
   guardando = signal(false);
-  horas = this.generarHoras();
+  mapLat = signal(-33.4489);
+  mapLng = signal(-70.6693);
 
   form = this.fb.nonNullable.group({
-    empleadoId: [this.data.empleadoId || '', [Validators.required]],
-    fecha: ['', [Validators.required]],
-    horaInicio: ['', [Validators.required]],
-    horaFin: ['', [Validators.required]],
-    motivo: [''],
+    nombre: ['', [Validators.required]],
+    direccion: [''],
+    comuna: [''],
+    ciudad: [''],
+    region: [''],
+    pais: ['Chile'],
+    telefono: [''],
   });
 
   ngOnInit(): void {
-    if (this.data.bloqueo) {
+    if (this.data.sucursal) {
       this.form.patchValue({
-        empleadoId: String(this.data.bloqueo.empleadoId),
-        fecha: this.data.bloqueo.fecha,
-        horaInicio: this.data.bloqueo.horaInicio,
-        horaFin: this.data.bloqueo.horaFin,
-        motivo: this.data.bloqueo.motivo || '',
+        nombre: this.data.sucursal.nombre || '',
+        direccion: this.data.sucursal.direccion || '',
+        comuna: this.data.sucursal.comuna || '',
+        ciudad: this.data.sucursal.ciudad || '',
+        region: this.data.sucursal.region || '',
+        pais: this.data.sucursal.pais || 'Chile',
+        telefono: this.data.sucursal.telefono || '',
       });
+      if (this.data.sucursal.latitud && this.data.sucursal.longitud) {
+        this.mapLat.set(this.data.sucursal.latitud);
+        this.mapLng.set(this.data.sucursal.longitud);
+      }
     }
+  }
+
+  onMapLocationChange(event: { lat: number; lng: number }): void {
+    this.mapLat.set(event.lat);
+    this.mapLng.set(event.lng);
+
+    this.geocodingService.reverse(event.lat, event.lng).subscribe((addr) => {
+      this.form.patchValue({
+        direccion: addr.direccion,
+        comuna: addr.comuna,
+        ciudad: addr.ciudad,
+        region: addr.region,
+        pais: addr.pais,
+      });
+    });
   }
 
   fieldError(field: string): boolean {
@@ -324,26 +325,23 @@ export class BloqueoDialogComponent implements OnInit {
     this.guardando.set(true);
     const formValue = this.form.getRawValue();
 
-    const resultado: CreateBloqueoDto = {
-      empleadoId: Number(formValue.empleadoId),
-      fecha: formValue.fecha,
-      horaInicio: formValue.horaInicio,
-      horaFin: formValue.horaFin,
-      motivo: formValue.motivo || undefined,
+    const resultado: SucursalDialogResult = {
+      id: this.data.sucursal?.id,
+      nombre: formValue.nombre,
+      direccion: formValue.direccion || undefined,
+      comuna: formValue.comuna || undefined,
+      ciudad: formValue.ciudad || undefined,
+      region: formValue.region || undefined,
+      pais: formValue.pais || undefined,
+      telefono: formValue.telefono || undefined,
+      latitud: this.mapLat(),
+      longitud: this.mapLng(),
+      activo: this.data.sucursal?.activo ?? true,
     };
 
     setTimeout(() => {
       this.guardando.set(false);
       this.dialogRef.close(resultado);
     }, 300);
-  }
-
-  private generarHoras(): string[] {
-    const horas: string[] = [];
-    for (let h = 7; h <= 22; h++) {
-      horas.push(`${h.toString().padStart(2, '0')}:00`);
-      horas.push(`${h.toString().padStart(2, '0')}:30`);
-    }
-    return horas;
   }
 }

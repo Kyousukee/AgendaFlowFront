@@ -344,8 +344,7 @@ export class ServicioDialogComponent implements OnInit {
     this.guardando.set(true);
     const formValue = this.form.getRawValue();
 
-    const resultado: Servicio = {
-      id: this.data.servicio?.id ?? 0,
+    const resultado: Omit<Servicio, 'id' | 'fechaCreacion'> = {
       empresaId: this.data.empresaId,
       nombre: formValue.nombre,
       descripcion: formValue.descripcion || undefined,
@@ -353,7 +352,6 @@ export class ServicioDialogComponent implements OnInit {
       precio: formValue.precio,
       color: formValue.color || undefined,
       activo: true,
-      fechaCreacion: this.data.servicio?.fechaCreacion || new Date().toISOString(),
     };
 
     setTimeout(() => {

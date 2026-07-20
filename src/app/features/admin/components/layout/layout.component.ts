@@ -34,6 +34,7 @@ export class LayoutComponent {
   ];
 
   adminNavItems = [
+    { label: 'Sucursales', icon: 'store', route: '/admin/sucursales' },
     { label: 'Configuracion', icon: 'settings', route: '/admin/configuracion' },
   ];
 

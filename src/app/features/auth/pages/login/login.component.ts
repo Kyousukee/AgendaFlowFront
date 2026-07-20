@@ -34,10 +34,15 @@ export class LoginComponent {
 
       const { email, password } = this.form.getRawValue();
 
-      setTimeout(() => {
-        this.auth.login(email, password);
-        this.isLoading.set(false);
-      }, 600);
+      this.auth.login(email, password).subscribe({
+        next: () => {
+          this.isLoading.set(false);
+        },
+        error: (err: Error) => {
+          this.errorMessage.set(err.message);
+          this.isLoading.set(false);
+        },
+      });
     }
   }
 }

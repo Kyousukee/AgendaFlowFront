@@ -1,6 +1,31 @@
-import { Empresa } from './empresa.interface';
-import { Sucursal } from './sucursal.interface';
-import { Empleado } from './empleado.interface';
+export interface LoginApiResponse {
+  accessToken: string;
+  user: {
+    id: number;
+    nombre: string;
+    apellido: string;
+    email: string;
+    rolId: number;
+    empleado: {
+      id: number;
+      nombre: string;
+      apellido: string;
+      email: string;
+      telefono: string | null;
+      foto: string | null;
+      sucursal: {
+        id: number;
+        nombre: string;
+        direccion: string;
+        empresa: {
+          id: number;
+          nombre: string;
+          slug: string;
+        };
+      };
+    };
+  };
+}
 
 export interface UserData {
   id: number;
@@ -8,14 +33,14 @@ export interface UserData {
   apellido?: string;
   email: string;
   empresaId: number;
-  rol: string;
+  rolId: number;
   telefono?: string;
 }
 
 export interface AuthResponse {
   token: string;
   usuario: UserData;
-  empresa: Empresa;
-  sucursales: Sucursal[];
-  empleado: Empleado;
+  empresa: { id: number; nombre: string; slug: string };
+  sucursales: { id: number; empresaId: number; nombre: string; direccion: string; activo: boolean }[];
+  empleado: { id: number; sucursalId: number; nombre: string; apellido: string; email: string; telefono?: string; foto?: string; activo: boolean; fechaCreacion: string };
 }

@@ -13,6 +13,20 @@ import {
   BloqueoDialogData,
 } from '../../components/bloqueo-dialog/bloqueo-dialog.component';
 
+interface BloqueoBackend {
+  id: number;
+  empleado?: { id: number; nombre: string; apellido?: string };
+  fecha: string;
+  horaInicio: string;
+  horaFin: string;
+  motivo?: string;
+}
+
+interface BloqueoNormalizado extends BloqueoAgenda {
+  empleadoId: number;
+  empleadoNombre: string;
+}
+
 @Component({
   selector: 'app-bloqueos',
   standalone: true,
@@ -26,7 +40,7 @@ export class BloqueosComponent {
   private bloqueosService = inject(BloqueosService);
   private dialog = inject(MatDialog);
 
-  bloqueos = signal<BloqueoAgenda[]>([]);
+  bloqueos = signal<BloqueoNormalizado[]>([]);
   empleados = signal<Empleado[]>([]);
   cargando = signal(true);
   filtroEmpleado = signal('');
@@ -82,22 +96,16 @@ export class BloqueosComponent {
     this.cargando.set(true);
 
     this.empleadosService.getBySucursal(sucursalId).subscribe({
-      next: (empleados) => {
-        this.empleados.set(empleados);
-        const empleadoIds = empleados.map((e) => e.id);
-        this.bloqueosService.getBySucursal(empleadoIds).subscribe({
-          next: (bloqueos) => {
-            this.bloqueos.set(bloqueos);
-            this.cargando.set(false);
-          },
-          error: () => {
-            this.bloqueos.set([]);
-            this.cargando.set(false);
-          },
-        });
+      next: (empleados) => this.empleados.set(empleados),
+      error: () => this.empleados.set([]),
+    });
+
+    this.bloqueosService.getBySucursal().subscribe({
+      next: (bloqueos) => {
+        this.bloqueos.set(bloqueos.map((b) => this.normalizar(b)));
+        this.cargando.set(false);
       },
       error: () => {
-        this.empleados.set([]);
         this.bloqueos.set([]);
         this.cargando.set(false);
       },
@@ -112,7 +120,7 @@ export class BloqueosComponent {
       panelClass: 'dialog-panel',
     });
 
-    dialogRef.afterClosed().subscribe((resultado: BloqueoAgenda | undefined) => {
+    dialogRef.afterClosed().subscribe((resultado) => {
       if (resultado) {
         this.bloqueosService.crear(resultado).subscribe(() => {
           this.cargarDatos();
@@ -121,25 +129,31 @@ export class BloqueosComponent {
     });
   }
 
-  editarBloqueo(bloqueo: BloqueoAgenda): void {
+  editarBloqueo(bloqueo: BloqueoNormalizado): void {
     const dialogRef = this.dialog.open(BloqueoDialogComponent, {
       data: {
-        bloqueo,
+        bloqueo: {
+          empleadoId: bloqueo.empleadoId,
+          fecha: bloqueo.fecha,
+          horaInicio: bloqueo.horaInicio.substring(0, 5),
+          horaFin: bloqueo.horaFin.substring(0, 5),
+          motivo: bloqueo.motivo,
+        },
         empleados: this.empleados(),
       } as BloqueoDialogData,
       panelClass: 'dialog-panel',
     });
 
-    dialogRef.afterClosed().subscribe((resultado: BloqueoAgenda | undefined) => {
+    dialogRef.afterClosed().subscribe((resultado) => {
       if (resultado) {
-        this.bloqueosService.actualizar(resultado).subscribe(() => {
+        this.bloqueosService.actualizar(bloqueo.id, resultado).subscribe(() => {
           this.cargarDatos();
         });
       }
     });
   }
 
-  eliminarBloqueo(bloqueo: BloqueoAgenda): void {
+  eliminarBloqueo(bloqueo: BloqueoNormalizado): void {
     this.bloqueosService.eliminar(bloqueo.id).subscribe(() => {
       this.cargarDatos();
     });
@@ -158,5 +172,19 @@ export class BloqueosComponent {
     this.filtroEmpleado.set('');
     this.filtroFechaDesde.set('');
     this.filtroFechaHasta.set('');
+  }
+
+  private normalizar(b: BloqueoBackend): BloqueoNormalizado {
+    return {
+      id: b.id,
+      empleadoId: b.empleado?.id ?? 0,
+      empleadoNombre: b.empleado
+        ? [b.empleado.nombre, b.empleado.apellido].filter(Boolean).join(' ')
+        : '',
+      fecha: b.fecha,
+      horaInicio: b.horaInicio.substring(0, 5),
+      horaFin: b.horaFin.substring(0, 5),
+      motivo: b.motivo,
+    };
   }
 }

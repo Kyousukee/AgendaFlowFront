@@ -18,10 +18,10 @@ const HORARIOS_POR_DEFECTO: HorarioSucursal[] = [
 @Injectable({ providedIn: 'root' })
 export class HorariosService {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/horarios`;
+  private apiUrl = environment.apiUrl;
 
   getBySucursal(sucursalId: number): Observable<HorarioSucursal[]> {
-    return this.http.get<HorarioSucursal[]>(`${this.apiUrl}/sucursal/${sucursalId}`).pipe(
+    return this.http.get<HorarioSucursal[]>(`${this.apiUrl}/sucursales/${sucursalId}/horarios`).pipe(
       map((horarios) =>
         horarios.length > 0 ? horarios : HORARIOS_POR_DEFECTO.map((h) => ({ ...h, sucursalId })),
       ),
@@ -29,9 +29,11 @@ export class HorariosService {
     );
   }
 
-  saveAll(sucursalId: number, horarios: HorarioSucursal[]): Observable<HorarioSucursal[]> {
+  saveAll(sucursalId: number, horarios: Omit<HorarioSucursal, 'id' | 'sucursalId'>[]): Observable<HorarioSucursal[]> {
+    console.log(`${this.apiUrl}/sucursales/${sucursalId}/horarios`);
+    console.log(horarios);
     return this.http
-      .put<HorarioSucursal[]>(`${this.apiUrl}/sucursal/${sucursalId}`, { horarios })
-      .pipe(catchError(() => of(horarios)));
+      .post<HorarioSucursal[]>(`${this.apiUrl}/sucursales/${sucursalId}/horarios`, { horarios })
+      .pipe(catchError(() => of([])));
   }
 }

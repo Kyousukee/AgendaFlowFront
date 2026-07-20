@@ -51,6 +51,7 @@ export class HorariosComponent implements OnInit {
   horarios: DiaHorario[] = [];
   guardando = signal(false);
   cargando = signal(true);
+  exito = signal(false);
 
   horas = [
     '08:00',
@@ -129,42 +130,110 @@ export class HorariosComponent implements OnInit {
     if (!sucursalId) return;
 
     this.guardando.set(true);
-    const horariosApi = this.mapearHaciaApi(this.horarios, sucursalId);
+    this.exito.set(false);
+    const horariosApi = this.mapearHaciaApi(this.horarios);
 
     this.horariosService.saveAll(sucursalId, horariosApi).subscribe({
-      next: () => this.guardando.set(false),
+      next: (data) => {
+        if (data.length > 0) {
+          this.horarios = this.mapearDesdeApi(data);
+        }
+        this.guardando.set(false);
+        this.exito.set(true);
+        setTimeout(() => this.exito.set(false), 3000);
+      },
       error: () => this.guardando.set(false),
     });
   }
 
   private mapearDesdeApi(data: HorarioSucursal[]): DiaHorario[] {
-    const horariosMap = new Map<number, HorarioSucursal>();
-    data.forEach((h) => horariosMap.set(h.diaSemana, h));
+    const normalizados = data.map((h) => ({
+      ...h,
+      horaInicio: this.normalizarHora(h.horaInicio),
+      horaFin: this.normalizarHora(h.horaFin),
+    }));
+
+    const agrupados = new Map<number, HorarioSucursal[]>();
+    normalizados.forEach((h) => {
+      const lista = agrupados.get(h.diaSemana) || [];
+      lista.push(h);
+      agrupados.set(h.diaSemana, lista);
+    });
 
     return Array.from({ length: 7 }, (_, i) => {
       const diaSemana = i + 1;
-      const api = horariosMap.get(diaSemana);
+      const entradas = agrupados.get(diaSemana) || [];
+
+      if (entradas.length === 0) {
+        return {
+          dia: NOMBRES_DIAS[diaSemana],
+          diaSemana,
+          activo: false,
+          apertura: '09:00',
+          cierre: '18:00',
+          descansoInicio: '',
+          descansoFin: '',
+        };
+      }
+
+      if (entradas.length === 1) {
+        const e = entradas[0];
+        return {
+          dia: NOMBRES_DIAS[diaSemana],
+          diaSemana,
+          activo: e.abierto,
+          apertura: e.horaInicio,
+          cierre: e.horaFin,
+          descansoInicio: '',
+          descansoFin: '',
+        };
+      }
+
+      entradas.sort((a, b) => a.horaInicio.localeCompare(b.horaInicio));
+      const primera = entradas[0];
+      const segunda = entradas[1];
       return {
         dia: NOMBRES_DIAS[diaSemana],
         diaSemana,
-        activo: api?.abierto ?? false,
-        apertura: api?.horaInicio ?? '09:00',
-        cierre: api?.horaFin ?? '18:00',
-        descansoInicio: '',
-        descansoFin: '',
+        activo: primera.abierto,
+        apertura: primera.horaInicio,
+        cierre: segunda.horaFin,
+        descansoInicio: primera.horaFin,
+        descansoFin: segunda.horaInicio,
       };
     });
   }
 
-  private mapearHaciaApi(horarios: DiaHorario[], sucursalId: number): HorarioSucursal[] {
-    return horarios.map((h) => ({
-      id: 0,
-      sucursalId,
-      diaSemana: h.diaSemana,
-      horaInicio: h.apertura,
-      horaFin: h.cierre,
-      abierto: h.activo,
-    }));
+  private mapearHaciaApi(horarios: DiaHorario[]): Omit<HorarioSucursal, 'id' | 'sucursalId'>[] {
+    const resultado: Omit<HorarioSucursal, 'id' | 'sucursalId'>[] = [];
+
+    for (const h of horarios) {
+      const tieneDescanso = h.descansoInicio && h.descansoFin;
+
+      if (tieneDescanso) {
+        resultado.push({
+          diaSemana: h.diaSemana,
+          horaInicio: h.apertura,
+          horaFin: h.descansoInicio,
+          abierto: h.activo,
+        });
+        resultado.push({
+          diaSemana: h.diaSemana,
+          horaInicio: h.descansoFin,
+          horaFin: h.cierre,
+          abierto: h.activo,
+        });
+      } else {
+        resultado.push({
+          diaSemana: h.diaSemana,
+          horaInicio: h.apertura,
+          horaFin: h.cierre,
+          abierto: h.activo,
+        });
+      }
+    }
+
+    return resultado;
   }
 
   private obtenerHorariosPorDefecto(): DiaHorario[] {
@@ -233,5 +302,10 @@ export class HorariosComponent implements OnInit {
         descansoFin: '',
       },
     ];
+  }
+
+  private normalizarHora(hora: string): string {
+    const parts = hora.split(':');
+    return `${parts[0]}:${parts[1]}`;
   }
 }

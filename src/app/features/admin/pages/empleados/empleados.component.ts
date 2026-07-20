@@ -6,7 +6,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { AuthService } from '../../../../core/services/auth.service';
 import { EmpleadosService } from '../../services/empleados.service';
 import { ServiciosService } from '../../services/servicios.service';
-import { ServiciosEmpleadosService } from '../../services/servicios-empleados.service';
 import { Empleado } from '../../../../core/interfaces/empleado.interface';
 import { Servicio } from '../../../../core/interfaces/servicio.interface';
 import {
@@ -26,7 +25,6 @@ export class EmpleadosComponent {
   private authService = inject(AuthService);
   private empleadosService = inject(EmpleadosService);
   private serviciosService = inject(ServiciosService);
-  private serviciosEmpleadosService = inject(ServiciosEmpleadosService);
   private dialog = inject(MatDialog);
 
   empleados = signal<Empleado[]>([]);
@@ -64,21 +62,14 @@ export class EmpleadosComponent {
 
     this.empleadosService.getBySucursal(sucursalId).subscribe({
       next: (empleados) => {
+        console.log('Empleados cargados:', empleados);
         this.empleados.set(empleados);
-        const empleadoIds = empleados.map((e) => e.id);
-        this.serviciosEmpleadosService.getBySucursal(sucursalId, empleadoIds).subscribe({
-          next: (se) => {
-            const map: Record<number, number[]> = {};
-            for (const e of empleadoIds) {
-              map[e] = se.filter((s) => s.empleadoId === e).map((s) => s.servicioId);
-            }
-            this.servicioIdsMap.set(map);
-            this.cargando.set(false);
-          },
-          error: () => {
-            this.cargando.set(false);
-          },
-        });
+        const map: Record<number, number[]> = {};
+        for (const e of empleados) {
+          map[e.id] = (e.serviciosEmpleados || []).map((se) => se.servicio.id);
+        }
+        this.servicioIdsMap.set(map);
+        this.cargando.set(false);
       },
       error: () => {
         this.empleados.set([]);
@@ -103,14 +94,8 @@ export class EmpleadosComponent {
     dialogRef.afterClosed().subscribe((resultado: EmpleadoDialogResult | undefined) => {
       if (resultado) {
         const { servicioIds, ...empleado } = resultado;
-        this.empleadosService.crear(empleado).subscribe(() => {
-          if (empleado.id && servicioIds.length > 0) {
-            this.serviciosEmpleadosService.save(empleado.id, servicioIds).subscribe(() => {
-              this.cargarDatos();
-            });
-          } else {
-            this.cargarDatos();
-          }
+        this.empleadosService.crear({ ...empleado, servicioIds }).subscribe(() => {
+          this.cargarDatos();
         });
       }
     });
@@ -132,11 +117,9 @@ export class EmpleadosComponent {
 
     dialogRef.afterClosed().subscribe((resultado: EmpleadoDialogResult | undefined) => {
       if (resultado) {
-        const { servicioIds, ...empleadoData } = resultado;
-        this.empleadosService.actualizar(empleadoData).subscribe(() => {
-          this.serviciosEmpleadosService.save(empleadoData.id, servicioIds).subscribe(() => {
-            this.cargarDatos();
-          });
+        const { servicioIds, sucursalId: _, ...body } = resultado;
+        this.empleadosService.actualizar(empleado.id, { ...body, servicioIds }).subscribe(() => {
+          this.cargarDatos();
         });
       }
     });

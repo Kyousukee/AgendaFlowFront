@@ -172,8 +172,8 @@ export class ReservarFormComponent implements OnChanges {
       fecha: this.fechaSeleccionada(),
       horaInicio: this.horaSeleccionada(),
       horaFin: this.calcularHoraFin(),
-      clienteNombre: formValue.nombre,
-      clienteApellido: formValue.apellido,
+      precio: servicio.precio,
+      clienteNombre: [formValue.nombre, formValue.apellido].filter(Boolean).join(' '),
       clienteEmail: formValue.email,
       clienteTelefono: formValue.telefono,
       observacion: formValue.observacion,
@@ -205,15 +205,17 @@ export class ReservarFormComponent implements OnChanges {
     for (let i = 0; i < 14; i++) {
       const fecha = new Date(hoy);
       fecha.setDate(hoy.getDate() + i);
-      const diaSemana = fecha.getDay() + 1;
+      const diaSemana = fecha.getDay() === 0 ? 7 : fecha.getDay();
 
       const abierto = this.horarios.some(
         (h) => h.diaSemana === diaSemana && h.abierto,
       );
 
       if (abierto) {
-        const str = fecha.toISOString().split('T')[0];
-        fechas.push(str);
+        const y = fecha.getFullYear();
+        const m = (fecha.getMonth() + 1).toString().padStart(2, '0');
+        const d = fecha.getDate().toString().padStart(2, '0');
+        fechas.push(`${y}-${m}-${d}`);
       }
     }
 
@@ -228,7 +230,15 @@ export class ReservarFormComponent implements OnChanges {
     if (!servicio || !empleado || !fecha) return;
 
     this.reservarService
-      .getHorariosDisponibles(this.sucursalId, empleado.id, servicio.id, fecha)
+      .getHorariosDisponibles(
+        this.sucursalId,
+        empleado.id,
+        servicio.id,
+        fecha,
+        this.servicios,
+        this.horarios,
+        this.bloqueos,
+      )
       .subscribe((horas) => {
         this.horasDisponibles.set(horas);
       });

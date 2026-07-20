@@ -4,7 +4,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ConfiguracionEmpresaService } from '../../services/configuracion-empresa.service';
-import { ConfiguracionEmpresa } from '../../../../core/interfaces/configuracion-empresa.interface';
 
 @Component({
   selector: 'app-configuracion',
@@ -68,7 +67,7 @@ export class ConfiguracionComponent {
     }
 
     this.cargando.set(true);
-    this.configService.getByEmpresa(empresaId).subscribe({
+    this.configService.obtener().subscribe({
       next: (config) => {
         this.configuracionId = config.id;
         this.form.patchValue({
@@ -99,15 +98,10 @@ export class ConfiguracionComponent {
   guardar(): void {
     if (this.form.invalid || this.guardando()) return;
 
-    const empresaId = this.authService.empresa()?.id;
-    if (!empresaId) return;
-
     this.guardando.set(true);
     const formValue = this.form.getRawValue();
 
-    const config: ConfiguracionEmpresa = {
-      id: this.configuracionId,
-      empresaId,
+    const data = {
       permitePagoAnticipado: formValue.permitePagoAnticipado,
       tipoAnticipo: formValue.tipoAnticipo,
       montoAnticipo: formValue.montoAnticipo,
@@ -119,8 +113,13 @@ export class ConfiguracionComponent {
       enviarWhatsapp: formValue.enviarWhatsapp,
     };
 
-    this.configService.guardar(config).subscribe({
-      next: () => {
+    const request$ = this.configuracionId > 0
+      ? this.configService.actualizar(data)
+      : this.configService.crear(data);
+
+    request$.subscribe({
+      next: (config) => {
+        this.configuracionId = config.id;
         this.guardando.set(false);
         this.guardado.set(true);
         setTimeout(() => this.guardado.set(false), 3000);

@@ -4,10 +4,10 @@
       <div class="loading-spinner"></div>
       <span>Cargando informacion...</span>
     </div>
-  } @else if (!empresa() || !sucursal()) {
+  } @else if (error()) {
     <div class="reservar-error">
       <h2>Sucursal no encontrada</h2>
-      <p>El enlace de reserva no es valido o la sucursal no esta disponible.</p>
+      <p>{{ error() }}</p>
     </div>
   } @else {
     <header class="reservar-header">

@@ -1,60 +1,47 @@
 import { Injectable, signal, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { Observable, tap, catchError, throwError } from 'rxjs';
 import { Empresa } from '../interfaces/empresa.interface';
 import { Sucursal } from '../interfaces/sucursal.interface';
 import { Empleado } from '../interfaces/empleado.interface';
-import { UserData, AuthResponse } from '../interfaces/auth-response.interface';
+import { UserData, LoginApiResponse } from '../interfaces/auth-response.interface';
+import { RegisterRequest } from '../../features/auth/interfaces/register-request.interface';
+import { environment } from '../../../environments/environment';
 
-const MOCK_EMPRESA: Empresa = {
-  id: 1,
-  nombre: 'Barberia Los Barones',
-  nombreComercial: 'Los Barones',
-  slug: 'los-barones',
-  descripcion: 'Barberia premium en el corazon de Santiago',
-  email: 'contacto@losbarones.cl',
-  telefono: '+56912345678',
-  whatsapp: '+56912345678',
-  logo: '',
-  banner: '',
-  colorPrincipal: '#C9A84C',
-  colorSecundario: '#1A1A1A',
-  activo: true,
-  fechaCreacion: new Date().toISOString(),
-};
+export const SUCURSAL_UPDATED = 'agendaflow_sucursal_updated';
 
-const MOCK_SUCURSALES: Sucursal[] = [
-  {
-    id: 1,
-    empresaId: 1,
-    nombre: 'Sucursal Centro',
-    direccion: 'Av. Libertador 1234',
-    comuna: 'Providencia',
-    ciudad: 'Santiago',
-    region: 'Metropolitana',
-    pais: 'Chile',
-    latitud: -33.4489,
-    longitud: -70.6693,
-    telefono: '+56912345678',
-    activo: true,
-    fechaCreacion: new Date().toISOString(),
-  },
-  {
-    id: 2,
-    empresaId: 1,
-    nombre: 'Sucursal Las Condes',
-    direccion: 'Av. Apoquindo 5678',
-    comuna: 'Las Condes',
-    ciudad: 'Santiago',
-    region: 'Metropolitana',
-    pais: 'Chile',
-    latitud: -33.415,
-    longitud: -70.585,
-    telefono: '+56987654321',
-    activo: true,
-    fechaCreacion: new Date().toISOString(),
-  },
-];
+interface ApiEmpresa {
+  id: number;
+  nombre: string;
+  slug: string;
+}
+
+interface ApiSucursal {
+  id: number;
+  nombre: string;
+  direccion: string;
+}
+
+interface ApiEmpleado {
+  id: number;
+  nombre: string;
+  apellido: string;
+  email: string;
+  telefono: string | null;
+  foto: string | null;
+  sucursal: ApiSucursal & { empresa: ApiEmpresa };
+}
+
+interface ApiUser {
+  id: number;
+  nombre: string;
+  apellido: string;
+  email: string;
+  rolId: number;
+  empleado: ApiEmpleado;
+}
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -67,6 +54,7 @@ export class AuthService {
 
   private platformId = inject(PLATFORM_ID);
   private router = inject(Router);
+  private http = inject(HttpClient);
 
   isLoggedIn = signal(false);
   currentUser = signal<UserData | null>(null);
@@ -87,6 +75,7 @@ export class AuthService {
       if (token && userJson) {
         this.isLoggedIn.set(true);
         this.currentUser.set(JSON.parse(userJson));
+        this.cargarSucursales();
       }
       if (empresaJson) {
         this.empresa.set(JSON.parse(empresaJson));
@@ -103,30 +92,107 @@ export class AuthService {
     }
   }
 
-  setSession(response: AuthResponse): void {
-    if (isPlatformBrowser(this.platformId)) {
-      localStorage.setItem(this.TOKEN_KEY, response.token);
-      localStorage.setItem(this.USER_KEY, JSON.stringify(response.usuario));
-      localStorage.setItem(this.EMPRESA_KEY, JSON.stringify(response.empresa));
-      localStorage.setItem(this.SUCURSALES_KEY, JSON.stringify(response.sucursales));
-      localStorage.setItem(this.EMPLEADO_KEY, JSON.stringify(response.empleado));
+  login(email: string, password: string): Observable<LoginApiResponse> {
+    return this.http
+      .post<LoginApiResponse>(`${environment.apiUrl}/auth/login`, { email, password })
+      .pipe(
+        tap((response) => this.handleLoginResponse(response)),
+        catchError((error) => {
+          let message = 'Error al iniciar sesion';
+          if (error.status === 401) {
+            message = 'Email o contrasena incorrectos';
+          } else if (error.status === 0) {
+            message = 'No se pudo conectar con el servidor';
+          }
+          return throwError(() => new Error(message));
+        }),
+      );
+  }
 
-      if (response.sucursales.length > 0) {
-        localStorage.setItem(this.SUCURSAL_ACTUAL_KEY, JSON.stringify(response.sucursales[0]));
-      }
+  private handleLoginResponse(response: LoginApiResponse): void {
+    const { accessToken, user } = response;
+    const apiUser: ApiUser = user as ApiUser;
+    const sucursal = apiUser.empleado.sucursal;
+    const apiEmpresa: ApiEmpresa = sucursal.empresa;
+
+    const userData: UserData = {
+      id: apiUser.id,
+      nombre: apiUser.nombre,
+      apellido: apiUser.apellido,
+      email: apiUser.email,
+      empresaId: apiEmpresa.id,
+      rolId: apiUser.rolId,
+      telefono: apiUser.empleado.telefono ?? undefined,
+    };
+
+    const empresaData: Empresa = {
+      id: apiEmpresa.id,
+      nombre: apiEmpresa.nombre,
+      slug: apiEmpresa.slug,
+      activo: true,
+      fechaCreacion: new Date().toISOString(),
+    };
+
+    const sucursalData: Sucursal = {
+      id: sucursal.id,
+      empresaId: apiEmpresa.id,
+      nombre: sucursal.nombre,
+      direccion: sucursal.direccion,
+      activo: true,
+      fechaCreacion: new Date().toISOString(),
+    };
+
+    const empleadoData: Empleado = {
+      id: apiUser.empleado.id,
+      sucursalId: sucursal.id,
+      nombre: apiUser.empleado.nombre,
+      apellido: apiUser.empleado.apellido,
+      email: apiUser.empleado.email,
+      telefono: apiUser.empleado.telefono ?? undefined,
+      foto: apiUser.empleado.foto ?? undefined,
+      activo: true,
+      fechaCreacion: new Date().toISOString(),
+    };
+
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem(this.TOKEN_KEY, accessToken);
+      localStorage.setItem(this.USER_KEY, JSON.stringify(userData));
+      localStorage.setItem(this.EMPRESA_KEY, JSON.stringify(empresaData));
+      localStorage.setItem(this.SUCURSALES_KEY, JSON.stringify([sucursalData]));
+      localStorage.setItem(this.SUCURSAL_ACTUAL_KEY, JSON.stringify(sucursalData));
+      localStorage.setItem(this.EMPLEADO_KEY, JSON.stringify(empleadoData));
     }
 
     this.isLoggedIn.set(true);
-    this.currentUser.set(response.usuario);
-    this.empresa.set(response.empresa);
-    this.sucursales.set(response.sucursales);
-    this.empleado.set(response.empleado);
-
-    if (response.sucursales.length > 0) {
-      this.sucursalActual.set(response.sucursales[0]);
-    }
+    this.currentUser.set(userData);
+    this.empresa.set(empresaData);
+    this.sucursales.set([sucursalData]);
+    this.sucursalActual.set(sucursalData);
+    this.empleado.set(empleadoData);
 
     this.router.navigate(['/admin/home']);
+    this.cargarSucursales();
+  }
+
+  cargarSucursales(): void {
+    this.http.get<Sucursal[]>(`${environment.apiUrl}/sucursales`).subscribe({
+      next: (data) => {
+        if (data.length > 0) {
+          this.sucursales.set(data);
+          if (isPlatformBrowser(this.platformId)) {
+            localStorage.setItem(this.SUCURSALES_KEY, JSON.stringify(data));
+          }
+          const actual = this.sucursalActual();
+          if (!actual || !data.find((s) => s.id === actual.id)) {
+            this.sucursalActual.set(data[0]);
+            if (isPlatformBrowser(this.platformId)) {
+              localStorage.setItem(this.SUCURSAL_ACTUAL_KEY, JSON.stringify(data[0]));
+            }
+          }
+        }
+      },
+      error: () => {},
+    });
   }
 
   cambiarSucursal(sucursalId: number): void {
@@ -135,12 +201,13 @@ export class AuthService {
       this.sucursalActual.set(suc);
       if (isPlatformBrowser(this.platformId)) {
         localStorage.setItem(this.SUCURSAL_ACTUAL_KEY, JSON.stringify(suc));
+        window.dispatchEvent(new CustomEvent(SUCURSAL_UPDATED, { detail: suc }));
       }
     }
   }
 
   esAdmin(): boolean {
-    return this.currentUser()?.rol === 'admin';
+    return this.currentUser()?.rolId === 1;
   }
 
   getToken(): string | null {
@@ -150,77 +217,23 @@ export class AuthService {
     return null;
   }
 
-  login(email: string, _password: string): void {
-    const mockResponse: AuthResponse = {
-      token: 'mock-token-' + Date.now(),
-      usuario: {
-        id: 1,
-        nombre: 'Usuario',
-        apellido: 'Demo',
-        email,
-        empresaId: 1,
-        rol: 'admin',
-        telefono: '+56912345678',
-      },
-      empresa: MOCK_EMPRESA,
-      sucursales: MOCK_SUCURSALES,
-      empleado: {
-        id: 1,
-        sucursalId: 1,
-        nombre: 'Usuario',
-        apellido: 'Demo',
-        email,
-        telefono: '+56912345678',
-        foto: '',
-        descripcion: 'Administrador principal',
-        activo: true,
-        fechaCreacion: new Date().toISOString(),
-      },
-    };
-
-    this.setSession(mockResponse);
-  }
-
-  register(
-    nombre: string,
-    apellido: string,
-    email: string,
-    _password: string,
-    empresaNombre: string,
-    sucursalNombre: string,
-  ): void {
-    const mockResponse: AuthResponse = {
-      token: 'mock-token-' + Date.now(),
-      usuario: {
-        id: 1,
-        nombre,
-        apellido,
-        email,
-        empresaId: 1,
-        rol: 'admin',
-      },
-      empresa: {
-        ...MOCK_EMPRESA,
-        nombre: empresaNombre,
-      },
-      sucursales: [
-        {
-          ...MOCK_SUCURSALES[0],
-          nombre: sucursalNombre || 'Sucursal Principal',
-        },
-      ],
-      empleado: {
-        id: 1,
-        sucursalId: 1,
-        nombre,
-        apellido,
-        email,
-        activo: true,
-        fechaCreacion: new Date().toISOString(),
-      },
-    };
-
-    this.setSession(mockResponse);
+  register(data: RegisterRequest): Observable<LoginApiResponse> {
+    return this.http
+      .post<LoginApiResponse>(`${environment.apiUrl}/auth/register`, data)
+      .pipe(
+        tap((response) => this.handleLoginResponse(response)),
+        catchError((error) => {
+          let message = 'Error al registrar usuario';
+          if (error.status === 409) {
+            message = 'El email ya esta registrado';
+          } else if (error.status === 400) {
+            message = 'Datos invalidos, revisa el formulario';
+          } else if (error.status === 0) {
+            message = 'No se pudo conectar con el servidor';
+          }
+          return throwError(() => new Error(message));
+        }),
+      );
   }
 
   logout(): void {
