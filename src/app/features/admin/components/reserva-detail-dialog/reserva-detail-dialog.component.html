@@ -2,7 +2,7 @@
   <div class="dialog-header">
     <div class="dialog-header__info">
       <h2 class="dialog-title">Detalle de Reserva</h2>
-      <span class="dialog-codigo">{{ data.codigo }}</span>
+      <span class="dialog-codigo">{{ data.reserva.codigo }}</span>
     </div>
     <span class="estado-badge" [attr.data-estado]="data.estado.nombre.toLowerCase()">
       {{ data.estado.nombre }}
@@ -15,22 +15,22 @@
         <mat-icon>calendar_today</mat-icon>
         <div class="detail-content">
           <span class="detail-label">Fecha</span>
-          <span class="detail-value">{{ formatearFecha(data.fecha) }}</span>
+          <span class="detail-value">{{ formatearFecha(data.reserva.fecha) }}</span>
         </div>
       </div>
       <div class="detail-row">
         <mat-icon>schedule</mat-icon>
         <div class="detail-content">
           <span class="detail-label">Horario</span>
-          <span class="detail-value">{{ formatearHora(data.horaInicio) }} - {{ formatearHora(data.horaFin) }}</span>
+          <span class="detail-value">{{ formatearHora(data.reserva.horaInicio) }} - {{ formatearHora(data.reserva.horaFin) }}</span>
         </div>
       </div>
-      @if (data.observacion) {
+      @if (data.reserva.observacion) {
         <div class="detail-row">
           <mat-icon>notes</mat-icon>
           <div class="detail-content">
             <span class="detail-label">Observacion</span>
-            <span class="detail-value">{{ data.observacion }}</span>
+            <span class="detail-value">{{ data.reserva.observacion }}</span>
           </div>
         </div>
       }
@@ -46,16 +46,16 @@
           <span class="field-label">Nombre</span>
           <span class="field-value">{{ getNombreCliente() }}</span>
         </div>
-        @if (data.cliente.email) {
+        @if (data.reserva.cliente.email) {
           <div class="section-field">
             <span class="field-label">Email</span>
-            <span class="field-value">{{ data.cliente.email }}</span>
+            <span class="field-value">{{ data.reserva.cliente.email }}</span>
           </div>
         }
-        @if (data.cliente.telefono) {
+        @if (data.reserva.cliente.telefono) {
           <div class="section-field">
             <span class="field-label">Telefono</span>
-            <span class="field-value">{{ data.cliente.telefono }}</span>
+            <span class="field-value">{{ data.reserva.cliente.telefono }}</span>
           </div>
         }
       </div>
@@ -73,11 +73,11 @@
         </div>
         <div class="section-field">
           <span class="field-label">Duracion</span>
-          <span class="field-value">{{ data.servicio.duracionMinutos }} min</span>
+          <span class="field-value">{{ data.reserva.servicio.duracionMinutos }} min</span>
         </div>
         <div class="section-field">
           <span class="field-label">Precio</span>
-          <span class="field-value field-value--gold">{{ formatearPrecio(data.precio) }}</span>
+          <span class="field-value field-value--gold">{{ formatearPrecio(data.reserva.precio) }}</span>
         </div>
       </div>
     </div>

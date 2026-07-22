@@ -5,13 +5,22 @@ import { Estado } from './estado.interface';
 import { Servicio } from './servicio.interface';
 import { Sucursal } from './sucursal.interface';
 
+export interface PagoReserva {
+  id: number;
+  reserva_id: number;
+  monto: number;
+  metodoPago: string;
+  codigoTransaccion: string;
+  fechaPago: string;
+}
+
 export interface Reserva {
   id: number;
   codigo: string;
-  empresa: Empresa;
+  empresa?: Empresa;
   sucursal: Sucursal;
   cliente: Cliente;
-  empleado: Empleado;
+  empleado?: Empleado;
   servicio: Servicio;
   fecha: string;
   horaInicio: string;
@@ -20,4 +29,5 @@ export interface Reserva {
   observacion?: string;
   fechaCreacion: string;
   estado: Estado;
+  pagos?: PagoReserva[];
 }

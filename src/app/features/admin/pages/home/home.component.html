@@ -5,11 +5,11 @@
       <p class="page-subtitle">Vista general de citas y disponibilidad</p>
     </div>
     <div class="page-actions">
-      <button class="btn btn--outline">
+      <button class="btn btn--outline" (click)="diaAnterior()">
         <mat-icon>chevron_left</mat-icon>
       </button>
       <span class="date-label">{{ selectedDay() }}</span>
-      <button class="btn btn--outline">
+      <button class="btn btn--outline" (click)="diaSiguiente()">
         <mat-icon>chevron_right</mat-icon>
       </button>
     </div>
@@ -36,61 +36,289 @@
     </div>
   }
 
-  <div class="horarios-grid">
-    <div class="servicios-panel">
-      <h3 class="panel-title">Servicios</h3>
-      <div class="servicios-list">
-        @for (servicio of servicios; track servicio.id) {
-          <div class="servicio-item">
-            <div class="servicio-color" [style.background]="servicio.color"></div>
-            <div class="servicio-info">
-              <span class="servicio-nombre">{{ servicio.nombre }}</span>
-              <span class="servicio-duracion">{{ servicio.duracion }} min</span>
-            </div>
+  @if (cargando()) {
+    <div class="horarios-grid">
+      <div class="servicios-panel">
+        <p class="empty-text">Cargando datos...</p>
+      </div>
+      <div class="timeline-panel">
+        <mat-card class="timeline-card">
+          <p class="empty-text">Cargando agenda...</p>
+        </mat-card>
+      </div>
+    </div>
+  } @else {
+    <div class="horarios-grid">
+      <div class="servicios-panel">
+        <h3 class="panel-title">Servicios</h3>
+        @if (servicios().length === 0) {
+          <p class="empty-text">No hay servicios configurados</p>
+        } @else {
+          <div class="servicios-list">
+            @for (servicio of servicios(); track servicio.id) {
+              <div class="servicio-item">
+                <div class="servicio-color" [style.background]="servicio.color || '#6B7280'"></div>
+                <div class="servicio-info">
+                  <span class="servicio-nombre">{{ servicio.nombre }}</span>
+                  <span class="servicio-duracion">{{ servicio.duracionMinutos }} min</span>
+                </div>
+              </div>
+            }
           </div>
         }
-      </div>
 
-      <div class="resumen">
-        <h3 class="panel-title">Resumen del dia</h3>
-        <div class="resumen-stats">
-          <div class="stat">
-            <span class="stat-value stat-value--ocupado">{{ totalOcupados }}</span>
-            <span class="stat-label">Citas agendadas</span>
-          </div>
-          <div class="stat">
-            <span class="stat-value stat-value--disponible">{{ totalDisponibles }}</span>
-            <span class="stat-label">Slots libres</span>
+        <div class="resumen">
+          <h3 class="panel-title">Resumen del dia</h3>
+          <div class="resumen-stats">
+            <div class="stat">
+              <span class="stat-value stat-value--ocupado">{{ totalOcupados() }}</span>
+              <span class="stat-label">Citas agendadas</span>
+            </div>
+            <div class="stat">
+              <span class="stat-value stat-value--disponible">{{ totalDisponibles() }}</span>
+              <span class="stat-label">Slots libres</span>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="timeline-panel">
-      <mat-card class="timeline-card">
-        <div class="timeline">
-          @for (slot of slots; track slot.hora) {
-            <div class="slot" [class.slot--ocupado]="slot.estado === 'ocupado'" [class.slot--disponible]="slot.estado === 'disponible'">
-              <div class="slot__hora">
-                <span class="slot__hora-inicio">{{ slot.hora }}</span>
-                <span class="slot__hora-fin">{{ slot.horaFin }}</span>
+      <div class="timeline-panel">
+        <mat-card class="timeline-card">
+          @if (timeline().length === 0) {
+            <p class="empty-text">No hay horarios configurados para este dia</p>
+          } @else {
+            <div class="timeline">
+              @for (row of timeline(); track row.hora) {
+                <div class="slot" [class.slot--ocupado]="row.items[0].type === 'reserva'" [class.slot--disponible]="row.items[0].type === 'disponible'">
+                  <div class="slot__hora">
+                    <span class="slot__hora-inicio">{{ row.hora }}</span>
+                    <span class="slot__hora-fin">{{ row.horaFin }}</span>
+                  </div>
+                  <div class="slot__bar">
+                    <div class="slot__items" [class.slot__items--multi]="row.items.length > 1">
+                      @for (item of row.items; track item.hora + item.empleado) {
+                        @if (item.type === 'reserva' && item.servicio) {
+                          <div class="slot__item" [style.borderLeftColor]="item.servicio.color || '#6B7280'" (click)="item.reserva && abrirModalPago(item.reserva)" role="button" tabindex="0">
+                            <div class="slot__item-main">
+                              <span class="slot__servicio" [style.color]="item.servicio.color || '#6B7280'">{{ item.servicio.nombre }}</span>
+                              <span class="slot__cliente">{{ item.cliente }}</span>
+                            </div>
+                            @if (item.empleado) {
+                              <span class="slot__empleado">
+                                <mat-icon class="slot__empleado-icon">person</mat-icon>
+                                {{ item.empleado }}
+                              </span>
+                            }
+                          </div>
+                        } @else {
+                          <div class="slot__item slot__item--vacio">
+                            <span class="slot__disponible-text">Disponible</span>
+                          </div>
+                        }
+                      }
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </mat-card>
+      </div>
+    </div>
+  }
+
+  @if (modalPagoAbierto()) {
+    <div class="modal-overlay" (click)="cerrarModalPago()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        @if (pagoExitoso()) {
+          <div class="modal__exito">
+            <mat-icon class="modal__exito-icon">check_circle</mat-icon>
+            <span>Pago registrado</span>
+          </div>
+        } @else {
+          <div class="modal__header">
+            @if (reservaSeleccionada(); as reserva) {
+              @if (tienePago(reserva)) {
+                <h3 class="modal__title">Pagos de la reserva</h3>
+              } @else {
+                <h3 class="modal__title">Registrar pago</h3>
+              }
+            }
+            <button class="modal__close" (click)="cerrarModalPago()">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+          <div class="modal__body">
+            @if (reservaSeleccionada(); as reserva) {
+              <div class="modal__resumen">
+                <div class="modal__resumen-row">
+                  <span class="modal__resumen-label">Cliente</span>
+                  <span class="modal__resumen-value">{{ reserva.cliente?.nombre }} {{ reserva.cliente?.apellido }}</span>
+                </div>
+                <div class="modal__resumen-row">
+                  <span class="modal__resumen-label">Servicio</span>
+                  <span class="modal__resumen-value">{{ reserva.servicio?.nombre }}</span>
+                </div>
+                <div class="modal__resumen-row">
+                  <span class="modal__resumen-label">Hora</span>
+                  <span class="modal__resumen-value">{{ reserva.horaInicio }} - {{ reserva.horaFin }}</span>
+                </div>
+                <div class="modal__resumen-row">
+                  <span class="modal__resumen-label">Monto</span>
+                  <span class="modal__resumen-value modal__resumen-value--gold">{{ formatearPrecio(reserva.precio) }}</span>
+                </div>
               </div>
-              <div class="slot__bar">
-                @if (slot.estado === 'ocupado' && slot.servicio) {
-                  <div class="slot__contenido" [style.borderLeftColor]="slot.servicio.color">
-                    <span class="slot__servicio" [style.color]="slot.servicio.color">{{ slot.servicio.nombre }}</span>
-                    <span class="slot__cliente">{{ slot.cliente }}</span>
+
+              @if (tienePago(reserva)) {
+                @if (pagoSeleccionado(); as pago) {
+                  @if (estadoActualizado()) {
+                    <div class="modal__exito modal__exito--inline">
+                      <mat-icon class="modal__exito-icon--sm">check_circle</mat-icon>
+                      <span>Estado actualizado</span>
+                    </div>
+                  } @else {
+                    <div class="modal__pago-detalle">
+                      <div class="modal__pago-detalle-header">
+                        <button class="modal__back" (click)="cerrarDetallePago()">
+                          <mat-icon>arrow_back</mat-icon>
+                        </button>
+                        <span class="modal__pago-detalle-title">Modificar estado</span>
+                      </div>
+                      <div class="modal__pago-info">
+                        <div class="modal__resumen-row">
+                          <span class="modal__resumen-label">Metodo</span>
+                          <span class="modal__resumen-value">{{ pago.metodoPago }}</span>
+                        </div>
+                        <div class="modal__resumen-row">
+                          <span class="modal__resumen-label">Monto</span>
+                          <span class="modal__resumen-value">{{ formatearPrecio(pago.monto) }}</span>
+                        </div>
+                        <div class="modal__resumen-row">
+                          <span class="modal__resumen-label">Codigo</span>
+                          <span class="modal__resumen-value">{{ pago.codigoTransaccion || '-' }}</span>
+                        </div>
+                      </div>
+                      <div class="modal__field">
+                        <label class="modal__label">Nuevo estado</label>
+                        <select class="modal__select" [ngModel]="nuevoEstadoPago()" (ngModelChange)="nuevoEstadoPago.set($event)">
+                          <option value="">Seleccionar estado</option>
+                          <option value="6">Pendiente</option>
+                          <option value="7">Pagado</option>
+                          <option value="8">Rechazado</option>
+                          <option value="9">Reembolsado</option>
+                        </select>
+                      </div>
+                    </div>
+                  }
+                } @else {
+                  <div class="modal__pagos-lista">
+                    <p class="modal__pagos-label">Pagos registrados</p>
+                    @for (pago of reserva.pagos; track pago.id) {
+                      <div class="modal__pago-item" (click)="seleccionarPago(pago)" role="button" tabindex="0">
+                        <div class="modal__pago-item-info">
+                          <span class="modal__pago-item-metodo">{{ pago.metodoPago }}</span>
+                          <span class="modal__pago-item-monto">{{ formatearPrecio(pago.monto) }}</span>
+                        </div>
+                        <div class="modal__pago-item-detalles">
+                          <span class="modal__pago-item-codigo">{{ pago.codigoTransaccion || 'Sin codigo' }}</span>
+                          <span class="modal__pago-item-fecha">{{ formatearFecha(pago.fechaPago) }}</span>
+                        </div>
+                        <mat-icon class="modal__pago-item-arrow">chevron_right</mat-icon>
+                      </div>
+                    }
+                  </div>
+                }
+              } @else {
+                <div class="modal__form">
+                  <div class="modal__field">
+                    <label class="modal__label">Monto</label>
+                    <input class="modal__input" type="number" [ngModel]="montoPago()" (ngModelChange)="montoPago.set($event)" />
+                  </div>
+                  <div class="modal__field">
+                    <label class="modal__label">Metodo de pago</label>
+                    <select class="modal__select" [ngModel]="metodoPago()" (ngModelChange)="metodoPago.set($event)">
+                      <option value="Efectivo">Efectivo</option>
+                      <option value="Tarjeta de credito">Tarjeta de credito</option>
+                      <option value="Tarjeta de debito">Tarjeta de debito</option>
+                      <option value="Transferencia">Transferencia</option>
+                      <option value="Webpay">Webpay</option>
+                    </select>
+                  </div>
+                  <div class="modal__field">
+                    <label class="modal__label">Codigo de transaccion</label>
+                    <input class="modal__input" type="text" [ngModel]="codigoTransaccion()" (ngModelChange)="codigoTransaccion.set($event)" placeholder="Opcional" />
+                  </div>
+                </div>
+              }
+
+              @if (pagoError()) {
+                <p class="modal__error">{{ pagoError() }}</p>
+              }
+
+              <div class="modal__divider"></div>
+
+              <div class="modal__section">
+                <h4 class="modal__section-title">Estado de la reserva</h4>
+                @if (estadoReservaActualizado()) {
+                  <div class="modal__exito modal__exito--inline">
+                    <mat-icon class="modal__exito-icon--sm">check_circle</mat-icon>
+                    <span>Estado actualizado</span>
                   </div>
                 } @else {
-                  <div class="slot__contenido slot__contenido--vacio">
-                    <span class="slot__disponible-text">Disponible</span>
+                  <div class="modal__reserva-estado">
+                    <span class="modal__resumen-label">Estado actual</span>
+                    <span class="modal__resumen-value">{{ reservaSeleccionada()?.estado?.nombre }}</span>
+                  </div>
+                  <div class="modal__field">
+                    <label class="modal__label">Cambiar estado</label>
+                    <select class="modal__select" [ngModel]="nuevoEstadoReserva()" (ngModelChange)="nuevoEstadoReserva.set($event)">
+                      <option value="">Sin cambios</option>
+                      <option value="1">Pendiente</option>
+                      <option value="2">Confirmada</option>
+                      <option value="3">Cancelada</option>
+                      <option value="4">Completada</option>
+                      <option value="5">No Asistio</option>
+                    </select>
                   </div>
                 }
               </div>
-            </div>
-          }
-        </div>
-      </mat-card>
+            }
+          </div>
+          <div class="modal__footer">
+            <button class="btn btn--outline" (click)="cerrarModalPago()">Cerrar</button>
+            @if (pagoSeleccionado(); as pago) {
+              @if (!estadoActualizado()) {
+                <button class="btn btn--primary" (click)="actualizarEstadoPago()" [disabled]="!nuevoEstadoPago() || actualizandoEstado()">
+                  @if (actualizandoEstado()) {
+                    <span>Actualizando...</span>
+                  } @else {
+                    <span>Guardar estado pago</span>
+                  }
+                </button>
+              }
+            } @else {
+              @if (!tienePago(reservaSeleccionada()!)) {
+                <button class="btn btn--primary" (click)="guardarPago()" [disabled]="guardandoPago()">
+                  @if (guardandoPago()) {
+                    <span>Guardando...</span>
+                  } @else {
+                    <span>Guardar pago</span>
+                  }
+                </button>
+              }
+            }
+            @if (nuevoEstadoReserva() && reservaSeleccionada()?.estado?.id?.toString() !== nuevoEstadoReserva() && !estadoReservaActualizado()) {
+              <button class="btn btn--primary" (click)="actualizarEstadoReserva()" [disabled]="actualizandoEstadoReserva()">
+                @if (actualizandoEstadoReserva()) {
+                  <span>Actualizando...</span>
+                } @else {
+                  <span>Guardar estado reserva</span>
+                }
+              </button>
+            }
+          </div>
+        }
+      </div>
     </div>
-  </div>
+  }
 </div>

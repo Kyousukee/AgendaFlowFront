@@ -28,7 +28,7 @@ export class PagosComponent {
   filtroEstado = signal('');
   filtroFechaDesde = signal('');
   filtroFechaHasta = signal('');
-  private lastEmpresaId = 0;
+  private lastSucursalId = 0;
 
   estadosUnicos = computed(() => {
     const estados = new Set(this.pagos().map((p) => p.estado.nombre));
@@ -69,40 +69,32 @@ export class PagosComponent {
 
   constructor() {
     effect(() => {
-      const emp = this.authService.empresa();
-      const empresaId = emp?.id ?? 0;
-      if (empresaId && empresaId !== this.lastEmpresaId) {
-        this.lastEmpresaId = empresaId;
+      const suc = this.authService.sucursalActual();
+      const sucursalId = suc?.id ?? 0;
+      if (sucursalId && sucursalId !== this.lastSucursalId) {
+        this.lastSucursalId = sucursalId;
         this.cargarPagos();
       }
     });
   }
 
   cargarPagos(): void {
-    const empresaId = this.authService.empresa()?.id;
-    if (!empresaId) {
+    const sucursalId = this.authService.sucursalActual()?.id;
+    if (!sucursalId) {
       this.pagos.set([]);
       this.cargando.set(false);
       return;
     }
 
     this.cargando.set(true);
-    this.pagosService.getByEmpresa(empresaId).subscribe({
+    this.pagosService.getBySucursal(sucursalId).subscribe({
       next: (data) => {
         this.pagos.set(data);
         this.cargando.set(false);
       },
       error: () => {
-        this.pagosService.getByEmpresa(1).subscribe({
-          next: (data) => {
-            this.pagos.set(data);
-            this.cargando.set(false);
-          },
-          error: () => {
-            this.pagos.set([]);
-            this.cargando.set(false);
-          },
-        });
+        this.pagos.set([]);
+        this.cargando.set(false);
       },
     });
   }
@@ -114,6 +106,7 @@ export class PagosComponent {
 
   getNombreEmpleado(pago: Pago): string {
     const e = pago.reserva.empleado;
+    if (!e) return 'Sin asignar';
     return [e.nombre, e.apellido].filter(Boolean).join(' ') || 'Sin nombre';
   }
 
@@ -160,7 +153,7 @@ export class PagosComponent {
 
   verReserva(pago: Pago): void {
     this.dialog.open(ReservaDetailDialogComponent, {
-      data: pago.reserva,
+      data: pago,
       panelClass: 'dialog-panel',
       width: '560px',
     });

@@ -17,8 +17,8 @@ export class BloqueosService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/bloqueos`;
 
-  getBySucursal(): Observable<BloqueoAgenda[]> {
-    return this.http.get<BloqueoAgenda[]>(this.apiUrl);
+  getBySucursal(sucursalId: number): Observable<BloqueoAgenda[]> {
+    return this.http.get<BloqueoAgenda[]>(`${this.apiUrl}?sucursalId=${sucursalId}`);
   }
 
   crear(bloqueo: CreateBloqueoDto): Observable<BloqueoAgenda> {

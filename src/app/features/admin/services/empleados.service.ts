@@ -29,7 +29,7 @@ export class EmpleadosService {
   private apiUrl = `${environment.apiUrl}/empleados`;
 
   getBySucursal(sucursalId: number): Observable<Empleado[]> {
-    return this.http.get<Empleado[]>(this.apiUrl);
+    return this.http.get<Empleado[]>(`${this.apiUrl}?sucursalId=${sucursalId}`);
   }
 
   crear(empleado: CreateEmpleadoDto): Observable<Empleado> {

@@ -111,6 +111,7 @@ export class ReservarPublicService {
     servicios: Servicio[],
     horarios: HorarioSucursal[],
     bloqueos: BloqueoAgenda[],
+    reservas: Reserva[] = [],
   ): Observable<string[]> {
     const servicio = servicios.find((s) => s.id === servicioId);
     if (!servicio) return of([]);
@@ -127,27 +128,43 @@ export class ReservarPublicService {
       (b) => b.empleadoId === empleadoId && b.fecha === fecha,
     );
 
+    const reservasDelDia = reservas.filter(
+      (r) => r.empleado?.id === empleadoId && r.fecha === fecha,
+    );
+
     const horas: string[] = [];
     const [aperturaH, aperturaM] = horario.horaInicio.split(':').map(Number);
     const [cierreH, cierreM] = horario.horaFin.split(':').map(Number);
     const duracion = servicio.duracionMinutos;
 
+    const ahora = new Date();
+    const esHoy = fecha === `${ahora.getFullYear()}-${(ahora.getMonth() + 1).toString().padStart(2, '0')}-${ahora.getDate().toString().padStart(2, '0')}`;
+    const minutosAhora = esHoy ? ahora.getHours() * 60 + ahora.getMinutes() : 0;
+
     let actual = aperturaH * 60 + aperturaM;
     const fin = cierreH * 60 + cierreM;
 
     while (actual + duracion <= fin) {
-      const h = Math.floor(actual / 60);
-      const m = actual % 60;
-      const horaStr = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+      if (actual > minutosAhora) {
+        const h = Math.floor(actual / 60);
+        const m = actual % 60;
+        const horaStr = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
 
-      const ocupado = bloqueosDelDia.some((b) => {
-        const bInicio = this.timeToMinutes(b.horaInicio);
-        const bFin = this.timeToMinutes(b.horaFin);
-        return actual < bFin && actual + duracion > bInicio;
-      });
+        const ocupadoPorBloqueo = bloqueosDelDia.some((b) => {
+          const bInicio = this.timeToMinutes(b.horaInicio);
+          const bFin = this.timeToMinutes(b.horaFin);
+          return actual < bFin && actual + duracion > bInicio;
+        });
 
-      if (!ocupado) {
-        horas.push(horaStr);
+        const ocupadoPorReserva = reservasDelDia.some((r) => {
+          const rInicio = this.timeToMinutes(r.horaInicio);
+          const rFin = this.timeToMinutes(r.horaFin);
+          return actual < rFin && actual + duracion > rInicio;
+        });
+
+        if (!ocupadoPorBloqueo && !ocupadoPorReserva) {
+          horas.push(horaStr);
+        }
       }
 
       actual += 30;
@@ -156,8 +173,36 @@ export class ReservarPublicService {
     return of(horas);
   }
 
+  getReservasBySucursal(sucursalId: number): Observable<Reserva[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/reservas/${sucursalId}`).pipe(
+      map((items) =>
+        items.map((item) => ({
+          id: item.id,
+          codigo: item.codigo,
+          empresa: item.empresa,
+          sucursal: item.sucursal,
+          cliente: item.cliente,
+          empleado: item.empleado,
+          servicio: item.servicio,
+          fecha: item.fecha,
+          horaInicio: (item.horaInicio ?? '').substring(0, 5),
+          horaFin: (item.horaFin ?? '').substring(0, 5),
+          precio: item.precio,
+          observacion: item.observacion,
+          fechaCreacion: item.fechaCreacion,
+          estado: item.estado,
+          pagos: item.pagos ?? [],
+        })),
+      ),
+    );
+  }
+
   crearReserva(data: CrearReservaDto): Observable<Reserva> {
     return this.http.post<Reserva>(this.apiUrl, data);
+  }
+
+  actualizarEstadoReserva(reservaId: number, estadoId: number): Observable<Reserva> {
+    return this.http.patch<Reserva>(`${this.apiUrl}/reservas/${reservaId}/estado`, { estadoId });
   }
 
   private timeToMinutes(time: string): number {

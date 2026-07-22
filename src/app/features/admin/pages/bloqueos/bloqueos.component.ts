@@ -100,7 +100,7 @@ export class BloqueosComponent {
       error: () => this.empleados.set([]),
     });
 
-    this.bloqueosService.getBySucursal().subscribe({
+    this.bloqueosService.getBySucursal(sucursalId).subscribe({
       next: (bloqueos) => {
         this.bloqueos.set(bloqueos.map((b) => this.normalizar(b)));
         this.cargando.set(false);

@@ -10,6 +10,7 @@ import { HorarioSucursal } from '../../../admin/interfaces/horario-sucursal.inte
 import { BloqueoAgenda } from '../../../../core/interfaces/bloqueo-agenda.interface';
 import { ServicioEmpleado } from '../../../../core/interfaces/servicio-empleado.interface';
 import { ConfiguracionEmpresa } from '../../../../core/interfaces/configuracion-empresa.interface';
+import { Reserva } from '../../../../core/interfaces/reserva.interface';
 import { ReservarFormComponent } from '../reservar-form/reservar-form.component';
 import { ReservarConfirmacionComponent } from '../reservar-confirmacion/reservar-confirmacion.component';
 
@@ -30,6 +31,7 @@ export class ReservarPageComponent implements OnInit {
   empleados = signal<Empleado[]>([]);
   horarios = signal<HorarioSucursal[]>([]);
   bloqueos = signal<BloqueoAgenda[]>([]);
+  reservas = signal<Reserva[]>([]);
   serviciosEmpleados = signal<ServicioEmpleado[]>([]);
   configuracion = signal<ConfiguracionEmpresa | null>(null);
   cargando = signal(true);
@@ -94,6 +96,7 @@ export class ReservarPageComponent implements OnInit {
       horarios: this.reservarService.getHorariosBySucursal(sucursalId),
       bloqueos: this.reservarService.getBloqueosBySucursal(sucursalId),
       serviciosEmpleados: this.reservarService.getServiciosEmpleados(sucursalId),
+      reservas: this.reservarService.getReservasBySucursal(sucursalId),
     }).subscribe({
       next: (data) => {
         console.log('Servicios:', data.servicios);
@@ -101,12 +104,13 @@ export class ReservarPageComponent implements OnInit {
         console.log('Horarios:', data.horarios);
         console.log('Bloqueos:', data.bloqueos);
         console.log('ServiciosEmpleados:', data.serviciosEmpleados);
-        console.log('ServiciosEmpleados:', data.serviciosEmpleados);
+        console.log('Reservas:', data.reservas);
         this.servicios.set(data.servicios);
         this.empleados.set(data.empleados);
         this.horarios.set(data.horarios);
         this.bloqueos.set(data.bloqueos);
         this.serviciosEmpleados.set(data.serviciosEmpleados);
+        this.reservas.set(data.reservas);
         this.cargando.set(false);
       },
       error: (err) => {

@@ -15,6 +15,7 @@ import { Empleado } from '../../../../core/interfaces/empleado.interface';
 import { HorarioSucursal } from '../../../admin/interfaces/horario-sucursal.interface';
 import { BloqueoAgenda } from '../../../../core/interfaces/bloqueo-agenda.interface';
 import { ServicioEmpleado } from '../../../../core/interfaces/servicio-empleado.interface';
+import { Reserva } from '../../../../core/interfaces/reserva.interface';
 import { ReservarPublicService } from '../../services/reservar-public.service';
 
 @Component({
@@ -32,6 +33,7 @@ export class ReservarFormComponent implements OnChanges {
   @Input({ required: true }) horarios: HorarioSucursal[] = [];
   @Input({ required: true }) bloqueos: BloqueoAgenda[] = [];
   @Input({ required: true }) serviciosEmpleados: ServicioEmpleado[] = [];
+  @Input({ required: true }) reservas: Reserva[] = [];
   @Output() reservaCreada = new EventEmitter<string>();
 
   private fb = inject(FormBuilder);
@@ -202,7 +204,7 @@ export class ReservarFormComponent implements OnChanges {
     const fechas: string[] = [];
     const hoy = new Date();
 
-    for (let i = 0; i < 14; i++) {
+    for (let i = 0; i < 30; i++) {
       const fecha = new Date(hoy);
       fecha.setDate(hoy.getDate() + i);
       const diaSemana = fecha.getDay() === 0 ? 7 : fecha.getDay();
@@ -238,6 +240,7 @@ export class ReservarFormComponent implements OnChanges {
         this.servicios,
         this.horarios,
         this.bloqueos,
+        this.reservas,
       )
       .subscribe((horas) => {
         this.horasDisponibles.set(horas);

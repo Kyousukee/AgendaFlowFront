@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
-import { Reserva } from '../../../../core/interfaces/reserva.interface';
+import { Pago } from '../../../../core/interfaces/pago.interface';
 
 @Component({
   selector: 'app-reserva-detail-dialog',
@@ -11,26 +11,27 @@ import { Reserva } from '../../../../core/interfaces/reserva.interface';
   styleUrl: './reserva-detail-dialog.component.scss',
 })
 export class ReservaDetailDialogComponent {
-  data = inject<Reserva>(MAT_DIALOG_DATA);
+  data = inject<Pago>(MAT_DIALOG_DATA);
 
   getNombreCliente(): string {
-    const c = this.data.cliente;
+    const c = this.data.reserva.cliente;
     return [c.nombre, c.apellido].filter(Boolean).join(' ') || 'Sin nombre';
   }
 
   getNombreEmpleado(): string {
-    const e = this.data.empleado;
+    const e = this.data.reserva.empleado;
+    if (!e) return 'Sin asignar';
     return [e.nombre, e.apellido].filter(Boolean).join(' ') || 'Sin nombre';
   }
 
   getNombreSucursal(): string {
-    const s = this.data.sucursal;
+    const s = this.data.reserva.sucursal;
     const partes = [s.nombre, s.comuna, s.ciudad].filter(Boolean);
     return partes.join(', ') || 'Sin ubicacion';
   }
 
   getNombreServicio(): string {
-    return this.data.servicio.nombre || 'Sin servicio';
+    return this.data.reserva.servicio.nombre || 'Sin servicio';
   }
 
   formatearPrecio(precio: number): string {
