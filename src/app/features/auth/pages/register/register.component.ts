@@ -11,6 +11,7 @@ import {
 import { AuthService } from '../../../../core/services/auth.service';
 import { MapPickerComponent } from '../../../../shared/components/map-picker/map-picker.component';
 import { GeocodingService } from '../../../../shared/services/geocoding.service';
+import { RegisterRequest } from '../../interfaces/register-request.interface';
 
 @Component({
   selector: 'app-register',
@@ -130,22 +131,28 @@ export class RegisterComponent {
 
     this.errorMessage.set('');
 
-    const account = this.accountForm.getRawValue();
-    const business = this.businessForm.getRawValue();
-    const branch = this.branchForm.getRawValue();
+    // confirmPassword se descarta: el RegisterDto del backend no la declara y
+    // su ValidationPipe corre con forbidNonWhitelisted, asi que devolveria 400.
+    const { confirmPassword, ...account } = this.accountForm.getRawValue();
+    void confirmPassword;
+
+    const payload: RegisterRequest = {
+      ...account,
+      ...this.businessForm.getRawValue(),
+      ...this.branchForm.getRawValue(),
+    };
 
     this.isLoading.set(true);
 
-    setTimeout(() => {
-      this.authService.register(
-        account.nombre,
-        account.apellido || '',
-        account.email,
-        account.password,
-        business.empresaNombre,
-        branch.sucursalNombre || '',
-      );
-      this.isLoading.set(false);
-    }, 600);
+    this.authService.register(payload).subscribe({
+      // setSession() ya navega a /admin/home.
+      next: () => this.isLoading.set(false),
+      error: (err: { error?: { message?: string } }) => {
+        this.errorMessage.set(
+          err.error?.message ?? 'No se pudo completar el registro',
+        );
+        this.isLoading.set(false);
+      },
+    });
   }
 }

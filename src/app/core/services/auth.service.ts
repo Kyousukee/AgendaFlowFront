@@ -1,64 +1,20 @@
 import { Injectable, signal, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { Observable, tap } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import { Empresa } from '../interfaces/empresa.interface';
 import { Sucursal } from '../interfaces/sucursal.interface';
 import { Empleado } from '../interfaces/empleado.interface';
 import { UserData, AuthResponse } from '../interfaces/auth-response.interface';
-
-const MOCK_EMPRESA: Empresa = {
-  id: 1,
-  nombre: 'Barberia Los Barones',
-  nombreComercial: 'Los Barones',
-  slug: 'los-barones',
-  descripcion: 'Barberia premium en el corazon de Santiago',
-  email: 'contacto@losbarones.cl',
-  telefono: '+56912345678',
-  whatsapp: '+56912345678',
-  logo: '',
-  banner: '',
-  colorPrincipal: '#C9A84C',
-  colorSecundario: '#1A1A1A',
-  activo: true,
-  fechaCreacion: new Date().toISOString(),
-};
-
-const MOCK_SUCURSALES: Sucursal[] = [
-  {
-    id: 1,
-    empresaId: 1,
-    nombre: 'Sucursal Centro',
-    direccion: 'Av. Libertador 1234',
-    comuna: 'Providencia',
-    ciudad: 'Santiago',
-    region: 'Metropolitana',
-    pais: 'Chile',
-    latitud: -33.4489,
-    longitud: -70.6693,
-    telefono: '+56912345678',
-    activo: true,
-    fechaCreacion: new Date().toISOString(),
-  },
-  {
-    id: 2,
-    empresaId: 1,
-    nombre: 'Sucursal Las Condes',
-    direccion: 'Av. Apoquindo 5678',
-    comuna: 'Las Condes',
-    ciudad: 'Santiago',
-    region: 'Metropolitana',
-    pais: 'Chile',
-    latitud: -33.415,
-    longitud: -70.585,
-    telefono: '+56987654321',
-    activo: true,
-    fechaCreacion: new Date().toISOString(),
-  },
-];
+import { RegisterRequest } from '../../features/auth/interfaces/register-request.interface';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly TOKEN_KEY = 'agendaflow_token';
+  private readonly REFRESH_KEY = 'agendaflow_refresh';
+  private readonly EXPIRES_KEY = 'agendaflow_expires';
   private readonly USER_KEY = 'agendaflow_user';
   private readonly EMPRESA_KEY = 'agendaflow_empresa';
   private readonly SUCURSALES_KEY = 'agendaflow_sucursales';
@@ -67,6 +23,7 @@ export class AuthService {
 
   private platformId = inject(PLATFORM_ID);
   private router = inject(Router);
+  private http = inject(HttpClient);
 
   isLoggedIn = signal(false);
   currentUser = signal<UserData | null>(null);
@@ -103,29 +60,81 @@ export class AuthService {
     }
   }
 
-  setSession(response: AuthResponse): void {
+  // ---------------------------------------------------------------------
+  //  Llamadas al backend
+  // ---------------------------------------------------------------------
+
+  login(email: string, password: string): Observable<AuthResponse> {
+    return this.http
+      .post<AuthResponse>(`${environment.apiUrl}/auth/login`, {
+        email,
+        password,
+      })
+      .pipe(tap((res) => this.setSession(res)));
+  }
+
+  register(dto: RegisterRequest): Observable<AuthResponse> {
+    return this.http
+      .post<AuthResponse>(`${environment.apiUrl}/auth/register`, dto)
+      .pipe(tap((res) => this.setSession(res)));
+  }
+
+  /**
+   * Intercambia el refresh token por una sesion nueva. Lo usa el interceptor
+   * cuando una peticion recibe 401. No llama a setSession() a proposito: no
+   * debe navegar a /admin/home en mitad de una peticion cualquiera.
+   */
+  refresh(): Observable<AuthResponse> {
+    return this.http
+      .post<AuthResponse>(`${environment.apiUrl}/auth/refresh`, {
+        refreshToken: this.getRefreshToken(),
+      })
+      .pipe(tap((res) => this.guardarSesion(res)));
+  }
+
+  // ---------------------------------------------------------------------
+  //  Sesion
+  // ---------------------------------------------------------------------
+
+  /** Persiste la sesion y actualiza las senales, sin navegar. */
+  private guardarSesion(response: AuthResponse): void {
     if (isPlatformBrowser(this.platformId)) {
-      localStorage.setItem(this.TOKEN_KEY, response.token);
-      localStorage.setItem(this.USER_KEY, JSON.stringify(response.usuario));
+      localStorage.setItem(this.TOKEN_KEY, response.accessToken);
+      localStorage.setItem(this.REFRESH_KEY, response.refreshToken);
+      localStorage.setItem(this.EXPIRES_KEY, String(response.expiresAt));
+      localStorage.setItem(this.USER_KEY, JSON.stringify(response.user));
       localStorage.setItem(this.EMPRESA_KEY, JSON.stringify(response.empresa));
-      localStorage.setItem(this.SUCURSALES_KEY, JSON.stringify(response.sucursales));
-      localStorage.setItem(this.EMPLEADO_KEY, JSON.stringify(response.empleado));
+      localStorage.setItem(
+        this.SUCURSALES_KEY,
+        JSON.stringify(response.sucursales),
+      );
+      localStorage.setItem(
+        this.EMPLEADO_KEY,
+        JSON.stringify(response.user.empleado),
+      );
 
       if (response.sucursales.length > 0) {
-        localStorage.setItem(this.SUCURSAL_ACTUAL_KEY, JSON.stringify(response.sucursales[0]));
+        localStorage.setItem(
+          this.SUCURSAL_ACTUAL_KEY,
+          JSON.stringify(response.sucursales[0]),
+        );
       }
     }
 
     this.isLoggedIn.set(true);
-    this.currentUser.set(response.usuario);
+    this.currentUser.set(response.user);
     this.empresa.set(response.empresa);
     this.sucursales.set(response.sucursales);
-    this.empleado.set(response.empleado);
+    this.empleado.set(response.user.empleado);
 
     if (response.sucursales.length > 0) {
       this.sucursalActual.set(response.sucursales[0]);
     }
+  }
 
+  /** Guarda la sesion y entra al panel. Para login y registro. */
+  setSession(response: AuthResponse): void {
+    this.guardarSesion(response);
     this.router.navigate(['/admin/home']);
   }
 
@@ -140,7 +149,7 @@ export class AuthService {
   }
 
   esAdmin(): boolean {
-    return this.currentUser()?.rol === 'admin';
+    return this.currentUser()?.rolId === 1;
   }
 
   getToken(): string | null {
@@ -150,82 +159,18 @@ export class AuthService {
     return null;
   }
 
-  login(email: string, _password: string): void {
-    const mockResponse: AuthResponse = {
-      token: 'mock-token-' + Date.now(),
-      usuario: {
-        id: 1,
-        nombre: 'Usuario',
-        apellido: 'Demo',
-        email,
-        empresaId: 1,
-        rol: 'admin',
-        telefono: '+56912345678',
-      },
-      empresa: MOCK_EMPRESA,
-      sucursales: MOCK_SUCURSALES,
-      empleado: {
-        id: 1,
-        sucursalId: 1,
-        nombre: 'Usuario',
-        apellido: 'Demo',
-        email,
-        telefono: '+56912345678',
-        foto: '',
-        descripcion: 'Administrador principal',
-        activo: true,
-        fechaCreacion: new Date().toISOString(),
-      },
-    };
-
-    this.setSession(mockResponse);
-  }
-
-  register(
-    nombre: string,
-    apellido: string,
-    email: string,
-    _password: string,
-    empresaNombre: string,
-    sucursalNombre: string,
-  ): void {
-    const mockResponse: AuthResponse = {
-      token: 'mock-token-' + Date.now(),
-      usuario: {
-        id: 1,
-        nombre,
-        apellido,
-        email,
-        empresaId: 1,
-        rol: 'admin',
-      },
-      empresa: {
-        ...MOCK_EMPRESA,
-        nombre: empresaNombre,
-      },
-      sucursales: [
-        {
-          ...MOCK_SUCURSALES[0],
-          nombre: sucursalNombre || 'Sucursal Principal',
-        },
-      ],
-      empleado: {
-        id: 1,
-        sucursalId: 1,
-        nombre,
-        apellido,
-        email,
-        activo: true,
-        fechaCreacion: new Date().toISOString(),
-      },
-    };
-
-    this.setSession(mockResponse);
+  getRefreshToken(): string | null {
+    if (isPlatformBrowser(this.platformId)) {
+      return localStorage.getItem(this.REFRESH_KEY);
+    }
+    return null;
   }
 
   logout(): void {
     if (isPlatformBrowser(this.platformId)) {
       localStorage.removeItem(this.TOKEN_KEY);
+      localStorage.removeItem(this.REFRESH_KEY);
+      localStorage.removeItem(this.EXPIRES_KEY);
       localStorage.removeItem(this.USER_KEY);
       localStorage.removeItem(this.EMPRESA_KEY);
       localStorage.removeItem(this.SUCURSALES_KEY);

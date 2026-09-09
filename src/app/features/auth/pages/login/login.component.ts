@@ -34,10 +34,16 @@ export class LoginComponent {
 
       const { email, password } = this.form.getRawValue();
 
-      setTimeout(() => {
-        this.auth.login(email, password);
-        this.isLoading.set(false);
-      }, 600);
+      this.auth.login(email, password).subscribe({
+        // setSession() ya navega a /admin/home; aqui solo se apaga el spinner.
+        next: () => this.isLoading.set(false),
+        error: (err: { error?: { message?: string } }) => {
+          this.errorMessage.set(
+            err.error?.message ?? 'No se pudo iniciar sesión',
+          );
+          this.isLoading.set(false);
+        },
+      });
     }
   }
 }

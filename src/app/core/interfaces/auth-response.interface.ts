@@ -7,15 +7,23 @@ export interface UserData {
   nombre: string;
   apellido?: string;
   email: string;
-  empresaId: number;
-  rol: string;
+  /**
+   * El backend emite un id numerico de rol, no un string.
+   * 1 = Administrador (los controladores protegidos llevan @Roles(1)).
+   */
+  rolId: number;
   telefono?: string;
+  empleado: Empleado | null;
 }
 
 export interface AuthResponse {
-  token: string;
-  usuario: UserData;
-  empresa: Empresa;
+  /** Access token emitido por Supabase Auth. */
+  accessToken: string;
+  /** Se intercambia en POST /auth/refresh cuando el access token caduca. */
+  refreshToken: string;
+  /** Unix epoch en segundos. */
+  expiresAt: number;
+  empresa: Empresa | null;
   sucursales: Sucursal[];
-  empleado: Empleado;
+  user: UserData;
 }
