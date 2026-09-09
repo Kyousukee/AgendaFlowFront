@@ -88,7 +88,8 @@ export class ServiciosComponent {
 
     dialogRef.afterClosed().subscribe((resultado) => {
       if (resultado) {
-        this.serviciosService.actualizar(resultado).subscribe(() => {
+        const { empresaId, ...body } = resultado;
+        this.serviciosService.actualizar(servicio.id, body).subscribe(() => {
           this.cargarServicios();
         });
       }

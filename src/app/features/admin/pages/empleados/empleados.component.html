@@ -54,6 +54,14 @@
             }
           </div>
 
+          <div class="empleado-servicios">
+            <span class="servicios-label">
+              <mat-icon>content_cut</mat-icon>
+              Servicios
+            </span>
+            <span class="servicios-value">{{ getServiciosAsignados(empleado.id) }}</span>
+          </div>
+
           <div class="empleado-actions">
             <button class="action-btn" (click)="editarEmpleado(empleado)" matTooltip="Editar">
               <mat-icon>edit</mat-icon>

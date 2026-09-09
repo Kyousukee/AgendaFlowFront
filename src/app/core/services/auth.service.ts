@@ -1,20 +1,51 @@
 import { Injectable, signal, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, tap } from 'rxjs';
-import { environment } from '../../../environments/environment';
+import { HttpClient } from '@angular/common/http';
+import { Observable, tap, catchError, throwError } from 'rxjs';
 import { Empresa } from '../interfaces/empresa.interface';
 import { Sucursal } from '../interfaces/sucursal.interface';
 import { Empleado } from '../interfaces/empleado.interface';
-import { UserData, AuthResponse } from '../interfaces/auth-response.interface';
+import { UserData, LoginApiResponse } from '../interfaces/auth-response.interface';
 import { RegisterRequest } from '../../features/auth/interfaces/register-request.interface';
+import { environment } from '../../../environments/environment';
+
+export const SUCURSAL_UPDATED = 'agendaflow_sucursal_updated';
+
+interface ApiEmpresa {
+  id: number;
+  nombre: string;
+  slug: string;
+}
+
+interface ApiSucursal {
+  id: number;
+  nombre: string;
+  direccion: string;
+}
+
+interface ApiEmpleado {
+  id: number;
+  nombre: string;
+  apellido: string;
+  email: string;
+  telefono: string | null;
+  foto: string | null;
+  sucursal: ApiSucursal & { empresa: ApiEmpresa };
+}
+
+interface ApiUser {
+  id: number;
+  nombre: string;
+  apellido: string;
+  email: string;
+  rolId: number;
+  empleado: ApiEmpleado;
+}
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly TOKEN_KEY = 'agendaflow_token';
-  private readonly REFRESH_KEY = 'agendaflow_refresh';
-  private readonly EXPIRES_KEY = 'agendaflow_expires';
   private readonly USER_KEY = 'agendaflow_user';
   private readonly EMPRESA_KEY = 'agendaflow_empresa';
   private readonly SUCURSALES_KEY = 'agendaflow_sucursales';
@@ -44,6 +75,7 @@ export class AuthService {
       if (token && userJson) {
         this.isLoggedIn.set(true);
         this.currentUser.set(JSON.parse(userJson));
+        this.cargarSucursales();
       }
       if (empresaJson) {
         this.empresa.set(JSON.parse(empresaJson));
@@ -60,82 +92,107 @@ export class AuthService {
     }
   }
 
-  // ---------------------------------------------------------------------
-  //  Llamadas al backend
-  // ---------------------------------------------------------------------
-
-  login(email: string, password: string): Observable<AuthResponse> {
+  login(email: string, password: string): Observable<LoginApiResponse> {
     return this.http
-      .post<AuthResponse>(`${environment.apiUrl}/auth/login`, {
-        email,
-        password,
-      })
-      .pipe(tap((res) => this.setSession(res)));
+      .post<LoginApiResponse>(`${environment.apiUrl}/auth/login`, { email, password })
+      .pipe(
+        tap((response) => this.handleLoginResponse(response)),
+        catchError((error) => {
+          let message = 'Error al iniciar sesion';
+          if (error.status === 401) {
+            message = 'Email o contrasena incorrectos';
+          } else if (error.status === 0) {
+            message = 'No se pudo conectar con el servidor';
+          }
+          return throwError(() => new Error(message));
+        }),
+      );
   }
 
-  register(dto: RegisterRequest): Observable<AuthResponse> {
-    return this.http
-      .post<AuthResponse>(`${environment.apiUrl}/auth/register`, dto)
-      .pipe(tap((res) => this.setSession(res)));
-  }
+  private handleLoginResponse(response: LoginApiResponse): void {
+    const { accessToken, user } = response;
+    const apiUser: ApiUser = user as ApiUser;
+    const sucursal = apiUser.empleado.sucursal;
+    const apiEmpresa: ApiEmpresa = sucursal.empresa;
 
-  /**
-   * Intercambia el refresh token por una sesion nueva. Lo usa el interceptor
-   * cuando una peticion recibe 401. No llama a setSession() a proposito: no
-   * debe navegar a /admin/home en mitad de una peticion cualquiera.
-   */
-  refresh(): Observable<AuthResponse> {
-    return this.http
-      .post<AuthResponse>(`${environment.apiUrl}/auth/refresh`, {
-        refreshToken: this.getRefreshToken(),
-      })
-      .pipe(tap((res) => this.guardarSesion(res)));
-  }
+    const userData: UserData = {
+      id: apiUser.id,
+      nombre: apiUser.nombre,
+      apellido: apiUser.apellido,
+      email: apiUser.email,
+      empresaId: apiEmpresa.id,
+      rolId: apiUser.rolId,
+      telefono: apiUser.empleado.telefono ?? undefined,
+    };
 
-  // ---------------------------------------------------------------------
-  //  Sesion
-  // ---------------------------------------------------------------------
+    const empresaData: Empresa = {
+      id: apiEmpresa.id,
+      nombre: apiEmpresa.nombre,
+      slug: apiEmpresa.slug,
+      activo: true,
+      fechaCreacion: new Date().toISOString(),
+    };
 
-  /** Persiste la sesion y actualiza las senales, sin navegar. */
-  private guardarSesion(response: AuthResponse): void {
+    const sucursalData: Sucursal = {
+      id: sucursal.id,
+      empresaId: apiEmpresa.id,
+      nombre: sucursal.nombre,
+      direccion: sucursal.direccion,
+      activo: true,
+      fechaCreacion: new Date().toISOString(),
+    };
+
+    const empleadoData: Empleado = {
+      id: apiUser.empleado.id,
+      sucursalId: sucursal.id,
+      nombre: apiUser.empleado.nombre,
+      apellido: apiUser.empleado.apellido,
+      email: apiUser.empleado.email,
+      telefono: apiUser.empleado.telefono ?? undefined,
+      foto: apiUser.empleado.foto ?? undefined,
+      activo: true,
+      fechaCreacion: new Date().toISOString(),
+    };
+
     if (isPlatformBrowser(this.platformId)) {
-      localStorage.setItem(this.TOKEN_KEY, response.accessToken);
-      localStorage.setItem(this.REFRESH_KEY, response.refreshToken);
-      localStorage.setItem(this.EXPIRES_KEY, String(response.expiresAt));
-      localStorage.setItem(this.USER_KEY, JSON.stringify(response.user));
-      localStorage.setItem(this.EMPRESA_KEY, JSON.stringify(response.empresa));
-      localStorage.setItem(
-        this.SUCURSALES_KEY,
-        JSON.stringify(response.sucursales),
-      );
-      localStorage.setItem(
-        this.EMPLEADO_KEY,
-        JSON.stringify(response.user.empleado),
-      );
-
-      if (response.sucursales.length > 0) {
-        localStorage.setItem(
-          this.SUCURSAL_ACTUAL_KEY,
-          JSON.stringify(response.sucursales[0]),
-        );
-      }
+      localStorage.setItem(this.TOKEN_KEY, accessToken);
+      localStorage.setItem(this.USER_KEY, JSON.stringify(userData));
+      localStorage.setItem(this.EMPRESA_KEY, JSON.stringify(empresaData));
+      localStorage.setItem(this.SUCURSALES_KEY, JSON.stringify([sucursalData]));
+      localStorage.setItem(this.SUCURSAL_ACTUAL_KEY, JSON.stringify(sucursalData));
+      localStorage.setItem(this.EMPLEADO_KEY, JSON.stringify(empleadoData));
     }
 
     this.isLoggedIn.set(true);
-    this.currentUser.set(response.user);
-    this.empresa.set(response.empresa);
-    this.sucursales.set(response.sucursales);
-    this.empleado.set(response.user.empleado);
+    this.currentUser.set(userData);
+    this.empresa.set(empresaData);
+    this.sucursales.set([sucursalData]);
+    this.sucursalActual.set(sucursalData);
+    this.empleado.set(empleadoData);
 
-    if (response.sucursales.length > 0) {
-      this.sucursalActual.set(response.sucursales[0]);
-    }
+    this.router.navigate(['/admin/home']);
+    this.cargarSucursales();
   }
 
-  /** Guarda la sesion y entra al panel. Para login y registro. */
-  setSession(response: AuthResponse): void {
-    this.guardarSesion(response);
-    this.router.navigate(['/admin/home']);
+  cargarSucursales(): void {
+    this.http.get<Sucursal[]>(`${environment.apiUrl}/sucursales`).subscribe({
+      next: (data) => {
+        if (data.length > 0) {
+          this.sucursales.set(data);
+          if (isPlatformBrowser(this.platformId)) {
+            localStorage.setItem(this.SUCURSALES_KEY, JSON.stringify(data));
+          }
+          const actual = this.sucursalActual();
+          if (!actual || !data.find((s) => s.id === actual.id)) {
+            this.sucursalActual.set(data[0]);
+            if (isPlatformBrowser(this.platformId)) {
+              localStorage.setItem(this.SUCURSAL_ACTUAL_KEY, JSON.stringify(data[0]));
+            }
+          }
+        }
+      },
+      error: () => {},
+    });
   }
 
   cambiarSucursal(sucursalId: number): void {
@@ -144,6 +201,7 @@ export class AuthService {
       this.sucursalActual.set(suc);
       if (isPlatformBrowser(this.platformId)) {
         localStorage.setItem(this.SUCURSAL_ACTUAL_KEY, JSON.stringify(suc));
+        window.dispatchEvent(new CustomEvent(SUCURSAL_UPDATED, { detail: suc }));
       }
     }
   }
@@ -159,18 +217,28 @@ export class AuthService {
     return null;
   }
 
-  getRefreshToken(): string | null {
-    if (isPlatformBrowser(this.platformId)) {
-      return localStorage.getItem(this.REFRESH_KEY);
-    }
-    return null;
+  register(data: RegisterRequest): Observable<LoginApiResponse> {
+    return this.http
+      .post<LoginApiResponse>(`${environment.apiUrl}/auth/register`, data)
+      .pipe(
+        tap((response) => this.handleLoginResponse(response)),
+        catchError((error) => {
+          let message = 'Error al registrar usuario';
+          if (error.status === 409) {
+            message = 'El email ya esta registrado';
+          } else if (error.status === 400) {
+            message = 'Datos invalidos, revisa el formulario';
+          } else if (error.status === 0) {
+            message = 'No se pudo conectar con el servidor';
+          }
+          return throwError(() => new Error(message));
+        }),
+      );
   }
 
   logout(): void {
     if (isPlatformBrowser(this.platformId)) {
       localStorage.removeItem(this.TOKEN_KEY);
-      localStorage.removeItem(this.REFRESH_KEY);
-      localStorage.removeItem(this.EXPIRES_KEY);
       localStorage.removeItem(this.USER_KEY);
       localStorage.removeItem(this.EMPRESA_KEY);
       localStorage.removeItem(this.SUCURSALES_KEY);

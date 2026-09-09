@@ -1,0 +1,336 @@
+.config-page {
+  max-width: 900px;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+}
+
+.page-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.page-subtitle {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  &--primary {
+    background: var(--gold);
+    color: var(--bg-primary);
+
+    &:hover:not(:disabled) {
+      background: var(--gold-light);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.spin {
+  animation: spin 1.2s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 4rem 2rem;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+
+  .loading-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+    color: var(--gold);
+    animation: spin 1.2s linear infinite;
+  }
+}
+
+.config-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.config-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color 0.15s ease;
+
+  &:hover {
+    border-color: var(--border-light);
+  }
+}
+
+.config-card__header {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.config-card__icon {
+  font-size: 22px;
+  width: 22px;
+  height: 22px;
+  color: var(--gold);
+}
+
+.config-card__title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.config-card__desc {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin: 0.125rem 0 0;
+}
+
+.config-card__body {
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.config-toggle {
+  padding: 0;
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  cursor: pointer;
+}
+
+.toggle-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.toggle-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.toggle-desc {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.toggle-input {
+  display: none;
+}
+
+.toggle-switch {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 18px;
+    height: 18px;
+    background: var(--text-muted);
+    border-radius: 50%;
+    transition: all 0.2s ease;
+  }
+}
+
+.toggle-input:checked + .toggle-switch {
+  background: var(--gold);
+  border-color: var(--gold);
+
+  &::after {
+    transform: translateX(20px);
+    background: var(--bg-primary);
+  }
+}
+
+.config-row {
+  display: flex;
+  gap: 1rem;
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+  }
+}
+
+.config-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.config-label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.config-input {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  font-family: inherit;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease;
+
+  &:focus {
+    border-color: var(--gold);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &::-webkit-inner-spin-button,
+  &::-webkit-outer-spin-button {
+    opacity: 1;
+  }
+}
+
+.config-select {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  font-family: inherit;
+  outline: none;
+  box-sizing: border-box;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%236b7280' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  padding-right: 2rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+
+  &:focus {
+    border-color: var(--gold);
+  }
+
+  option {
+    background: var(--bg-surface);
+    color: var(--text-primary);
+  }
+}
+
+.config-input-with-prefix {
+  display: flex;
+  align-items: center;
+}
+
+.config-prefix {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 40px;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border);
+  border-right: none;
+  border-radius: 8px 0 0 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.config-input--prefixed {
+  border-radius: 0 8px 8px 0;
+}
+
+.config-input-with-suffix {
+  display: flex;
+  align-items: center;
+}
+
+.config-input--suffixed {
+  border-radius: 8px 0 0 8px;
+  border-right: none;
+}
+
+.config-suffix {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 60px;
+  height: 40px;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border);
+  border-left: none;
+  border-radius: 0 8px 8px 0;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.config-hint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}

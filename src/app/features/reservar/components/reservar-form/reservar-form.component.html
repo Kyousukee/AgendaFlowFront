@@ -1,0 +1,270 @@
+<div class="reservar-form">
+  <div class="steps-bar">
+    @for (step of [1, 2, 3, 4]; track step) {
+      @if (step <= totalPasos()) {
+        <div
+          class="step"
+          [class.step--active]="paso() === step"
+          [class.step--done]="paso() > step"
+        >
+          <div class="step__circle">
+            @if (paso() > step) {
+              <span class="step__check">✓</span>
+            } @else {
+              <span>{{ step }}</span>
+            }
+          </div>
+          <span class="step__label">
+            @if (step === 1) { Servicio }
+            @else if (step === 2) { Empleado }
+            @else if (step === 3) { Fecha y hora }
+            @else { Datos }
+          </span>
+        </div>
+      }
+    }
+  </div>
+
+  @if (paso() === 1) {
+    <div class="form-section">
+      <h2 class="form-section__title">Selecciona un servicio</h2>
+      <p class="form-section__desc">Elige el servicio que deseas agendar</p>
+
+      <div class="servicios-grid">
+        @for (servicio of servicios; track servicio.id) {
+          <button
+            class="servicio-card"
+            [class.servicio-card--selected]="servicioSeleccionado()?.id === servicio.id"
+            (click)="seleccionarServicio(servicio)"
+          >
+            <div class="servicio-card__color" [style.background]="servicio.color || '#C9A84C'"></div>
+            <div class="servicio-card__body">
+              <span class="servicio-card__nombre">{{ servicio.nombre }}</span>
+              @if (servicio.descripcion) {
+                <span class="servicio-card__desc">{{ servicio.descripcion }}</span>
+              }
+              <div class="servicio-card__meta">
+                <span class="servicio-card__duracion">{{ servicio.duracionMinutos }} min</span>
+                <span class="servicio-card__precio">{{ formatearPrecio(servicio.precio) }}</span>
+              </div>
+            </div>
+          </button>
+        }
+      </div>
+    </div>
+  }
+
+  @if (paso() === 2 && configuracion().permiteSeleccionEmpleado) {
+    <div class="form-section">
+      <h2 class="form-section__title">Selecciona un empleado</h2>
+      <p class="form-section__desc">Elige quien te atendera</p>
+
+      <div class="empleados-grid">
+        @for (empleado of empleados; track empleado.id) {
+          @if (empleadoOfreceServicio(empleado.id, servicioSeleccionado()?.id || 0)) {
+            <button
+              class="empleado-card"
+              [class.empleado-card--selected]="empleadoSeleccionado()?.id === empleado.id"
+              (click)="seleccionarEmpleado(empleado)"
+            >
+              <div class="empleado-card__avatar">
+                {{ empleado.nombre?.charAt(0) || '?' }}{{ empleado.apellido?.charAt(0) || '' }}
+              </div>
+              <div class="empleado-card__info">
+                <span class="empleado-card__nombre">{{ getNombreEmpleado(empleado) }}</span>
+                @if (empleado.descripcion) {
+                  <span class="empleado-card__desc">{{ empleado.descripcion }}</span>
+                }
+              </div>
+            </button>
+          }
+        }
+      </div>
+    </div>
+  }
+
+  @if ((paso() === 2 && !configuracion().permiteSeleccionEmpleado) || paso() === 3) {
+    <div class="form-section">
+      <h2 class="form-section__title">Selecciona fecha y hora</h2>
+      <p class="form-section__desc">Elige cuando quieres tu cita</p>
+
+      <div class="fechas-section">
+        <label class="field-label">Fecha</label>
+        <div class="fechas-scroll">
+          @for (fecha of fechasDisponibles(); track fecha) {
+            <button
+              class="fecha-chip"
+              [class.fecha-chip--selected]="fechaSeleccionada() === fecha"
+              (click)="seleccionarFecha(fecha)"
+            >
+              <span class="fecha-chip__dia">{{ formatearFechaCorta(fecha) }}</span>
+            </button>
+          }
+        </div>
+      </div>
+
+      @if (fechaSeleccionada()) {
+        <div class="horas-section">
+          <label class="field-label">Hora</label>
+          @if (horasDisponibles().length === 0) {
+            <p class="sin-horas">No hay horas disponibles para esta fecha</p>
+          } @else {
+            <div class="horas-grid">
+              @for (hora of horasDisponibles(); track hora) {
+                <button
+                  class="hora-chip"
+                  [class.hora-chip--selected]="horaSeleccionada() === hora"
+                  (click)="seleccionarHora(hora)"
+                >
+                  {{ hora }}
+                </button>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  @if ((paso() === 3 && !configuracion().permiteSeleccionEmpleado) || paso() === 4) {
+    <div class="form-section">
+      <h2 class="form-section__title">Tus datos</h2>
+      <p class="form-section__desc">Completa tu informacion de contacto</p>
+
+      <form class="cliente-form" [formGroup]="form">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="field-label" for="nombre">Nombre *</label>
+            <input
+              id="nombre"
+              type="text"
+              class="form-input"
+              placeholder="Tu nombre"
+              formControlName="nombre"
+              [class.form-input--error]="fieldError('nombre')"
+            />
+            @if (fieldError('nombre')) {
+              <span class="form-error">Requerido</span>
+            }
+          </div>
+          <div class="form-group">
+            <label class="field-label" for="apellido">Apellido *</label>
+            <input
+              id="apellido"
+              type="text"
+              class="form-input"
+              placeholder="Tu apellido"
+              formControlName="apellido"
+              [class.form-input--error]="fieldError('apellido')"
+            />
+            @if (fieldError('apellido')) {
+              <span class="form-error">Requerido</span>
+            }
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="field-label" for="email">Email *</label>
+            <input
+              id="email"
+              type="email"
+              class="form-input"
+              placeholder="tu@email.com"
+              formControlName="email"
+              [class.form-input--error]="fieldError('email')"
+            />
+            @if (fieldError('email')) {
+              <span class="form-error">Email invalido</span>
+            }
+          </div>
+          <div class="form-group">
+            <label class="field-label" for="telefono">Telefono *</label>
+            <input
+              id="telefono"
+              type="tel"
+              class="form-input"
+              placeholder="+56 9 1234 5678"
+              formControlName="telefono"
+              [class.form-input--error]="fieldError('telefono')"
+            />
+            @if (fieldError('telefono')) {
+              <span class="form-error">Requerido</span>
+            }
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="field-label" for="observacion">Observacion (opcional)</label>
+          <textarea
+            id="observacion"
+            class="form-input form-textarea"
+            placeholder="Alguna indicacion especial..."
+            formControlName="observacion"
+            rows="3"
+          ></textarea>
+        </div>
+      </form>
+    </div>
+  }
+
+  @if (paso() === totalPasos() && servicioSeleccionado() && empleadoSeleccionado() && fechaSeleccionada() && horaSeleccionada()) {
+    <div class="resumen-card">
+      <h3 class="resumen-card__title">Resumen de tu reserva</h3>
+      <div class="resumen-card__body">
+        <div class="resumen-item">
+          <span class="resumen-item__label">Servicio</span>
+          <span class="resumen-item__value resumen-item__value--gold">{{ servicioSeleccionado()?.nombre }}</span>
+        </div>
+        <div class="resumen-item">
+          <span class="resumen-item__label">Empleado</span>
+          <span class="resumen-item__value">{{ getNombreEmpleado(empleadoSeleccionado()!) }}</span>
+        </div>
+        <div class="resumen-item">
+          <span class="resumen-item__label">Fecha</span>
+          <span class="resumen-item__value">{{ formatearFecha(fechaSeleccionada()) }}</span>
+        </div>
+        <div class="resumen-item">
+          <span class="resumen-item__label">Hora</span>
+          <span class="resumen-item__value">{{ horaSeleccionada() }} - {{ calcularHoraFin() }}</span>
+        </div>
+        <div class="resumen-item resumen-item--total">
+          <span class="resumen-item__label">Total</span>
+          <span class="resumen-item__price">{{ formatearPrecio(servicioSeleccionado()!.precio) }}</span>
+        </div>
+      </div>
+    </div>
+  }
+
+  <div class="form-actions">
+    @if (paso() > 1) {
+      <button class="btn btn--secondary" (click)="retrocederPaso()">
+        ← Atras
+      </button>
+    }
+    <div class="form-actions__spacer"></div>
+    @if (paso() < totalPasos()) {
+      <button
+        class="btn btn--primary"
+        (click)="avanzarPaso()"
+        [disabled]="paso() === 1 && !servicioSeleccionado()"
+        [class.btn--hidden]="paso() === 2 && configuracion().permiteSeleccionEmpleado && !empleadoSeleccionado()"
+        [class.btn--hidden]="paso() === (configuracion().permiteSeleccionEmpleado ? 3 : 2) && (!fechaSeleccionada() || !horaSeleccionada())"
+      >
+        Siguiente →
+      </button>
+    } @else {
+      <button
+        class="btn btn--primary btn--confirm"
+        (click)="confirmar()"
+        [disabled]="form.invalid || guardando() || !servicioSeleccionado() || !empleadoSeleccionado() || !fechaSeleccionada() || !horaSeleccionada()"
+      >
+        @if (guardando()) {
+          Confirmando...
+        } @else {
+          Confirmar reserva
+        }
+      </button>
+    }
+  </div>
+</div>

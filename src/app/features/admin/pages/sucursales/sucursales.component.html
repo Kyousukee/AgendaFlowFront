@@ -1,0 +1,79 @@
+<div class="sucursales-page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Sucursales</h1>
+      <p class="page-subtitle">Gestion de locales de tu negocio</p>
+    </div>
+    <button class="btn btn--primary" (click)="abrirDialogo()">
+      <mat-icon>add</mat-icon>
+      Crear sucursal
+    </button>
+  </div>
+
+  @if (cargando()) {
+    <div class="loading-state">
+      <mat-icon class="loading-icon">hourglass_empty</mat-icon>
+      <span>Cargando sucursales...</span>
+    </div>
+  } @else if (sucursales().length === 0) {
+    <div class="empty-state">
+      <mat-icon class="empty-icon">storefront</mat-icon>
+      <h3 class="empty-title">Sin sucursales</h3>
+      <p class="empty-text">Crea tu primera sucursal para comenzar a gestionar tus locales.</p>
+      <button class="btn btn--primary" (click)="abrirDialogo()">
+        <mat-icon>add</mat-icon>
+        Crear sucursal
+      </button>
+    </div>
+  } @else {
+    <div class="sucursales-grid">
+      @for (sucursal of sucursales(); track sucursal.id) {
+        <mat-card class="sucursal-card">
+          <div class="sucursal-header">
+            <div class="sucursal-icon">
+              <mat-icon>store</mat-icon>
+            </div>
+            <div class="sucursal-info">
+              <span class="sucursal-nombre">{{ sucursal.nombre }}</span>
+              @if (sucursal.direccion) {
+                <span class="sucursal-direccion">{{ sucursal.direccion }}</span>
+              }
+            </div>
+          </div>
+
+          <div class="sucursal-meta">
+            @if (sucursal.comuna || sucursal.ciudad) {
+              <div class="meta-item">
+                <mat-icon>location_on</mat-icon>
+                <span>{{ sucursal.comuna }}{{ sucursal.comuna && sucursal.ciudad ? ', ' : '' }}{{ sucursal.ciudad }}</span>
+              </div>
+            }
+            @if (sucursal.telefono) {
+              <div class="meta-item">
+                <mat-icon>phone</mat-icon>
+                <span>{{ sucursal.telefono }}</span>
+              </div>
+            }
+            <div class="meta-item">
+              <mat-icon>{{ sucursal.activo ? 'check_circle' : 'cancel' }}</mat-icon>
+              <span>{{ sucursal.activo ? 'Activa' : 'Inactiva' }}</span>
+            </div>
+          </div>
+
+          <div class="sucursal-actions">
+            <button class="action-btn" (click)="editarSucursal(sucursal)" matTooltip="Editar">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button
+              class="action-btn action-btn--danger"
+              (click)="eliminarSucursal(sucursal)"
+              matTooltip="Eliminar"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </mat-card>
+      }
+    </div>
+  }
+</div>

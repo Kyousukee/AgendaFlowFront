@@ -9,9 +9,9 @@ import {
   ValidationErrors,
 } from '@angular/forms';
 import { AuthService } from '../../../../core/services/auth.service';
+import { RegisterRequest } from '../../interfaces/register-request.interface';
 import { MapPickerComponent } from '../../../../shared/components/map-picker/map-picker.component';
 import { GeocodingService } from '../../../../shared/services/geocoding.service';
-import { RegisterRequest } from '../../interfaces/register-request.interface';
 
 @Component({
   selector: 'app-register',
@@ -131,26 +131,37 @@ export class RegisterComponent {
 
     this.errorMessage.set('');
 
-    // confirmPassword se descarta: el RegisterDto del backend no la declara y
-    // su ValidationPipe corre con forbidNonWhitelisted, asi que devolveria 400.
-    const { confirmPassword, ...account } = this.accountForm.getRawValue();
-    void confirmPassword;
-
-    const payload: RegisterRequest = {
-      ...account,
-      ...this.businessForm.getRawValue(),
-      ...this.branchForm.getRawValue(),
-    };
+    const account = this.accountForm.getRawValue();
+    const business = this.businessForm.getRawValue();
+    const branch = this.branchForm.getRawValue();
 
     this.isLoading.set(true);
 
+    const payload: RegisterRequest = {
+      nombre: account.nombre,
+      apellido: account.apellido || '',
+      email: account.email,
+      password: account.password,
+      empresaNombre: business.empresaNombre,
+      nombreComercial: business.nombreComercial || undefined,
+      empresaEmail: business.empresaEmail || undefined,
+      telefono: business.telefono || undefined,
+      sucursalNombre: branch.sucursalNombre || undefined,
+      direccion: branch.direccion || undefined,
+      comuna: branch.comuna || undefined,
+      ciudad: branch.ciudad || undefined,
+      region: branch.region || undefined,
+      pais: branch.pais || undefined,
+      latitud: branch.latitud,
+      longitud: branch.longitud,
+    };
+
     this.authService.register(payload).subscribe({
-      // setSession() ya navega a /admin/home.
-      next: () => this.isLoading.set(false),
-      error: (err: { error?: { message?: string } }) => {
-        this.errorMessage.set(
-          err.error?.message ?? 'No se pudo completar el registro',
-        );
+      next: () => {
+        this.isLoading.set(false);
+      },
+      error: (err: Error) => {
+        this.errorMessage.set(err.message);
         this.isLoading.set(false);
       },
     });

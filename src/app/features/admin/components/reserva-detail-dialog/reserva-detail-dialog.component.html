@@ -1,0 +1,111 @@
+<div class="reserva-dialog">
+  <div class="dialog-header">
+    <div class="dialog-header__info">
+      <h2 class="dialog-title">Detalle de Reserva</h2>
+      <span class="dialog-codigo">{{ data.reserva.codigo }}</span>
+    </div>
+    <span class="estado-badge" [attr.data-estado]="data.estado.nombre.toLowerCase()">
+      {{ data.estado.nombre }}
+    </span>
+  </div>
+
+  <div class="dialog-body">
+    <div class="detail-section">
+      <div class="detail-row">
+        <mat-icon>calendar_today</mat-icon>
+        <div class="detail-content">
+          <span class="detail-label">Fecha</span>
+          <span class="detail-value">{{ formatearFecha(data.reserva.fecha) }}</span>
+        </div>
+      </div>
+      <div class="detail-row">
+        <mat-icon>schedule</mat-icon>
+        <div class="detail-content">
+          <span class="detail-label">Horario</span>
+          <span class="detail-value">{{ formatearHora(data.reserva.horaInicio) }} - {{ formatearHora(data.reserva.horaFin) }}</span>
+        </div>
+      </div>
+      @if (data.reserva.observacion) {
+        <div class="detail-row">
+          <mat-icon>notes</mat-icon>
+          <div class="detail-content">
+            <span class="detail-label">Observacion</span>
+            <span class="detail-value">{{ data.reserva.observacion }}</span>
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="detail-section">
+      <h3 class="section-title">
+        <mat-icon>person</mat-icon>
+        Cliente
+      </h3>
+      <div class="section-card">
+        <div class="section-field">
+          <span class="field-label">Nombre</span>
+          <span class="field-value">{{ getNombreCliente() }}</span>
+        </div>
+        @if (data.reserva.cliente.email) {
+          <div class="section-field">
+            <span class="field-label">Email</span>
+            <span class="field-value">{{ data.reserva.cliente.email }}</span>
+          </div>
+        }
+        @if (data.reserva.cliente.telefono) {
+          <div class="section-field">
+            <span class="field-label">Telefono</span>
+            <span class="field-value">{{ data.reserva.cliente.telefono }}</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <h3 class="section-title">
+        <mat-icon>content_cut</mat-icon>
+        Servicio
+      </h3>
+      <div class="section-card">
+        <div class="section-field">
+          <span class="field-label">Servicio</span>
+          <span class="field-value field-value--highlight">{{ getNombreServicio() }}</span>
+        </div>
+        <div class="section-field">
+          <span class="field-label">Duracion</span>
+          <span class="field-value">{{ data.reserva.servicio.duracionMinutos }} min</span>
+        </div>
+        <div class="section-field">
+          <span class="field-label">Precio</span>
+          <span class="field-value field-value--gold">{{ formatearPrecio(data.reserva.precio) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <h3 class="section-title">
+        <mat-icon>badge</mat-icon>
+        Empleado
+      </h3>
+      <div class="section-card">
+        <div class="section-field">
+          <span class="field-label">Nombre</span>
+          <span class="field-value">{{ getNombreEmpleado() }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <h3 class="section-title">
+        <mat-icon>store</mat-icon>
+        Sucursal
+      </h3>
+      <div class="section-card">
+        <div class="section-field">
+          <span class="field-label">Ubicacion</span>
+          <span class="field-value">{{ getNombreSucursal() }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

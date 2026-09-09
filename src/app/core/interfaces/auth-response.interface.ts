@@ -1,29 +1,46 @@
-import { Empresa } from './empresa.interface';
-import { Sucursal } from './sucursal.interface';
-import { Empleado } from './empleado.interface';
+export interface LoginApiResponse {
+  accessToken: string;
+  user: {
+    id: number;
+    nombre: string;
+    apellido: string;
+    email: string;
+    rolId: number;
+    empleado: {
+      id: number;
+      nombre: string;
+      apellido: string;
+      email: string;
+      telefono: string | null;
+      foto: string | null;
+      sucursal: {
+        id: number;
+        nombre: string;
+        direccion: string;
+        empresa: {
+          id: number;
+          nombre: string;
+          slug: string;
+        };
+      };
+    };
+  };
+}
 
 export interface UserData {
   id: number;
   nombre: string;
   apellido?: string;
   email: string;
-  /**
-   * El backend emite un id numerico de rol, no un string.
-   * 1 = Administrador (los controladores protegidos llevan @Roles(1)).
-   */
+  empresaId: number;
   rolId: number;
   telefono?: string;
-  empleado: Empleado | null;
 }
 
 export interface AuthResponse {
-  /** Access token emitido por Supabase Auth. */
-  accessToken: string;
-  /** Se intercambia en POST /auth/refresh cuando el access token caduca. */
-  refreshToken: string;
-  /** Unix epoch en segundos. */
-  expiresAt: number;
-  empresa: Empresa | null;
-  sucursales: Sucursal[];
-  user: UserData;
+  token: string;
+  usuario: UserData;
+  empresa: { id: number; nombre: string; slug: string };
+  sucursales: { id: number; empresaId: number; nombre: string; direccion: string; activo: boolean }[];
+  empleado: { id: number; sucursalId: number; nombre: string; apellido: string; email: string; telefono?: string; foto?: string; activo: boolean; fechaCreacion: string };
 }

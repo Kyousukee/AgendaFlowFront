@@ -1,0 +1,132 @@
+.reservar-page {
+  min-height: 100vh;
+  background: var(--bg-primary);
+}
+
+.reservar-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  gap: 1rem;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.reservar-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  gap: 0.5rem;
+  text-align: center;
+  padding: 2rem;
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+  }
+
+  p {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin: 0;
+  }
+}
+
+.reservar-header {
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 1.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.reservar-header__content {
+  max-width: 640px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.reservar-header__empresa {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.reservar-header__logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.reservar-header__logo-placeholder {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: var(--gold);
+  color: var(--bg-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.125rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.reservar-header__info {
+  display: flex;
+  flex-direction: column;
+}
+
+.reservar-header__nombre {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.reservar-header__sucursal {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.reservar-header__ubicacion {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+.ubicacion-icon {
+  font-size: 0.875rem;
+}
+
+.reservar-main {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}

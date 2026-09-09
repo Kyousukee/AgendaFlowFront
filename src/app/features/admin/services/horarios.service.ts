@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { HorarioSucursal } from '../interfaces/horario-sucursal.interface';
 import { environment } from '../../../../environments/environment';
 
@@ -15,56 +15,25 @@ const HORARIOS_POR_DEFECTO: HorarioSucursal[] = [
   { id: 0, sucursalId: 0, diaSemana: 7, horaInicio: '09:00', horaFin: '14:00', abierto: false },
 ];
 
-/**
- * Postgres devuelve las columnas TIME como "09:00:00", pero el desplegable de
- * la pantalla tiene opciones "09:00": sin recortar los segundos, el valor no
- * coincide con ningun <option> y el select aparece vacio.
- */
-const aHoraCorta = (hora: string): string => (hora ?? '').slice(0, 5);
-
 @Injectable({ providedIn: 'root' })
 export class HorariosService {
   private http = inject(HttpClient);
+  private apiUrl = environment.apiUrl;
 
   getBySucursal(sucursalId: number): Observable<HorarioSucursal[]> {
-    return this.http
-      .get<HorarioSucursal[]>(
-        `${environment.apiUrl}/sucursales/${sucursalId}/horarios`,
-      )
-      .pipe(
-        map((horarios) =>
-          horarios.length > 0
-            ? horarios.map((h) => ({
-                ...h,
-                horaInicio: aHoraCorta(h.horaInicio),
-                horaFin: aHoraCorta(h.horaFin),
-              }))
-            : HORARIOS_POR_DEFECTO.map((h) => ({ ...h, sucursalId })),
-        ),
-      );
+    return this.http.get<HorarioSucursal[]>(`${this.apiUrl}/sucursales/${sucursalId}/horarios`).pipe(
+      map((horarios) =>
+        horarios.length > 0 ? horarios : HORARIOS_POR_DEFECTO.map((h) => ({ ...h, sucursalId })),
+      ),
+      catchError(() => of(HORARIOS_POR_DEFECTO.map((h) => ({ ...h, sucursalId })))),
+    );
   }
 
-  saveAll(
-    sucursalId: number,
-    horarios: HorarioSucursal[],
-  ): Observable<HorarioSucursal[]> {
-    // El backend valida con forbidNonWhitelisted: mandar id o sucursalId
-    // dentro de cada horario devolveria 400. Solo van los cuatro campos
-    // que declara CreateHorarioDto.
-    const body = {
-      horarios: horarios.map(({ diaSemana, horaInicio, horaFin, abierto }) => ({
-        diaSemana,
-        horaInicio,
-        horaFin,
-        abierto,
-      })),
-    };
-
-    // POST y no PUT: el endpoint de lote borra los horarios de la sucursal y
-    // vuelve a insertarlos.
-    return this.http.post<HorarioSucursal[]>(
-      `${environment.apiUrl}/sucursales/${sucursalId}/horarios`,
-      body,
-    );
+  saveAll(sucursalId: number, horarios: Omit<HorarioSucursal, 'id' | 'sucursalId'>[]): Observable<HorarioSucursal[]> {
+    console.log(`${this.apiUrl}/sucursales/${sucursalId}/horarios`);
+    console.log(horarios);
+    return this.http
+      .post<HorarioSucursal[]>(`${this.apiUrl}/sucursales/${sucursalId}/horarios`, { horarios })
+      .pipe(catchError(() => of([])));
   }
 }
