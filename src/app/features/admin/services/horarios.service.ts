@@ -29,11 +29,10 @@ export class HorariosService {
     );
   }
 
+  // Sin catchError a proposito: devolver of([]) hacia que la pantalla
+  // mostrase "guardado" cuando el POST habia fallado.
   saveAll(sucursalId: number, horarios: Omit<HorarioSucursal, 'id' | 'sucursalId'>[]): Observable<HorarioSucursal[]> {
-    console.log(`${this.apiUrl}/sucursales/${sucursalId}/horarios`);
-    console.log(horarios);
     return this.http
-      .post<HorarioSucursal[]>(`${this.apiUrl}/sucursales/${sucursalId}/horarios`, { horarios })
-      .pipe(catchError(() => of([])));
+      .post<HorarioSucursal[]>(`${this.apiUrl}/sucursales/${sucursalId}/horarios`, { horarios });
   }
 }

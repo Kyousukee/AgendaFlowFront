@@ -46,6 +46,7 @@ interface ApiUser {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly TOKEN_KEY = 'agendaflow_token';
+  private readonly REFRESH_KEY = 'agendaflow_refresh';
   private readonly USER_KEY = 'agendaflow_user';
   private readonly EMPRESA_KEY = 'agendaflow_empresa';
   private readonly SUCURSALES_KEY = 'agendaflow_sucursales';
@@ -156,6 +157,9 @@ export class AuthService {
 
     if (isPlatformBrowser(this.platformId)) {
       localStorage.setItem(this.TOKEN_KEY, accessToken);
+      if (response.refreshToken) {
+        localStorage.setItem(this.REFRESH_KEY, response.refreshToken);
+      }
       localStorage.setItem(this.USER_KEY, JSON.stringify(userData));
       localStorage.setItem(this.EMPRESA_KEY, JSON.stringify(empresaData));
       localStorage.setItem(this.SUCURSALES_KEY, JSON.stringify([sucursalData]));
@@ -217,6 +221,25 @@ export class AuthService {
     return null;
   }
 
+  getRefreshToken(): string | null {
+    if (isPlatformBrowser(this.platformId)) {
+      return localStorage.getItem(this.REFRESH_KEY);
+    }
+    return null;
+  }
+
+  /**
+   * Cambia el refresh token por una sesion nueva. Sin esto el primer 401
+   * expulsaba al usuario: los access token de Supabase caducan en 1 h.
+   */
+  refresh(): Observable<LoginApiResponse> {
+    return this.http
+      .post<LoginApiResponse>(`${environment.apiUrl}/auth/refresh`, {
+        refreshToken: this.getRefreshToken(),
+      })
+      .pipe(tap((response) => this.handleLoginResponse(response)));
+  }
+
   register(data: RegisterRequest): Observable<LoginApiResponse> {
     return this.http
       .post<LoginApiResponse>(`${environment.apiUrl}/auth/register`, data)
@@ -239,6 +262,7 @@ export class AuthService {
   logout(): void {
     if (isPlatformBrowser(this.platformId)) {
       localStorage.removeItem(this.TOKEN_KEY);
+      localStorage.removeItem(this.REFRESH_KEY);
       localStorage.removeItem(this.USER_KEY);
       localStorage.removeItem(this.EMPRESA_KEY);
       localStorage.removeItem(this.SUCURSALES_KEY);

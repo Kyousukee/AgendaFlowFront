@@ -1,5 +1,9 @@
 export interface LoginApiResponse {
   accessToken: string;
+  /** Se intercambia en POST /auth/refresh cuando caduca el access token. */
+  refreshToken: string;
+  /** Unix epoch en segundos. */
+  expiresAt: number;
   user: {
     id: number;
     nombre: string;
