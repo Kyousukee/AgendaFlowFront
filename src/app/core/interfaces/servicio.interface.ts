@@ -7,5 +7,6 @@ export interface Servicio {
   precio: number;
   color?: string;
   activo: boolean;
+  desactivadoPorSuscripcion?: boolean;
   fechaCreacion: string;
 }

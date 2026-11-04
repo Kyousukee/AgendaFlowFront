@@ -11,5 +11,6 @@ export interface Sucursal {
   longitud?: number;
   telefono?: string;
   activo: boolean;
+  desactivadoPorSuscripcion?: boolean;
   fechaCreacion: string;
 }

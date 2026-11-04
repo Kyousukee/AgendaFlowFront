@@ -22,6 +22,70 @@
     </button>
   </div>
 
+  @if (suscripcion.suscripcion(); as plan) {
+    <section class="config-card plan-card">
+      <div class="config-card__header">
+        <mat-icon class="config-card__icon">workspace_premium</mat-icon>
+        <div>
+          <h2 class="config-card__title">Tu plan</h2>
+          <p class="config-card__desc">Plan vigente y uso de tu cuenta</p>
+        </div>
+      </div>
+
+      <div class="config-card__body">
+        <div class="plan-resumen">
+          <div class="plan-dato">
+            <span class="plan-dato__label">Plan</span>
+            <span class="plan-dato__valor">{{ plan.plan }}</span>
+          </div>
+          <div class="plan-dato">
+            <span class="plan-dato__label">Fecha de fin</span>
+            <span class="plan-dato__valor">
+              @if (plan.sinVencimiento || !plan.fechaFin) {
+                Sin vencimiento
+              } @else {
+                {{ plan.fechaFin | date: 'dd-MM-yyyy' }}
+              }
+            </span>
+          </div>
+        </div>
+
+        <div class="plan-uso">
+          @for (recurso of recursos; track recurso.clave) {
+            @let limite = plan.limites[recurso.clave];
+            @let uso = plan.uso[recurso.clave];
+            <div class="plan-uso__fila">
+              <div class="plan-uso__texto">
+                <span class="plan-uso__recurso">{{ recurso.etiqueta }}</span>
+                <span class="plan-uso__cantidad">
+                  @if (limite === null) {
+                    {{ uso }} · ilimitado
+                  } @else {
+                    {{ uso }} de {{ limite }}
+                  }
+                </span>
+              </div>
+              @if (limite !== null) {
+                <mat-progress-bar
+                  mode="determinate"
+                  [value]="porcentajeUso(uso, limite)"
+                  [attr.aria-label]="recurso.etiqueta + ': ' + uso + ' de ' + limite"
+                />
+              }
+            </div>
+          }
+        </div>
+
+        @if (plan.plan === 'Gratis' || plan.plan === 'Prueba') {
+          <p class="plan-cta">
+            <mat-icon>rocket_launch</mat-icon>
+            Contáctanos para activar el plan Pro
+          </p>
+        }
+      </div>
+    </section>
+  }
+
   @if (cargando()) {
     <div class="loading-state">
       <mat-icon class="loading-icon">hourglass_empty</mat-icon>

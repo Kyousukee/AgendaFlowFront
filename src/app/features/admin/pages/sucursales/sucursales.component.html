@@ -4,10 +4,20 @@
       <h1 class="page-title">Sucursales</h1>
       <p class="page-subtitle">Gestion de locales de tu negocio</p>
     </div>
-    <button class="btn btn--primary" (click)="abrirDialogo()">
-      <mat-icon>add</mat-icon>
-      Crear sucursal
-    </button>
+    <span
+      class="tooltip-wrapper"
+      matTooltip="Alcanzaste el límite del plan Gratis"
+      [matTooltipDisabled]="!suscripcion.limiteAlcanzado('sucursales')"
+    >
+      <button
+        class="btn btn--primary"
+        [disabled]="suscripcion.limiteAlcanzado('sucursales')"
+        (click)="abrirDialogo()"
+      >
+        <mat-icon>add</mat-icon>
+        Crear sucursal
+      </button>
+    </span>
   </div>
 
   @if (cargando()) {
@@ -20,10 +30,20 @@
       <mat-icon class="empty-icon">storefront</mat-icon>
       <h3 class="empty-title">Sin sucursales</h3>
       <p class="empty-text">Crea tu primera sucursal para comenzar a gestionar tus locales.</p>
-      <button class="btn btn--primary" (click)="abrirDialogo()">
-        <mat-icon>add</mat-icon>
-        Crear sucursal
-      </button>
+      <span
+        class="tooltip-wrapper"
+        matTooltip="Alcanzaste el límite del plan Gratis"
+        [matTooltipDisabled]="!suscripcion.limiteAlcanzado('sucursales')"
+      >
+        <button
+          class="btn btn--primary"
+          [disabled]="suscripcion.limiteAlcanzado('sucursales')"
+          (click)="abrirDialogo()"
+        >
+          <mat-icon>add</mat-icon>
+          Crear sucursal
+        </button>
+      </span>
     </div>
   } @else {
     <div class="sucursales-grid">
@@ -35,6 +55,9 @@
             </div>
             <div class="sucursal-info">
               <span class="sucursal-nombre">{{ sucursal.nombre }}</span>
+              @if (sucursal.desactivadoPorSuscripcion) {
+                <app-etiqueta-plan />
+              }
               @if (sucursal.direccion) {
                 <span class="sucursal-direccion">{{ sucursal.direccion }}</span>
               }

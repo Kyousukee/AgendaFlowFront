@@ -6,12 +6,16 @@ import { routes } from './app.routes';
 import { provideClientHydration } from '@angular/platform-browser';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { sessionInterceptor } from './core/interceptors/session.interceptor';
+import { suscripcionInterceptor } from './core/interceptors/suscripcion.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
     provideClientHydration(),
-    provideHttpClient(withFetch(), withInterceptors([authInterceptor, sessionInterceptor])),
+    provideHttpClient(
+      withFetch(),
+      withInterceptors([authInterceptor, sessionInterceptor, suscripcionInterceptor]),
+    ),
   ],
 };

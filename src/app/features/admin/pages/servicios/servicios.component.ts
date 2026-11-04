@@ -3,6 +3,9 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { SuscripcionService } from '../../../../core/services/suscripcion.service';
+import { EtiquetaPlanComponent } from '../../../../shared/components/etiqueta-plan/etiqueta-plan.component';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ServiciosService } from '../../services/servicios.service';
 import { Servicio } from '../../../../core/interfaces/servicio.interface';
@@ -14,7 +17,7 @@ import {
 @Component({
   selector: 'app-servicios',
   standalone: true,
-  imports: [MatCardModule, MatIconModule, MatButtonModule],
+  imports: [MatCardModule, MatIconModule, MatButtonModule, MatTooltipModule, EtiquetaPlanComponent],
   templateUrl: './servicios.component.html',
   styleUrl: './servicios.component.scss',
 })
@@ -22,6 +25,7 @@ export class ServiciosComponent {
   private authService = inject(AuthService);
   private serviciosService = inject(ServiciosService);
   private dialog = inject(MatDialog);
+  suscripcion = inject(SuscripcionService);
 
   servicios = signal<Servicio[]>([]);
   cargando = signal(true);
@@ -72,6 +76,7 @@ export class ServiciosComponent {
       if (resultado) {
         this.serviciosService.crear(resultado).subscribe(() => {
           this.cargarServicios();
+          this.suscripcion.cargar();
         });
       }
     });
@@ -91,6 +96,7 @@ export class ServiciosComponent {
         const { empresaId, ...body } = resultado;
         this.serviciosService.actualizar(servicio.id, body).subscribe(() => {
           this.cargarServicios();
+          this.suscripcion.cargar();
         });
       }
     });
@@ -100,6 +106,7 @@ export class ServiciosComponent {
     if (!servicio.id) return;
     this.serviciosService.eliminar(servicio.id).subscribe(() => {
       this.cargarServicios();
+      this.suscripcion.cargar();
     });
   }
 

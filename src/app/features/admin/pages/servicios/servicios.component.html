@@ -4,10 +4,20 @@
       <h1 class="page-title">Servicios</h1>
       <p class="page-subtitle">Catalogo de servicios que ofreces</p>
     </div>
-    <button class="btn btn--primary" (click)="abrirDialogo()">
-      <mat-icon>add</mat-icon>
-      Agregar servicio
-    </button>
+    <span
+      class="tooltip-wrapper"
+      matTooltip="Alcanzaste el límite del plan Gratis"
+      [matTooltipDisabled]="!suscripcion.limiteAlcanzado('servicios')"
+    >
+      <button
+        class="btn btn--primary"
+        [disabled]="suscripcion.limiteAlcanzado('servicios')"
+        (click)="abrirDialogo()"
+      >
+        <mat-icon>add</mat-icon>
+        Agregar servicio
+      </button>
+    </span>
   </div>
 
   @if (cargando()) {
@@ -22,10 +32,20 @@
       <p class="empty-text">
         Agrega tu primer servicio para que tus clientes puedan agendar citas.
       </p>
-      <button class="btn btn--primary" (click)="abrirDialogo()">
-        <mat-icon>add</mat-icon>
-        Agregar servicio
-      </button>
+      <span
+        class="tooltip-wrapper"
+        matTooltip="Alcanzaste el límite del plan Gratis"
+        [matTooltipDisabled]="!suscripcion.limiteAlcanzado('servicios')"
+      >
+        <button
+          class="btn btn--primary"
+          [disabled]="suscripcion.limiteAlcanzado('servicios')"
+          (click)="abrirDialogo()"
+        >
+          <mat-icon>add</mat-icon>
+          Agregar servicio
+        </button>
+      </span>
     </div>
   } @else {
     <div class="servicios-grid">
@@ -36,6 +56,9 @@
             <div class="servicio-header">
               <div class="servicio-info">
                 <span class="servicio-nombre">{{ servicio.nombre }}</span>
+                @if (servicio.desactivadoPorSuscripcion) {
+                  <app-etiqueta-plan />
+                }
                 @if (servicio.descripcion) {
                   <span class="servicio-desc">{{ servicio.descripcion }}</span>
                 }

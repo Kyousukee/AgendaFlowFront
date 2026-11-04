@@ -1,14 +1,18 @@
 import { Component, effect, inject, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { AuthService } from '../../../../core/services/auth.service';
+import { SuscripcionService } from '../../../../core/services/suscripcion.service';
+import { RecursoLimitado } from '../../../../core/interfaces/suscripcion.interface';
 import { ConfiguracionEmpresaService } from '../../services/configuracion-empresa.service';
 
 @Component({
   selector: 'app-configuracion',
   standalone: true,
-  imports: [ReactiveFormsModule, MatIconModule, MatButtonModule],
+  imports: [ReactiveFormsModule, MatIconModule, MatButtonModule, MatProgressBarModule, DatePipe],
   templateUrl: './configuracion.component.html',
   styleUrl: './configuracion.component.scss',
 })
@@ -16,6 +20,17 @@ export class ConfiguracionComponent {
   private authService = inject(AuthService);
   private configService = inject(ConfiguracionEmpresaService);
   private fb = inject(FormBuilder);
+  suscripcion = inject(SuscripcionService);
+
+  readonly recursos: { clave: RecursoLimitado; etiqueta: string }[] = [
+    { clave: 'sucursales', etiqueta: 'Sucursales' },
+    { clave: 'empleados', etiqueta: 'Empleados' },
+    { clave: 'servicios', etiqueta: 'Servicios' },
+  ];
+
+  porcentajeUso(uso: number, limite: number): number {
+    return limite > 0 ? Math.min(100, (uso / limite) * 100) : 100;
+  }
 
   guardando = signal(false);
   cargando = signal(true);
