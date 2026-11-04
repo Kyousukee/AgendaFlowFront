@@ -4,10 +4,20 @@
       <h1 class="page-title">Empleados</h1>
       <p class="page-subtitle">Gestion de tu equipo de trabajo</p>
     </div>
-    <button class="btn btn--primary" (click)="abrirDialogo()">
-      <mat-icon>person_add</mat-icon>
-      Agregar empleado
-    </button>
+    <span
+      class="tooltip-wrapper"
+      matTooltip="Alcanzaste el límite del plan Gratis"
+      [matTooltipDisabled]="!suscripcion.limiteAlcanzado('empleados')"
+    >
+      <button
+        class="btn btn--primary"
+        [disabled]="suscripcion.limiteAlcanzado('empleados')"
+        (click)="abrirDialogo()"
+      >
+        <mat-icon>person_add</mat-icon>
+        Agregar empleado
+      </button>
+    </span>
   </div>
 
   @if (cargando()) {
@@ -20,10 +30,20 @@
       <mat-icon class="empty-icon">people_outline</mat-icon>
       <h3 class="empty-title">Sin empleados</h3>
       <p class="empty-text">Agrega tu primer empleado para comenzar a gestionar tu equipo.</p>
-      <button class="btn btn--primary" (click)="abrirDialogo()">
-        <mat-icon>person_add</mat-icon>
-        Agregar empleado
-      </button>
+      <span
+        class="tooltip-wrapper"
+        matTooltip="Alcanzaste el límite del plan Gratis"
+        [matTooltipDisabled]="!suscripcion.limiteAlcanzado('empleados')"
+      >
+        <button
+          class="btn btn--primary"
+          [disabled]="suscripcion.limiteAlcanzado('empleados')"
+          (click)="abrirDialogo()"
+        >
+          <mat-icon>person_add</mat-icon>
+          Agregar empleado
+        </button>
+      </span>
     </div>
   } @else {
     <div class="empleados-grid">
@@ -35,6 +55,9 @@
             </div>
             <div class="empleado-info">
               <span class="empleado-nombre">{{ empleado.nombre }} {{ empleado.apellido }}</span>
+              @if (empleado.desactivadoPorSuscripcion) {
+                <app-etiqueta-plan />
+              }
               @if (empleado.email) {
                 <span class="empleado-email">{{ empleado.email }}</span>
               }

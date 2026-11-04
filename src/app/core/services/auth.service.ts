@@ -9,6 +9,7 @@ import { Empleado } from '../interfaces/empleado.interface';
 import { UserData, LoginApiResponse } from '../interfaces/auth-response.interface';
 import { RegisterRequest } from '../../features/auth/interfaces/register-request.interface';
 import { environment } from '../../../environments/environment';
+import { SuscripcionService } from './suscripcion.service';
 
 export const SUCURSAL_UPDATED = 'agendaflow_sucursal_updated';
 
@@ -55,6 +56,7 @@ export class AuthService {
   private platformId = inject(PLATFORM_ID);
   private router = inject(Router);
   private http = inject(HttpClient);
+  private suscripcionService = inject(SuscripcionService);
 
   isLoggedIn = signal(false);
   currentUser = signal<UserData | null>(null);
@@ -76,6 +78,8 @@ export class AuthService {
         this.isLoggedIn.set(true);
         this.currentUser.set(JSON.parse(userJson));
         this.cargarSucursales();
+        // Diferido: authInterceptor inyecta AuthService, que aún se está construyendo.
+        queueMicrotask(() => this.suscripcionService.cargar());
       }
       if (empresaJson) {
         this.empresa.set(JSON.parse(empresaJson));
@@ -172,6 +176,8 @@ export class AuthService {
 
     this.router.navigate(['/admin/home']);
     this.cargarSucursales();
+    this.suscripcionService.limpiar();
+    this.suscripcionService.cargar();
   }
 
   cargarSucursales(): void {
@@ -252,6 +258,7 @@ export class AuthService {
     this.sucursales.set([]);
     this.sucursalActual.set(null);
     this.empleado.set(null);
+    this.suscripcionService.limpiar();
     this.router.navigate(['/login']);
   }
 }

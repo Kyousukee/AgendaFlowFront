@@ -1,0 +1,23 @@
+:host {
+  display: inline-flex;
+}
+
+.etiqueta-plan {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(156, 163, 175, 0.12);
+  border: 1px solid rgba(156, 163, 175, 0.3);
+  color: var(--text-secondary);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  white-space: nowrap;
+
+  &__icon {
+    font-size: 13px;
+    width: 13px;
+    height: 13px;
+  }
+}

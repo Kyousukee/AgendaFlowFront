@@ -22,6 +22,7 @@ export interface Empleado {
   foto?: string | null;
   descripcion?: string | null;
   activo: boolean;
+  desactivadoPorSuscripcion?: boolean;
   fechaCreacion: string;
   serviciosEmpleados?: ServicioEmpleadoResponse[];
 }

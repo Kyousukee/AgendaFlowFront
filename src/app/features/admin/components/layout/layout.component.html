@@ -51,6 +51,20 @@
     </nav>
 
     <div class="sidebar__footer">
+      @let plan = suscripcion.suscripcion();
+      @if (plan && suscripcion.etiquetaPlan()) {
+        <a
+          class="plan-chip"
+          routerLink="/admin/configuracion"
+          [class.plan-chip--prueba]="plan.plan === 'Prueba'"
+          [class.plan-chip--gratis]="plan.plan === 'Gratis'"
+          [class.plan-chip--pro]="plan.plan === 'Pro'"
+          [class.plan-chip--por-vencer]="plan.porVencer"
+        >
+          <mat-icon class="plan-chip__icon">workspace_premium</mat-icon>
+          <span>{{ suscripcion.etiquetaPlan() }}</span>
+        </a>
+      }
       <div class="sidebar__user">
         <span class="user-name"
           >{{ auth.currentUser()?.nombre }} {{ auth.currentUser()?.apellido }}</span
@@ -65,6 +79,21 @@
   </aside>
 
   <main class="admin-main">
+    @if (suscripcion.mostrarAviso()) {
+      <div class="aviso-suscripcion" role="status">
+        <mat-icon class="aviso-suscripcion__icon">info</mat-icon>
+        <span class="aviso-suscripcion__texto">{{ suscripcion.suscripcion()?.aviso }}</span>
+        <a class="aviso-suscripcion__link" routerLink="/admin/configuracion">Ver plan</a>
+        <button
+          type="button"
+          class="aviso-suscripcion__cerrar"
+          aria-label="Cerrar aviso"
+          (click)="suscripcion.cerrarAviso()"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    }
     <router-outlet />
   </main>
 </div>

@@ -3,6 +3,9 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { SuscripcionService } from '../../../../core/services/suscripcion.service';
+import { EtiquetaPlanComponent } from '../../../../shared/components/etiqueta-plan/etiqueta-plan.component';
 import { AuthService } from '../../../../core/services/auth.service';
 import { EmpleadosService } from '../../services/empleados.service';
 import { ServiciosService } from '../../services/servicios.service';
@@ -17,7 +20,7 @@ import {
 @Component({
   selector: 'app-empleados',
   standalone: true,
-  imports: [MatCardModule, MatIconModule, MatButtonModule],
+  imports: [MatCardModule, MatIconModule, MatButtonModule, MatTooltipModule, EtiquetaPlanComponent],
   templateUrl: './empleados.component.html',
   styleUrl: './empleados.component.scss',
 })
@@ -26,6 +29,7 @@ export class EmpleadosComponent {
   private empleadosService = inject(EmpleadosService);
   private serviciosService = inject(ServiciosService);
   private dialog = inject(MatDialog);
+  suscripcion = inject(SuscripcionService);
 
   empleados = signal<Empleado[]>([]);
   servicios = signal<Servicio[]>([]);
@@ -96,6 +100,7 @@ export class EmpleadosComponent {
         const { servicioIds, ...empleado } = resultado;
         this.empleadosService.crear({ ...empleado, servicioIds }).subscribe(() => {
           this.cargarDatos();
+          this.suscripcion.cargar();
         });
       }
     });
@@ -120,6 +125,7 @@ export class EmpleadosComponent {
         const { servicioIds, sucursalId: _, ...body } = resultado;
         this.empleadosService.actualizar(empleado.id, { ...body, servicioIds }).subscribe(() => {
           this.cargarDatos();
+          this.suscripcion.cargar();
         });
       }
     });
@@ -129,6 +135,7 @@ export class EmpleadosComponent {
     if (!empleado.id) return;
     this.empleadosService.eliminar(empleado.id).subscribe(() => {
       this.cargarDatos();
+      this.suscripcion.cargar();
     });
   }
 

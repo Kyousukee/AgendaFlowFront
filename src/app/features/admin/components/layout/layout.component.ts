@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { AuthService } from '../../../../core/services/auth.service';
+import { SuscripcionService } from '../../../../core/services/suscripcion.service';
 
 @Component({
   selector: 'app-admin-layout',
@@ -23,6 +24,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 })
 export class LayoutComponent {
   auth = inject(AuthService);
+  suscripcion = inject(SuscripcionService);
 
   navItems = [
     { label: 'Inicio', icon: 'dashboard', route: '/admin/home' },

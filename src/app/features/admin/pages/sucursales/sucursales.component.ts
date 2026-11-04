@@ -3,6 +3,9 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { SuscripcionService } from '../../../../core/services/suscripcion.service';
+import { EtiquetaPlanComponent } from '../../../../shared/components/etiqueta-plan/etiqueta-plan.component';
 import { SucursalesService } from '../../services/sucursales.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { Sucursal } from '../../../../core/interfaces/sucursal.interface';
@@ -15,7 +18,7 @@ import {
 @Component({
   selector: 'app-sucursales',
   standalone: true,
-  imports: [MatCardModule, MatIconModule, MatButtonModule],
+  imports: [MatCardModule, MatIconModule, MatButtonModule, MatTooltipModule, EtiquetaPlanComponent],
   templateUrl: './sucursales.component.html',
   styleUrl: './sucursales.component.scss',
 })
@@ -23,6 +26,7 @@ export class SucursalesComponent implements OnInit {
   private sucursalesService = inject(SucursalesService);
   private authService = inject(AuthService);
   private dialog = inject(MatDialog);
+  suscripcion = inject(SuscripcionService);
 
   sucursales = signal<Sucursal[]>([]);
   cargando = signal(true);
@@ -56,6 +60,7 @@ export class SucursalesComponent implements OnInit {
         const { id, ...payload } = resultado;
         this.sucursalesService.crear(payload).subscribe(() => {
           this.cargarDatos();
+          this.suscripcion.cargar();
           this.authService.cargarSucursales();
         });
       }
@@ -73,6 +78,7 @@ export class SucursalesComponent implements OnInit {
         const { id, ...payload } = resultado;
         this.sucursalesService.actualizar(id, payload).subscribe(() => {
           this.cargarDatos();
+          this.suscripcion.cargar();
           this.authService.cargarSucursales();
         });
       }
@@ -83,6 +89,7 @@ export class SucursalesComponent implements OnInit {
     if (!sucursal.id) return;
     this.sucursalesService.eliminar(sucursal.id).subscribe(() => {
       this.cargarDatos();
+      this.suscripcion.cargar();
       this.authService.cargarSucursales();
     });
   }
