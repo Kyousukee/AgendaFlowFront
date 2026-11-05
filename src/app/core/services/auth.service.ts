@@ -79,7 +79,10 @@ export class AuthService {
         this.currentUser.set(JSON.parse(userJson));
         this.cargarSucursales();
         // Diferido: authInterceptor inyecta AuthService, que aún se está construyendo.
-        queueMicrotask(() => this.suscripcionService.cargar());
+        queueMicrotask(() => {
+          this.suscripcionService.cargar();
+          this.cargarEmpresa();
+        });
       }
       if (empresaJson) {
         this.empresa.set(JSON.parse(empresaJson));
@@ -176,6 +179,7 @@ export class AuthService {
 
     this.router.navigate(['/admin/home']);
     this.cargarSucursales();
+    this.cargarEmpresa();
     this.suscripcionService.limpiar();
     this.suscripcionService.cargar();
   }
@@ -199,6 +203,37 @@ export class AuthService {
       },
       error: () => {},
     });
+  }
+
+  /**
+   * El login solo trae id, nombre y slug de la empresa; el resto (logo, nombre comercial)
+   * se completa desde la ficha pública de la empresa.
+   */
+  cargarEmpresa(): void {
+    const slug = this.empresa()?.slug;
+    if (!slug) return;
+    this.http.get<Empresa>(`${environment.apiUrl}/reservar/empresa-slug/${slug}`).subscribe({
+      next: (data) => {
+        if (data) {
+          this.actualizarEmpresa({
+            logo: data.logo ?? null,
+            nombreComercial: data.nombreComercial,
+          });
+        }
+      },
+      error: () => {},
+    });
+  }
+
+  /** Actualiza la empresa en memoria y en localStorage para que el cambio se vea en toda la app. */
+  actualizarEmpresa(cambios: Partial<Empresa>): void {
+    const actual = this.empresa();
+    if (!actual) return;
+    const empresa: Empresa = { ...actual, ...cambios };
+    this.empresa.set(empresa);
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem(this.EMPRESA_KEY, JSON.stringify(empresa));
+    }
   }
 
   cambiarSucursal(sucursalId: number): void {

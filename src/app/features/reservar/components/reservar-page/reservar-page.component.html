@@ -14,7 +14,11 @@
       <div class="reservar-header__content">
         <div class="reservar-header__empresa">
           @if (empresa()?.logo) {
-            <img [src]="empresa()?.logo" [alt]="empresa()?.nombre" class="reservar-header__logo" />
+            <img
+              [src]="empresa()?.logo"
+              [alt]="empresa()?.nombreComercial || empresa()?.nombre"
+              class="reservar-header__logo"
+            />
           } @else {
             <div class="reservar-header__logo-placeholder">
               {{ empresa()?.nombre?.charAt(0) || 'A' }}
