@@ -1,13 +1,54 @@
 <div class="admin-layout">
   <aside class="sidebar">
     <div class="sidebar__header">
-      <a routerLink="/" class="sidebar__logo">
+      <a routerLink="/" class="sidebar__logo" aria-label="AgendaFlow, inicio">
         <img src="logo.png" alt="AgendaFlow" class="sidebar__logo-img" />
       </a>
     </div>
 
-    @if (auth.sucursales().length > 0) {
-      <div class="sidebar__sucursal">
+    <nav class="sidebar__nav" aria-label="Panel">
+      @for (item of navItems; track item.route) {
+        <a class="sidebar__link" [routerLink]="item.route" routerLinkActive="sidebar__link--active">
+          <mat-icon>{{ item.icon }}</mat-icon>
+          <span class="sidebar__link-label">{{ item.label }}</span>
+        </a>
+      }
+      @if (auth.esAdmin()) {
+        <p class="sidebar__group">Administración</p>
+        @for (item of adminNavItems; track item.route) {
+          <a class="sidebar__link" [routerLink]="item.route" routerLinkActive="sidebar__link--active">
+            <mat-icon>{{ item.icon }}</mat-icon>
+            <span class="sidebar__link-label">{{ item.label }}</span>
+          </a>
+        }
+      }
+    </nav>
+
+    <div class="sidebar__footer">
+      @let plan = suscripcion.suscripcion();
+      @if (plan && suscripcion.etiquetaPlan()) {
+        <a
+          class="plan-chip"
+          routerLink="/admin/configuracion"
+          [class.plan-chip--prueba]="plan.plan === 'Prueba'"
+          [class.plan-chip--gratis]="plan.plan === 'Gratis'"
+          [class.plan-chip--pro]="plan.plan === 'Pro'"
+          [class.plan-chip--por-vencer]="plan.porVencer"
+        >
+          <mat-icon class="plan-chip__icon">workspace_premium</mat-icon>
+          <span>{{ suscripcion.etiquetaPlan() }}</span>
+        </a>
+      }
+      <button class="sidebar__logout" (click)="auth.logout()">
+        <mat-icon>logout</mat-icon>
+        <span class="sidebar__link-label">Cerrar sesión</span>
+      </button>
+    </div>
+  </aside>
+
+  <div class="admin-body">
+    <header class="topbar">
+      @if (auth.sucursales().length > 0) {
         <div class="sucursal-info">
           <mat-icon class="sucursal-icon">store</mat-icon>
           <div class="sucursal-text">
@@ -29,71 +70,33 @@
             }
           </div>
         </div>
-      </div>
-    }
+      }
 
-    <nav class="sidebar__nav">
-      @for (item of navItems; track item.route) {
-        <a class="sidebar__link" [routerLink]="item.route" routerLinkActive="sidebar__link--active">
-          <mat-icon>{{ item.icon }}</mat-icon>
-          <span>{{ item.label }}</span>
-        </a>
-      }
-      @if (auth.esAdmin()) {
-        <div class="sidebar__divider"></div>
-        @for (item of adminNavItems; track item.route) {
-          <a class="sidebar__link" [routerLink]="item.route" routerLinkActive="sidebar__link--active">
-            <mat-icon>{{ item.icon }}</mat-icon>
-            <span>{{ item.label }}</span>
-          </a>
-        }
-      }
-    </nav>
-
-    <div class="sidebar__footer">
-      @let plan = suscripcion.suscripcion();
-      @if (plan && suscripcion.etiquetaPlan()) {
-        <a
-          class="plan-chip"
-          routerLink="/admin/configuracion"
-          [class.plan-chip--prueba]="plan.plan === 'Prueba'"
-          [class.plan-chip--gratis]="plan.plan === 'Gratis'"
-          [class.plan-chip--pro]="plan.plan === 'Pro'"
-          [class.plan-chip--por-vencer]="plan.porVencer"
-        >
-          <mat-icon class="plan-chip__icon">workspace_premium</mat-icon>
-          <span>{{ suscripcion.etiquetaPlan() }}</span>
-        </a>
-      }
-      <div class="sidebar__user">
+      <div class="topbar__user">
         <span class="user-name"
           >{{ auth.currentUser()?.nombre }} {{ auth.currentUser()?.apellido }}</span
         >
         <span class="user-email">{{ auth.currentUser()?.email }}</span>
       </div>
-      <button class="sidebar__logout" (click)="auth.logout()">
-        <mat-icon>logout</mat-icon>
-        <span>Cerrar Sesion</span>
-      </button>
-    </div>
-  </aside>
+    </header>
 
-  <main class="admin-main">
-    @if (suscripcion.mostrarAviso()) {
-      <div class="aviso-suscripcion" role="status">
-        <mat-icon class="aviso-suscripcion__icon">info</mat-icon>
-        <span class="aviso-suscripcion__texto">{{ suscripcion.suscripcion()?.aviso }}</span>
-        <a class="aviso-suscripcion__link" routerLink="/admin/configuracion">Ver plan</a>
-        <button
-          type="button"
-          class="aviso-suscripcion__cerrar"
-          aria-label="Cerrar aviso"
-          (click)="suscripcion.cerrarAviso()"
-        >
-          <mat-icon>close</mat-icon>
-        </button>
-      </div>
-    }
-    <router-outlet />
-  </main>
+    <main class="admin-main">
+      @if (suscripcion.mostrarAviso()) {
+        <div class="aviso-suscripcion" role="status">
+          <mat-icon class="aviso-suscripcion__icon">info</mat-icon>
+          <span class="aviso-suscripcion__texto">{{ suscripcion.suscripcion()?.aviso }}</span>
+          <a class="aviso-suscripcion__link" routerLink="/admin/configuracion">Ver plan</a>
+          <button
+            type="button"
+            class="aviso-suscripcion__cerrar"
+            aria-label="Cerrar aviso"
+            (click)="suscripcion.cerrarAviso()"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      }
+      <router-outlet />
+    </main>
+  </div>
 </div>

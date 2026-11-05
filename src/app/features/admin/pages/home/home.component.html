@@ -1,15 +1,15 @@
 <div class="horarios-page">
   <div class="page-header">
     <div>
-      <h1 class="page-title">Agenda del dia</h1>
+      <h1 class="page-title">Agenda del día</h1>
       <p class="page-subtitle">Vista general de citas y disponibilidad</p>
     </div>
     <div class="page-actions">
-      <button class="btn btn--outline" (click)="diaAnterior()">
+      <button class="btn btn--outline" (click)="diaAnterior()" aria-label="Día anterior">
         <mat-icon>chevron_left</mat-icon>
       </button>
       <span class="date-label">{{ selectedDay() }}</span>
-      <button class="btn btn--outline" (click)="diaSiguiente()">
+      <button class="btn btn--outline" (click)="diaSiguiente()" aria-label="Día siguiente">
         <mat-icon>chevron_right</mat-icon>
       </button>
     </div>
@@ -68,7 +68,7 @@
         }
 
         <div class="resumen">
-          <h3 class="panel-title">Resumen del dia</h3>
+          <h3 class="panel-title">Resumen del día</h3>
           <div class="resumen-stats">
             <div class="stat">
               <span class="stat-value stat-value--ocupado">{{ totalOcupados() }}</span>
@@ -85,7 +85,7 @@
       <div class="timeline-panel">
         <mat-card class="timeline-card">
           @if (timeline().length === 0) {
-            <p class="empty-text">No hay horarios configurados para este dia</p>
+            <p class="empty-text">No hay horarios configurados para este día</p>
           } @else {
             <div class="timeline">
               @for (row of timeline(); track row.hora) {
@@ -144,7 +144,7 @@
                 <h3 class="modal__title">Registrar pago</h3>
               }
             }
-            <button class="modal__close" (click)="cerrarModalPago()">
+            <button class="modal__close" (click)="cerrarModalPago()" aria-label="Cerrar">
               <mat-icon>close</mat-icon>
             </button>
           </div>
@@ -186,7 +186,7 @@
                       </div>
                       <div class="modal__pago-info">
                         <div class="modal__resumen-row">
-                          <span class="modal__resumen-label">Metodo</span>
+                          <span class="modal__resumen-label">Método</span>
                           <span class="modal__resumen-value">{{ pago.metodoPago }}</span>
                         </div>
                         <div class="modal__resumen-row">
@@ -194,7 +194,7 @@
                           <span class="modal__resumen-value">{{ formatearPrecio(pago.monto) }}</span>
                         </div>
                         <div class="modal__resumen-row">
-                          <span class="modal__resumen-label">Codigo</span>
+                          <span class="modal__resumen-label">Código</span>
                           <span class="modal__resumen-value">{{ pago.codigoTransaccion || '-' }}</span>
                         </div>
                       </div>
@@ -220,7 +220,7 @@
                           <span class="modal__pago-item-monto">{{ formatearPrecio(pago.monto) }}</span>
                         </div>
                         <div class="modal__pago-item-detalles">
-                          <span class="modal__pago-item-codigo">{{ pago.codigoTransaccion || 'Sin codigo' }}</span>
+                          <span class="modal__pago-item-codigo">{{ pago.codigoTransaccion || 'Sin código' }}</span>
                           <span class="modal__pago-item-fecha">{{ formatearFecha(pago.fechaPago) }}</span>
                         </div>
                         <mat-icon class="modal__pago-item-arrow">chevron_right</mat-icon>
@@ -235,17 +235,17 @@
                     <input class="modal__input" type="number" [ngModel]="montoPago()" (ngModelChange)="montoPago.set($event)" />
                   </div>
                   <div class="modal__field">
-                    <label class="modal__label">Metodo de pago</label>
+                    <label class="modal__label">Método de pago</label>
                     <select class="modal__select" [ngModel]="metodoPago()" (ngModelChange)="metodoPago.set($event)">
                       <option value="Efectivo">Efectivo</option>
-                      <option value="Tarjeta de credito">Tarjeta de credito</option>
-                      <option value="Tarjeta de debito">Tarjeta de debito</option>
+                      <option value="Tarjeta de credito">Tarjeta de crédito</option>
+                      <option value="Tarjeta de debito">Tarjeta de débito</option>
                       <option value="Transferencia">Transferencia</option>
                       <option value="Webpay">Webpay</option>
                     </select>
                   </div>
                   <div class="modal__field">
-                    <label class="modal__label">Codigo de transaccion</label>
+                    <label class="modal__label">Código de transacción</label>
                     <input class="modal__input" type="text" [ngModel]="codigoTransaccion()" (ngModelChange)="codigoTransaccion.set($event)" placeholder="Opcional" />
                   </div>
                 </div>
@@ -277,7 +277,7 @@
                       <option value="2">Confirmada</option>
                       <option value="3">Cancelada</option>
                       <option value="4">Completada</option>
-                      <option value="5">No Asistio</option>
+                      <option value="5">No asistió</option>
                     </select>
                   </div>
                 }

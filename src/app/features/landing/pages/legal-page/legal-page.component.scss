@@ -1,0 +1,227 @@
+// Páginas legales: índice en la zona del eje (42%) y el texto a una medida de lectura.
+// Los estilos del texto van con ::ng-deep acotado a .legal__body porque llega por ng-content
+// desde privacidad y términos.
+
+.legal {
+  padding: calc(64px + clamp(56px, 7vw, 104px)) var(--margin) clamp(80px, 9vw, 140px);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+
+  &__head {
+    margin-left: calc(var(--axis) - var(--margin));
+    margin-bottom: 56px;
+  }
+
+  &__title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--step-head);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+
+  &__date {
+    margin-top: 12px;
+    font-size: 0.9375rem;
+    color: var(--text-secondary);
+  }
+
+  &__layout {
+    display: grid;
+    grid-template-columns: calc(var(--axis) - var(--margin)) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  &__toc {
+    position: sticky;
+    top: 96px;
+    padding-right: 40px;
+  }
+
+  &__toc-title {
+    margin-bottom: 12px;
+    font-size: 0.9375rem;
+    font-weight: 600;
+  }
+
+  &__toc-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    list-style: none;
+  }
+
+  &__toc-link {
+    font-size: 0.9375rem;
+    color: var(--text-secondary);
+    transition: color var(--duration-fast) var(--ease-out);
+
+    &:hover,
+    &:focus-visible {
+      color: var(--text-primary);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--gold-light);
+      outline-offset: 3px;
+    }
+  }
+
+  &__body {
+    max-width: 68ch;
+  }
+}
+
+.legal__body ::ng-deep {
+  section {
+    scroll-margin-top: 88px;
+
+    & + section {
+      margin-top: 48px;
+    }
+  }
+
+  h2 {
+    margin-bottom: 14px;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 1.625rem;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+  }
+
+  h3 {
+    margin: 20px 0 8px;
+    font-size: 1.0625rem;
+    font-weight: 600;
+  }
+
+  p,
+  li {
+    font-size: 1.125rem;
+    line-height: 1.6;
+    color: var(--text-primary);
+  }
+
+  p + p,
+  p + ul,
+  ul + p {
+    margin-top: 12px;
+  }
+
+  ul {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-left: 22px;
+  }
+
+  strong {
+    font-weight: 600;
+  }
+
+  a {
+    color: var(--gold-light);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  .tabla-wrap {
+    overflow-x: auto;
+    margin-top: 16px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9375rem;
+
+    th {
+      padding: 0 12px 10px 0;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-align: left;
+    }
+
+    td {
+      padding: 12px 12px 12px 0;
+      border-top: 1px solid var(--border); // taste-skill-ignore: filas de tabla
+      vertical-align: top;
+      line-height: 1.45;
+    }
+
+    code {
+      font-size: 0.875rem;
+      color: var(--gold-light);
+      word-break: break-all;
+    }
+  }
+}
+
+@media (max-width: 900px) {
+  .legal {
+    padding-top: calc(56px + 48px);
+
+    &__head {
+      margin-left: 0;
+      margin-bottom: 32px;
+    }
+
+    &__layout {
+      grid-template-columns: minmax(0, 1fr);
+      row-gap: 32px;
+    }
+
+    &__toc {
+      position: static;
+      padding: 20px;
+      border-radius: 10px;
+      background: var(--bg-surface);
+    }
+  }
+
+  .legal__body ::ng-deep {
+    p,
+    li {
+      font-size: 1.0625rem;
+    }
+  }
+}
+
+// Teléfono: cada fila de la tabla pasa a un bloque (clave; tipo y duración; para qué).
+@media (max-width: 600px) {
+  .legal__body ::ng-deep table {
+    thead {
+      display: none;
+    }
+
+    tr {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 4px 12px;
+      padding: 14px 0;
+      border-top: 1px solid var(--border); // taste-skill-ignore: filas de tabla
+    }
+
+    td {
+      padding: 0;
+      border: 0;
+
+      &:first-child,
+      &:nth-child(3) {
+        grid-column: 1 / -1;
+      }
+
+      &:nth-child(2),
+      &:nth-child(4) {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+      }
+
+      &:nth-child(3) {
+        order: 3;
+      }
+    }
+  }
+}

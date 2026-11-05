@@ -1,275 +1,141 @@
+// Empleados — lista de filas (SPEC 03, paso 13). Cabecera, botones, estados, meta-item y
+// action-btn vienen de features/admin/styles/_admin.scss. Cada mat-card es una fila.
+
 .empleados-page {
-  max-width: 1200px;
-}
-
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 2rem;
-}
-
-.page-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: 0.25rem;
-}
-
-.page-subtitle {
-  font-size: 0.875rem;
-  color: var(--text-muted);
-}
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.625rem 1.25rem;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  border: none;
-  font-family: inherit;
-  transition: all 0.15s ease;
-
-  mat-icon {
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
-  }
-
-  &--primary {
-    background: var(--gold);
-    color: var(--bg-primary);
-
-    &:hover {
-      background: var(--gold-light);
-    }
-  }
-}
-
-.loading-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  padding: 4rem 2rem;
-  color: var(--text-muted);
-  font-size: 0.875rem;
-
-  .loading-icon {
-    font-size: 32px;
-    width: 32px;
-    height: 32px;
-    color: var(--gold);
-    animation: spin 1.2s linear infinite;
-  }
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  padding: 4rem 2rem;
-  background: var(--bg-surface);
-  border: 1px dashed var(--border);
-  border-radius: 12px;
-  text-align: center;
-}
-
-.empty-icon {
-  font-size: 48px;
-  width: 48px;
-  height: 48px;
-  color: var(--text-muted);
-  opacity: 0.5;
-}
-
-.empty-title {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin: 0;
-}
-
-.empty-text {
-  font-size: 0.875rem;
-  color: var(--text-muted);
-  margin: 0;
+  max-width: 1080px;
 }
 
 .empleados-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1rem;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 10px;
+  background: var(--bg-surface);
 }
 
 .empleado-card {
-  background: var(--bg-surface) !important;
-  border: 1px solid var(--border);
-  border-radius: 12px !important;
-  padding: 1.25rem !important;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  transition: border-color 0.15s ease;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) minmax(0, 220px) 150px auto;
+  grid-template-areas:
+    'avatar info servicios meta actions'
+    'avatar desc servicios meta actions';
+  align-items: center;
+  gap: 2px 16px;
+  padding: 14px 16px;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none; // taste-skill-ignore: quita la sombra por defecto de mat-card
+  transition: background-color var(--duration-fast) var(--ease-out);
+
+  & + & {
+    border-top: 1px solid var(--border); // taste-skill-ignore: filas de una lista
+  }
 
   &:hover {
-    border-color: var(--gold);
+    background: var(--bg-surface-elevated);
   }
 }
 
 .empleado-header {
-  display: flex;
-  align-items: center;
-  gap: 0.875rem;
+  display: contents;
 }
 
 .empleado-avatar {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: rgba(201, 168, 76, 0.15);
+  grid-area: avatar;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-
-  span {
-    font-size: 0.875rem;
-    font-weight: 700;
-    color: var(--gold);
-  }
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(201, 168, 76, 0.14);
+  color: var(--gold-light);
+  font-family: var(--font-display);
+  font-size: 1rem;
 }
 
 .empleado-info {
+  grid-area: info;
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
   min-width: 0;
 }
 
 .empleado-nombre {
-  font-size: 0.9375rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--text-primary);
 }
 
 .empleado-email {
-  font-size: 0.8125rem;
-  color: var(--text-muted);
-  white-space: nowrap;
   overflow: hidden;
+  max-width: 100%;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
   text-overflow: ellipsis;
 }
 
 .empleado-desc {
-  font-size: 0.8125rem;
+  grid-area: desc;
+  overflow: hidden;
+  font-size: 0.875rem;
   color: var(--text-secondary);
-  line-height: 1.5;
-  margin: 0;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .empleado-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 0.375rem;
+  grid-area: meta;
 }
 
-.meta-item {
+.empleado-servicios {
+  grid-area: servicios;
   display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.servicios-label {
+  display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 6px;
   font-size: 0.8125rem;
   color: var(--text-secondary);
 
   mat-icon {
-    font-size: 16px;
-    width: 16px;
-    height: 16px;
-    color: var(--text-muted);
-  }
-}
-
-.empleado-servicios {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.servicios-label {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--text-muted);
-
-  mat-icon {
-    font-size: 12px;
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 14px;
+    font-size: 14px;
   }
 }
 
 .servicios-value {
-  font-size: 0.8125rem;
-  color: var(--text-secondary);
-  line-height: 1.4;
+  overflow: hidden;
+  font-size: 0.9375rem;
+  color: var(--text-primary);
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .empleado-actions {
+  grid-area: actions;
   display: flex;
-  justify-content: flex-end;
-  gap: 0.375rem;
-  padding-top: 0.5rem;
-  border-top: 1px solid var(--border);
-  margin-top: auto;
+  gap: 4px;
 }
 
-.action-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
-  border: none;
-  background: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: all 0.15s ease;
-
-  mat-icon {
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
+@media (max-width: 800px) {
+  .empleado-card {
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+    grid-template-areas:
+      'avatar info actions'
+      'avatar servicios servicios'
+      'avatar meta meta'
+      'avatar desc desc';
+    align-items: start;
+    gap: 6px 12px;
   }
-
-  &:hover {
-    background: var(--bg-surface-hover);
-    color: var(--text-primary);
-  }
-
-  &--danger:hover {
-    background: rgba(239, 68, 68, 0.1);
-    color: #ef4444;
-  }
-}
-
-.tooltip-wrapper {
-  display: inline-flex;
 }

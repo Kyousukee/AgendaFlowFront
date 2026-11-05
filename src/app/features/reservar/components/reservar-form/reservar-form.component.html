@@ -9,7 +9,7 @@
         >
           <div class="step__circle">
             @if (paso() > step) {
-              <span class="step__check">✓</span>
+              <span class="step__check material-icons" aria-hidden="true">check</span>
             } @else {
               <span>{{ step }}</span>
             }
@@ -57,7 +57,7 @@
   @if (paso() === 2 && configuracion().permiteSeleccionEmpleado) {
     <div class="form-section">
       <h2 class="form-section__title">Selecciona un empleado</h2>
-      <p class="form-section__desc">Elige quien te atendera</p>
+      <p class="form-section__desc">Elige quién te atenderá</p>
 
       <div class="empleados-grid">
         @for (empleado of empleados; track empleado.id) {
@@ -86,7 +86,7 @@
   @if ((paso() === 2 && !configuracion().permiteSeleccionEmpleado) || paso() === 3) {
     <div class="form-section">
       <h2 class="form-section__title">Selecciona fecha y hora</h2>
-      <p class="form-section__desc">Elige cuando quieres tu cita</p>
+      <p class="form-section__desc">Elige cuándo quieres tu cita</p>
 
       <div class="fechas-section">
         <label class="field-label">Fecha</label>
@@ -129,7 +129,7 @@
   @if ((paso() === 3 && !configuracion().permiteSeleccionEmpleado) || paso() === 4) {
     <div class="form-section">
       <h2 class="form-section__title">Tus datos</h2>
-      <p class="form-section__desc">Completa tu informacion de contacto</p>
+      <p class="form-section__desc">Completa tu información de contacto</p>
 
       <form class="cliente-form" [formGroup]="form">
         <div class="form-row">
@@ -175,11 +175,11 @@
               [class.form-input--error]="fieldError('email')"
             />
             @if (fieldError('email')) {
-              <span class="form-error">Email invalido</span>
+              <span class="form-error">Email inválido</span>
             }
           </div>
           <div class="form-group">
-            <label class="field-label" for="telefono">Telefono *</label>
+            <label class="field-label" for="telefono">Teléfono *</label>
             <input
               id="telefono"
               type="tel"
@@ -195,11 +195,11 @@
         </div>
 
         <div class="form-group">
-          <label class="field-label" for="observacion">Observacion (opcional)</label>
+          <label class="field-label" for="observacion">Observación (opcional)</label>
           <textarea
             id="observacion"
             class="form-input form-textarea"
-            placeholder="Alguna indicacion especial..."
+            placeholder="Alguna indicación especial..."
             formControlName="observacion"
             rows="3"
           ></textarea>
@@ -239,7 +239,7 @@
   <div class="form-actions">
     @if (paso() > 1) {
       <button class="btn btn--secondary" (click)="retrocederPaso()">
-        ← Atras
+        ← Atrás
       </button>
     }
     <div class="form-actions__spacer"></div>

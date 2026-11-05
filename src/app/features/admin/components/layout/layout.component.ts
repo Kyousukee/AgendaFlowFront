@@ -37,7 +37,7 @@ export class LayoutComponent {
 
   adminNavItems = [
     { label: 'Sucursales', icon: 'store', route: '/admin/sucursales' },
-    { label: 'Configuracion', icon: 'settings', route: '/admin/configuracion' },
+    { label: 'Configuración', icon: 'settings', route: '/admin/configuracion' },
   ];
 
   cambiarSucursal(event: Event): void {

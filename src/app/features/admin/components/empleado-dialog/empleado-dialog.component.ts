@@ -27,7 +27,7 @@ export type EmpleadoDialogResult = Omit<Empleado, 'id' | 'fechaCreacion' | 'foto
     <div class="dialog">
       <div class="dialog__header">
         <h2 class="dialog__title">{{ data.empleado ? 'Editar' : 'Agregar' }} empleado</h2>
-        <button class="dialog__close" (click)="cerrar()">
+        <button class="dialog__close" (click)="cerrar()" aria-label="Cerrar">
           <mat-icon>close</mat-icon>
         </button>
       </div>
@@ -62,7 +62,7 @@ export type EmpleadoDialogResult = Omit<Empleado, 'id' | 'fechaCreacion' | 'foto
 
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label" for="email">Correo electronico</label>
+            <label class="form-label" for="email">Correo electrónico</label>
             <input
               id="email"
               type="email"
@@ -76,7 +76,7 @@ export type EmpleadoDialogResult = Omit<Empleado, 'id' | 'fechaCreacion' | 'foto
             }
           </div>
           <div class="form-group">
-            <label class="form-label" for="telefono">Telefono</label>
+            <label class="form-label" for="telefono">Teléfono</label>
             <input
               id="telefono"
               type="tel"
@@ -88,7 +88,7 @@ export type EmpleadoDialogResult = Omit<Empleado, 'id' | 'fechaCreacion' | 'foto
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="descripcion">Descripcion / Especialidad</label>
+          <label class="form-label" for="descripcion">Descripción / especialidad</label>
           <textarea
             id="descripcion"
             class="form-input form-textarea"
@@ -128,137 +128,25 @@ export type EmpleadoDialogResult = Omit<Empleado, 'id' | 'fechaCreacion' | 'foto
       </form>
     </div>
   `,
+  // Armazón del diálogo y campos: features/admin/styles/_admin.scss (.dialog-panel).
+  // Aquí solo lo propio de este diálogo (SPEC 03: se restiliza en su lugar).
   styles: `
-    .dialog {
-      padding: 0;
-      min-width: 480px;
-    }
-
-    .dialog__header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1.25rem 1.5rem;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .dialog__title {
-      font-size: 1.125rem;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin: 0;
-    }
-
-    .dialog__close {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 32px;
-      height: 32px;
-      border-radius: 6px;
-      border: none;
-      background: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      transition: all 0.15s ease;
-
-      &:hover {
-        background: var(--bg-surface-hover);
-        color: var(--text-primary);
-      }
-    }
-
-    .dialog__form {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      padding: 1.5rem;
-    }
-
-    .dialog__actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 0.75rem;
-      padding-top: 0.5rem;
-    }
-
-    .form-row {
-      display: flex;
-      gap: 0.75rem;
-
-      .form-group {
-        flex: 1;
-      }
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.375rem;
-    }
-
-    .form-label {
-      font-size: 0.8125rem;
-      font-weight: 500;
-      color: var(--text-secondary);
-    }
-
-    .form-input {
-      width: 100%;
-      padding: 0.625rem 0.875rem;
-      background: var(--bg-primary);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font-size: 0.875rem;
-      color: var(--text-primary);
-      font-family: inherit;
-      transition: border-color 0.15s ease;
-      outline: none;
-      box-sizing: border-box;
-
-      &:focus {
-        border-color: var(--gold);
-      }
-    }
-
-    .form-input::placeholder {
-      color: var(--text-muted);
-    }
-
-    .form-input--error {
-      border-color: #ef4444;
-    }
-
-    .form-textarea {
-      resize: vertical;
-      min-height: 80px;
-    }
-
-    .form-error {
-      font-size: 0.75rem;
-      color: #ef4444;
-    }
-
     .servicios-checklist {
       display: flex;
       flex-direction: column;
-      gap: 0.375rem;
-      background: var(--bg-primary);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 0.5rem;
-      max-height: 180px;
+      max-height: 200px;
       overflow-y: auto;
+      border-radius: 8px;
+      background: var(--bg-primary);
     }
 
     .servicio-check {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      padding: 0.5rem 0.625rem;
-      border-radius: 6px;
+      gap: 10px;
+      padding: 10px 12px;
       cursor: pointer;
-      transition: background-color 0.1s ease;
+      transition: background-color var(--duration-fast) var(--ease-out);
 
       &:hover {
         background: var(--bg-surface-hover);
@@ -273,61 +161,22 @@ export type EmpleadoDialogResult = Omit<Empleado, 'id' | 'fechaCreacion' | 'foto
     }
 
     .servicio-color {
+      flex-shrink: 0;
       width: 10px;
       height: 10px;
       border-radius: 50%;
-      flex-shrink: 0;
     }
 
     .servicio-nombre {
-      font-size: 0.8125rem;
-      color: var(--text-primary);
       flex: 1;
+      font-size: 0.9375rem;
+      color: var(--text-primary);
     }
 
     .servicio-duracion {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      padding: 0.625rem 1.25rem;
-      border-radius: 8px;
       font-size: 0.875rem;
-      font-weight: 500;
-      cursor: pointer;
-      border: none;
-      font-family: inherit;
-      transition: all 0.15s ease;
-    }
-
-    .btn--primary {
-      background: var(--gold);
-      color: var(--bg-primary);
-
-      &:hover:not(:disabled) {
-        background: var(--gold-light);
-      }
-
-      &:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-      }
-    }
-
-    .btn--secondary {
-      background: var(--bg-surface-elevated);
       color: var(--text-secondary);
-      border: 1px solid var(--border);
-
-      &:hover {
-        color: var(--text-primary);
-        border-color: var(--border-light);
-      }
+      font-variant-numeric: tabular-nums;
     }
   `,
 })

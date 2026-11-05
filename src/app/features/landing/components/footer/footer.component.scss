@@ -1,116 +1,120 @@
+// Footer compacto: la marca a la izquierda (columnas 1–4), los enlaces a la derecha (7–12)
+// y una fila final con copyright, créditos de fotos y "Volver arriba".
 .footer {
-  padding: 4rem 1.5rem 2rem;
-  border-top: 1px solid var(--border);
-
-  &__container {
-    max-width: 1200px;
-    margin: 0 auto;
-  }
+  padding: 64px var(--margin) 28px;
+  // Un paso de tono (carbón) lo separa del contenido, sin línea.
+  background: var(--field-char);
+  color: var(--text-primary);
 
   &__top {
-    display: flex;
-    justify-content: space-between;
-    gap: 4rem;
-    margin-bottom: 3rem;
-
-    @media (max-width: 768px) {
-      flex-direction: column;
-      gap: 2rem;
-    }
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: 24px;
+    row-gap: 40px;
   }
 
   &__brand {
-    max-width: 280px;
-  }
-
-  &__logo {
+    grid-column: 1 / span 4;
     display: flex;
-    align-items: center;
-    margin-bottom: 1rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
   }
 
-  &__logo-img {
-    height: 56px;
+  &__logo img {
+    height: 48px;
     width: auto;
   }
 
   &__tagline {
-    font-size: 0.875rem;
-    color: var(--text-muted);
-    line-height: 1.6;
+    max-width: 32ch;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--text-secondary);
   }
 
-  &__links-group {
-    display: flex;
-    gap: 3rem;
-
-    @media (max-width: 768px) {
-      flex-wrap: wrap;
-      gap: 2rem;
-    }
+  &__cols {
+    grid-column: 7 / span 6;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
   }
 
-  &__links {
+  &__col {
     display: flex;
     flex-direction: column;
-    gap: 0.625rem;
+    gap: 10px;
   }
 
-  &__links-title {
-    font-size: 0.8125rem;
+  &__col-title {
+    margin-bottom: 4px;
+    font-size: 0.9375rem;
     font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: 0.25rem;
+  }
+
+  &__link,
+  &__top-link,
+  &__credits a {
+    color: var(--text-secondary);
+    transition: color var(--duration-fast) var(--ease-out);
+
+    &:hover {
+      color: var(--text-primary);
+    }
   }
 
   &__link {
-    font-size: 0.8125rem;
-    color: var(--text-muted);
-    transition: color 0.2s ease;
-
-    &:hover {
-      color: var(--text-secondary);
-    }
+    font-size: 0.9375rem;
   }
 
   &__bottom {
     display: flex;
-    align-items: center;
+    flex-wrap: wrap;
+    align-items: baseline;
     justify-content: space-between;
-    padding-top: 2rem;
-    border-top: 1px solid var(--border);
-
-    @media (max-width: 480px) {
-      flex-direction: column;
-      gap: 1rem;
-    }
-  }
-
-  &__copyright {
+    gap: 10px 24px;
+    margin-top: 56px;
     font-size: 0.8125rem;
-    color: var(--text-muted);
+    color: var(--text-secondary);
   }
 
-  &__social {
-    display: flex;
-    gap: 1rem;
+  &__credits {
+    flex: 1;
+    min-width: 0;
+    text-align: center;
   }
 
-  &__social-link {
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
-    background: var(--bg-surface);
-    border: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-muted);
-    transition: all 0.2s ease;
+  &__top-link {
+    font-size: 0.8125rem;
+  }
 
-    &:hover {
-      color: var(--text-primary);
-      border-color: var(--border-light);
+  a:focus-visible {
+    outline: 2px solid var(--gold-light);
+    outline-offset: 3px;
+  }
+}
+
+@media (max-width: 900px) {
+  .footer {
+    padding-top: 48px;
+
+    &__brand,
+    &__cols {
+      grid-column: 1 / -1;
+    }
+
+    &__cols {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    &__bottom {
+      flex-direction: column;
+      margin-top: 40px;
+    }
+
+    &__credits {
+      text-align: left;
     }
   }
 }

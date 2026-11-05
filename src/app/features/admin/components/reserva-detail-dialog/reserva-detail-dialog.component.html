@@ -1,7 +1,7 @@
 <div class="reserva-dialog">
   <div class="dialog-header">
     <div class="dialog-header__info">
-      <h2 class="dialog-title">Detalle de Reserva</h2>
+      <h2 class="dialog-title">Detalle de reserva</h2>
       <span class="dialog-codigo">{{ data.reserva.codigo }}</span>
     </div>
     <span class="estado-badge" [attr.data-estado]="data.estado.nombre.toLowerCase()">
@@ -29,7 +29,7 @@
         <div class="detail-row">
           <mat-icon>notes</mat-icon>
           <div class="detail-content">
-            <span class="detail-label">Observacion</span>
+            <span class="detail-label">Observación</span>
             <span class="detail-value">{{ data.reserva.observacion }}</span>
           </div>
         </div>
@@ -54,7 +54,7 @@
         }
         @if (data.reserva.cliente.telefono) {
           <div class="section-field">
-            <span class="field-label">Telefono</span>
+            <span class="field-label">Teléfono</span>
             <span class="field-value">{{ data.reserva.cliente.telefono }}</span>
           </div>
         }
@@ -72,7 +72,7 @@
           <span class="field-value field-value--highlight">{{ getNombreServicio() }}</span>
         </div>
         <div class="section-field">
-          <span class="field-label">Duracion</span>
+          <span class="field-label">Duración</span>
           <span class="field-value">{{ data.reserva.servicio.duracionMinutos }} min</span>
         </div>
         <div class="section-field">
@@ -102,7 +102,7 @@
       </h3>
       <div class="section-card">
         <div class="section-field">
-          <span class="field-label">Ubicacion</span>
+          <span class="field-label">Ubicación</span>
           <span class="field-value">{{ getNombreSucursal() }}</span>
         </div>
       </div>

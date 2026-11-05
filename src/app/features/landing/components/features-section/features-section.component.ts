@@ -1,42 +1,72 @@
 import { Component } from '@angular/core';
+import { ScrollRevealDirective } from '../../directives/scroll-reveal.directive';
 
+interface Comparacion {
+  capacidad: string;
+  agendaflow: string;
+  libreta: string;
+  whatsapp: string;
+}
+
+/** Funciones — comparación escrita en palabras. Solo lista lo que la app hace hoy. */
 @Component({
   selector: 'app-features-section',
   standalone: true,
+  imports: [ScrollRevealDirective],
   templateUrl: './features-section.component.html',
   styleUrl: './features-section.component.scss',
 })
 export class FeaturesSectionComponent {
-  features = [
+  readonly columnas = ['AgendaFlow', 'Libreta', 'WhatsApp'] as const;
+
+  readonly filas: Comparacion[] = [
     {
-      icon: 'calendar',
-      title: 'Agenda Inteligente',
-      description: 'Reservas con IA que llenan huecos, previenen doble reservacion y envian recordatorios automaticos a los clientes.',
+      capacidad: 'Reservas a cualquier hora',
+      agendaflow: 'Sí, 24/7 desde tu enlace',
+      libreta: 'Solo con el local abierto',
+      whatsapp: 'Cuando alguien contesta',
     },
     {
-      icon: 'users',
-      title: 'Gestion de Clientes',
-      description: 'Manten perfiles detallados, historial de citas y preferencias de cada cliente en un solo lugar.',
+      capacidad: 'Horas libres según el servicio',
+      agendaflow: 'Sí, por la duración de cada uno',
+      libreta: 'Se calculan a ojo',
+      whatsapp: 'Se calculan a ojo',
     },
     {
-      icon: 'chart',
-      title: 'Analiticas del Negocio',
-      description: 'Rastrea ingresos, horas pico y rendimiento del personal con paneles y reportes en tiempo real.',
+      capacidad: 'Precio y duración a la vista',
+      agendaflow: 'Sí, antes de reservar',
+      libreta: 'En una pizarra del local',
+      whatsapp: 'Se preguntan por chat',
     },
     {
-      icon: 'credit-card',
-      title: 'Pagos y Punto de Venta',
-      description: 'Acepta tarjetas, divide cuentas, administra propinas y controla inventario &mdash; todo integrado en la plataforma.',
+      capacidad: 'Agenda por cada profesional',
+      agendaflow: 'Sí, con sus servicios',
+      libreta: 'Columnas hechas a mano',
+      whatsapp: 'No',
     },
     {
-      icon: 'bell',
-      title: 'Recordatorios Automaticos',
-      description: 'Reduce inasistencias en un 80% con recordatorios por SMS y correo enviados automaticamente antes de cada cita.',
+      capacidad: 'Varias sucursales',
+      agendaflow: 'Sí, cada una con su horario',
+      libreta: 'Una libreta por local',
+      whatsapp: 'Un chat por local',
     },
     {
-      icon: 'globe',
-      title: 'Reservas en Linea',
-      description: 'Dale a tus clientes una pagina de reservas con marca propia que pueden usar 24/7. Incrustala en tu sitio web.',
+      capacidad: 'Almuerzo, vacaciones y feriados',
+      agendaflow: 'Se bloquean y dejan de ofrecerse',
+      libreta: 'Se tachan a mano',
+      whatsapp: 'Se avisa uno por uno',
+    },
+    {
+      capacidad: 'Registro de pagos',
+      agendaflow: 'Sí, por cada reserva',
+      libreta: 'En otra libreta',
+      whatsapp: 'No',
+    },
+    {
+      capacidad: 'El día completo de un vistazo',
+      agendaflow: 'Sí, en el panel',
+      libreta: 'Hojeando páginas',
+      whatsapp: 'Buscando mensajes',
     },
   ];
 }

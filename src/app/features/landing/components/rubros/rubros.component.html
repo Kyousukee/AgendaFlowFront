@@ -1,0 +1,24 @@
+<section class="rubros" id="rubros" aria-labelledby="rubros-title" appScrollReveal [revealStagger]="0.06">
+  <div class="rubros__head" data-reveal>
+    <h2 class="rubros__title" id="rubros-title">No solo barberías</h2>
+    <p class="rubros__lead">
+      Si tu negocio trabaja con hora agendada, AgendaFlow lo ordena igual: servicios con su
+      duración, profesionales con su horario y clientes que reservan solos.
+    </p>
+  </div>
+
+  <ul class="rubros__grid">
+    @for (t of tiles; track $index) {
+      @if (t.tipo === 'palabra') {
+        <li class="rubros__tile rubros__tile--{{ t.tono }}" data-reveal>
+          <span class="rubros__word" [class.is-long]="t.larga">{{ t.palabra }}</span>
+          <span class="rubros__caption">{{ t.detalle }}</span>
+        </li>
+      } @else {
+        <li class="rubros__tile rubros__tile--foto" data-reveal>
+          <img [src]="t.src" [alt]="t.alt" [width]="t.ancho" [height]="t.alto" loading="lazy" />
+        </li>
+      }
+    }
+  </ul>
+</section>

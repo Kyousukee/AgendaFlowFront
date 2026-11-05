@@ -1,0 +1,129 @@
+// Rubros — muro de tiles cuadrados con una palabra grande y un pie corto,
+// con colores rotando en orden fijo y una foto cada tres o cuatro celdas.
+.rubros {
+  padding: var(--space-section) var(--margin) 0;
+
+  &__head {
+    display: grid;
+    grid-template-columns: calc(var(--axis) - var(--margin)) 1fr;
+    align-items: end;
+    margin-bottom: 56px;
+  }
+
+  &__title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--step-head);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+  }
+
+  &__lead {
+    max-width: 40ch;
+    font-size: var(--step-lead);
+    line-height: 1.45;
+    color: var(--text-primary);
+  }
+
+  &__grid {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+
+  &__tile {
+    position: relative;
+    aspect-ratio: 1;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    container-type: inline-size;
+
+    &--gold {
+      background: var(--field-gold);
+      color: var(--on-gold);
+    }
+    &--char {
+      background: var(--field-char);
+      color: var(--text-primary);
+    }
+    &--bone {
+      background: var(--field-bone);
+      color: var(--on-bone);
+    }
+    &--ink {
+      background: var(--bg-surface-hover);
+      color: var(--gold-light);
+    }
+
+    &--foto img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: grayscale(1) contrast(1.05);
+      transition: transform 1.2s var(--ease-out);
+    }
+
+    &--foto:hover img {
+      transform: scale(1.04);
+    }
+  }
+
+  &__word {
+    font-family: var(--font-display);
+    font-size: 18cqi;
+    line-height: 1;
+    letter-spacing: -0.02em;
+
+    &.is-long {
+      font-size: 12.5cqi;
+    }
+  }
+
+  &__caption {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 18px;
+    padding: 0 12px;
+    text-align: center;
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+}
+
+// Teléfono: dos columnas, celdas cuadradas.
+@media (max-width: 900px) {
+  .rubros {
+    &__head {
+      grid-template-columns: 1fr;
+      row-gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    &__lead {
+      font-size: 1.0625rem;
+    }
+
+    &__grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+    }
+
+    &__word {
+      font-size: 19cqi;
+
+      &.is-long {
+        font-size: 13cqi;
+      }
+    }
+
+    &__caption {
+      bottom: 12px;
+      font-size: 0.8125rem;
+    }
+  }
+}

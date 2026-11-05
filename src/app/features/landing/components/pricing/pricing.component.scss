@@ -1,178 +1,147 @@
+// Precios — dos campos a sangre que se tocan en un borde vertical duro.
+// Gratis en hueso (columnas 1–5), Pro en dorado (6–12): el ancho dice cuál importa más.
 .pricing {
-  padding: 6rem 1.5rem;
-  background: var(--bg-surface);
-
-  &__container {
-    max-width: 800px;
-    margin: 0 auto;
-  }
-
-  &__header {
-    text-align: center;
-    margin-bottom: 4rem;
-  }
-
-  &__label {
-    display: inline-block;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--gold);
-    margin-bottom: 1rem;
-  }
+  padding-top: var(--space-section);
 
   &__title {
-    font-family: 'Playfair Display', serif;
-    font-size: 2.75rem;
-    font-weight: 700;
-    line-height: 1.2;
+    margin: 0 var(--margin) 56px;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--step-head);
+    line-height: 1;
     letter-spacing: -0.02em;
     color: var(--text-primary);
-    margin-bottom: 1rem;
-
-    @media (max-width: 768px) {
-      font-size: 2rem;
-    }
   }
 
-  &__title-accent {
-    background: linear-gradient(135deg, var(--gold), var(--gold-light));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  &__subtitle {
-    font-size: 1.0625rem;
-    color: var(--text-secondary);
-    max-width: 440px;
-    margin: 0 auto;
-    line-height: 1.7;
-  }
-
-  &__grid {
+  &__fields {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
+    grid-template-columns: 5fr 7fr;
+  }
+}
 
-    @media (max-width: 600px) {
-      grid-template-columns: 1fr;
-      max-width: 400px;
-      margin: 0 auto;
+.plan {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 48px;
+  min-width: 0;
+  min-height: 72svh;
+  padding: 40px;
+
+  &--free {
+    background: var(--field-bone);
+    color: var(--on-bone);
+  }
+
+  &--pro {
+    background: var(--field-gold);
+    color: var(--on-gold);
+  }
+
+  &__top {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  &__name {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(3rem, 5vw, 4.5rem);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+
+  &__for {
+    max-width: 26ch;
+    font-size: var(--step-lead);
+    line-height: 1.35;
+    font-weight: 600;
+  }
+
+  &__includes {
+    max-width: 44ch;
+    font-size: 1.0625rem;
+    line-height: 1.55;
+  }
+
+  &__bottom {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+  }
+
+  &__price {
+    white-space: nowrap;
+    font-family: var(--font-display);
+    font-size: clamp(3.5rem, 7.6vw, 8rem);
+    line-height: 0.9;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__period {
+    font-size: max(1rem, 0.2em);
+    letter-spacing: 0;
+  }
+
+  &__btn {
+    display: inline-flex;
+    align-items: center;
+    min-height: 56px;
+    padding: 0 28px;
+    background: var(--field-ink);
+    color: var(--text-primary);
+    font-weight: 600;
+    transition:
+      background-color var(--duration-fast) var(--ease-out),
+      transform var(--duration-fast) var(--ease-out);
+
+    &:hover {
+      background: var(--bg-surface-hover);
+    }
+
+    &:active {
+      transform: scale(0.98);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--field-ink);
+      outline-offset: 4px;
     }
   }
 }
 
-.plan-card {
-  position: relative;
-  padding: 2.5rem 2rem;
-  background: var(--bg-primary);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  display: flex;
-  flex-direction: column;
-
-  &--featured {
-    border-color: var(--gold);
-    background: linear-gradient(180deg, rgba(201, 168, 76, 0.05) 0%, var(--bg-primary) 100%);
+// Teléfono: los campos se apilan, Pro primero; el borde duro entre ambos se mantiene.
+@media (max-width: 900px) {
+  .pricing__fields {
+    grid-template-columns: 1fr;
   }
 
-  &__badge {
-    position: absolute;
-    top: -12px;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 0.25rem 1rem;
-    background: var(--gold);
-    color: var(--bg-primary);
-    font-size: 0.75rem;
-    font-weight: 600;
-    border-radius: 100px;
-    white-space: nowrap;
-  }
+  .plan {
+    min-height: 0;
+    padding: 28px 20px 20px;
 
-  &__header {
-    margin-bottom: 1.5rem;
-  }
-
-  &__name {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 0.25rem;
-  }
-
-  &__description {
-    font-size: 0.875rem;
-    color: var(--text-muted);
-  }
-
-  &__price {
-    display: flex;
-    align-items: baseline;
-    gap: 0.25rem;
-    margin-bottom: 2rem;
-  }
-
-  &__amount {
-    font-family: 'Playfair Display', serif;
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: var(--text-primary);
-  }
-
-  &__period {
-    font-size: 0.875rem;
-    color: var(--text-muted);
-  }
-
-  &__features {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    margin-bottom: 2rem;
-    flex: 1;
-  }
-
-  &__feature {
-    display: flex;
-    align-items: center;
-    gap: 0.625rem;
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-  }
-
-  &__btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.875rem 1.5rem;
-    border-radius: 8px;
-    font-size: 0.9375rem;
-    font-weight: 500;
-    transition: all 0.2s ease;
-    text-decoration: none;
-
-    &--outline {
-      border: 1px solid var(--border-light);
-      color: var(--text-secondary);
-
-      &:hover {
-        border-color: var(--text-muted);
-        color: var(--text-primary);
-      }
+    &--pro {
+      order: -1;
     }
 
-    &--primary {
-      background: var(--gold);
-      color: var(--bg-primary);
+    &__name {
+      font-size: 12vw;
+    }
 
-      &:hover {
-        background: var(--gold-light);
-        transform: translateY(-1px);
-      }
+    &__price {
+      font-size: 15vw;
+    }
+
+    &__bottom {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    &__btn {
+      justify-content: center;
     }
   }
 }

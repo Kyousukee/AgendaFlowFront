@@ -1,7 +1,7 @@
 <div class="config-page">
   <div class="page-header">
     <div>
-      <h1 class="page-title">Configuracion de la empresa</h1>
+      <h1 class="page-title">Configuración de la empresa</h1>
       <p class="page-subtitle">Preferencias y comportamiento del sistema de reservas</p>
     </div>
     <button
@@ -89,7 +89,7 @@
   @if (cargando()) {
     <div class="loading-state">
       <mat-icon class="loading-icon">hourglass_empty</mat-icon>
-      <span>Cargando configuracion...</span>
+      <span>Cargando configuración...</span>
     </div>
   } @else {
     <form class="config-form" [formGroup]="form" (ngSubmit)="guardar()">
@@ -161,7 +161,7 @@
           <div class="config-card__body">
             <div class="config-row">
               <div class="config-field">
-                <label class="config-label">Tiempo maximo de cancelacion</label>
+                <label class="config-label">Tiempo máximo de cancelación</label>
                 <div class="config-input-with-suffix">
                   <input
                     type="number"
@@ -171,10 +171,10 @@
                   />
                   <span class="config-suffix">horas</span>
                 </div>
-                <span class="config-hint">Tiempo antes del servicio para cancelar sin penalizacion</span>
+                <span class="config-hint">Tiempo antes del servicio para cancelar sin penalización</span>
               </div>
               <div class="config-field">
-                <label class="config-label">Duracion minima de reserva</label>
+                <label class="config-label">Duración mínima de reserva</label>
                 <div class="config-input-with-suffix">
                   <input
                     type="number"
@@ -185,7 +185,7 @@
                   />
                   <span class="config-suffix">minutos</span>
                 </div>
-                <span class="config-hint">Intervalo minimo para agendar citas</span>
+                <span class="config-hint">Intervalo mínimo para agendar citas</span>
               </div>
             </div>
           </div>
@@ -204,8 +204,8 @@
             <div class="config-toggle">
               <label class="toggle-label">
                 <span class="toggle-text">
-                  <span class="toggle-title">Permitir seleccion de empleado</span>
-                  <span class="toggle-desc">El cliente puede elegir quien lo atiende</span>
+                  <span class="toggle-title">Permitir selección de empleado</span>
+                  <span class="toggle-desc">El cliente puede elegir quién lo atiende</span>
                 </span>
                 <input
                   type="checkbox"
@@ -238,7 +238,7 @@
             <mat-icon class="config-card__icon">notifications</mat-icon>
             <div>
               <h2 class="config-card__title">Notificaciones</h2>
-              <p class="config-card__desc">Canales de confirmacion y recordatorios</p>
+              <p class="config-card__desc">Canales de confirmación y recordatorios</p>
             </div>
           </div>
 
@@ -246,7 +246,7 @@
             <div class="config-toggle">
               <label class="toggle-label">
                 <span class="toggle-text">
-                  <span class="toggle-title">Enviar correo electronico</span>
+                  <span class="toggle-title">Enviar correo electrónico</span>
                   <span class="toggle-desc">Confirmaciones y recordatorios por email</span>
                 </span>
                 <input
@@ -262,7 +262,7 @@
               <label class="toggle-label">
                 <span class="toggle-text">
                   <span class="toggle-title">Enviar WhatsApp</span>
-                  <span class="toggle-desc">Mensajes automaticos por WhatsApp</span>
+                  <span class="toggle-desc">Mensajes automáticos por WhatsApp</span>
                 </span>
                 <input
                   type="checkbox"

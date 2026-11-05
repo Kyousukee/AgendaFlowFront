@@ -33,7 +33,7 @@ export interface SucursalDialogResult {
     <div class="dialog">
       <div class="dialog__header">
         <h2 class="dialog__title">{{ data.sucursal ? 'Editar' : 'Crear' }} sucursal</h2>
-        <button class="dialog__close" (click)="cerrar()">
+        <button class="dialog__close" (click)="cerrar()" aria-label="Cerrar">
           <mat-icon>close</mat-icon>
         </button>
       </div>
@@ -55,7 +55,7 @@ export interface SucursalDialogResult {
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="direccion">Direccion</label>
+          <label class="form-label" for="direccion">Dirección</label>
           <input
             id="direccion"
             type="text"
@@ -78,22 +78,22 @@ export interface SucursalDialogResult {
 
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label" for="region">Region</label>
+            <label class="form-label" for="region">Región</label>
             <input id="region" type="text" class="form-input" formControlName="region" />
           </div>
           <div class="form-group">
-            <label class="form-label" for="telefono">Telefono</label>
+            <label class="form-label" for="telefono">Teléfono</label>
             <input id="telefono" type="tel" class="form-input" formControlName="telefono" />
           </div>
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="pais">Pais</label>
+          <label class="form-label" for="pais">País</label>
           <input id="pais" type="text" class="form-input" formControlName="pais" />
         </div>
 
         <div class="form-group">
-          <label class="form-label">Ubicacion en el mapa</label>
+          <label class="form-label">Ubicación en el mapa</label>
           <app-map-picker
             [lat]="mapLat()"
             [lng]="mapLng()"
@@ -110,152 +110,9 @@ export interface SucursalDialogResult {
       </form>
     </div>
   `,
-  styles: `
-    .dialog {
-      padding: 0;
-      min-width: 480px;
-    }
-
-    .dialog__header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1.25rem 1.5rem;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .dialog__title {
-      font-size: 1.125rem;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin: 0;
-    }
-
-    .dialog__close {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 32px;
-      height: 32px;
-      border-radius: 6px;
-      border: none;
-      background: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      transition: all 0.15s ease;
-
-      &:hover {
-        background: var(--bg-surface-hover);
-        color: var(--text-primary);
-      }
-    }
-
-    .dialog__form {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      padding: 1.5rem;
-    }
-
-    .dialog__actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 0.75rem;
-      padding-top: 0.5rem;
-    }
-
-    .form-row {
-      display: flex;
-      gap: 0.75rem;
-
-      .form-group {
-        flex: 1;
-      }
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.375rem;
-    }
-
-    .form-label {
-      font-size: 0.8125rem;
-      font-weight: 500;
-      color: var(--text-secondary);
-    }
-
-    .form-input {
-      width: 100%;
-      padding: 0.625rem 0.875rem;
-      background: var(--bg-primary);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font-size: 0.875rem;
-      color: var(--text-primary);
-      font-family: inherit;
-      transition: border-color 0.15s ease;
-      outline: none;
-      box-sizing: border-box;
-
-      &:focus {
-        border-color: var(--gold);
-      }
-    }
-
-    .form-input::placeholder {
-      color: var(--text-muted);
-    }
-
-    .form-input--error {
-      border-color: #ef4444;
-    }
-
-    .form-error {
-      font-size: 0.75rem;
-      color: #ef4444;
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      padding: 0.625rem 1.25rem;
-      border-radius: 8px;
-      font-size: 0.875rem;
-      font-weight: 500;
-      cursor: pointer;
-      border: none;
-      font-family: inherit;
-      transition: all 0.15s ease;
-    }
-
-    .btn--primary {
-      background: var(--gold);
-      color: var(--bg-primary);
-
-      &:hover:not(:disabled) {
-        background: var(--gold-light);
-      }
-
-      &:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-      }
-    }
-
-    .btn--secondary {
-      background: var(--bg-surface-elevated);
-      color: var(--text-secondary);
-      border: 1px solid var(--border);
-
-      &:hover {
-        color: var(--text-primary);
-        border-color: var(--border-light);
-      }
-    }
-  `,
+  // Armazón del diálogo y campos: features/admin/styles/_admin.scss (.dialog-panel).
+  // Aquí solo lo propio de este diálogo (SPEC 03: se restiliza en su lugar).
+  styles: ``,
 })
 export class SucursalDialogComponent implements OnInit {
   private fb = inject(FormBuilder);

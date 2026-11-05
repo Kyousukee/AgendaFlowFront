@@ -1,106 +1,140 @@
+// Funciones — tabla comparativa sin líneas: filas alternadas por tono y la columna
+// de AgendaFlow como un solo bloque dorado que sube 24px sobre la primera fila.
 .features {
-  padding: 6rem 1.5rem;
-  position: relative;
+  padding: var(--space-section) var(--margin) 0;
 
-  &__container {
-    max-width: 1200px;
-    margin: 0 auto;
+  &__head {
+    display: grid;
+    grid-template-columns: calc(var(--axis) - var(--margin)) 1fr;
+    align-items: end;
+    margin-bottom: 72px;
   }
 
-  &__header {
-    text-align: center;
-    margin-bottom: 4rem;
-  }
-
-  &__label {
-    display: inline-block;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--gold);
-    margin-bottom: 1rem;
+  &__lead {
+    max-width: 40ch;
+    font-size: var(--step-lead);
+    line-height: 1.45;
+    color: var(--text-primary);
   }
 
   &__title {
-    font-family: 'Playfair Display', serif;
-    font-size: 2.75rem;
-    font-weight: 700;
-    line-height: 1.2;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--step-head);
+    line-height: 1;
     letter-spacing: -0.02em;
     color: var(--text-primary);
-    margin-bottom: 1rem;
-
-    @media (max-width: 768px) {
-      font-size: 2rem;
-    }
   }
 
-  &__title-accent {
-    background: linear-gradient(135deg, var(--gold), var(--gold-light));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+  &__table {
+    display: flex;
+    flex-direction: column;
   }
 
-  &__subtitle {
-    font-size: 1.0625rem;
-    color: var(--text-secondary);
-    max-width: 520px;
-    margin: 0 auto;
-    line-height: 1.7;
-  }
-
-  &__grid {
+  &__row {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
+    grid-template-columns: 5fr repeat(3, 2.333fr);
+    min-height: 68px;
 
-    @media (max-width: 900px) {
-      grid-template-columns: repeat(2, 1fr);
+    &:nth-child(even) {
+      background: var(--bg-surface);
     }
 
-    @media (max-width: 600px) {
-      grid-template-columns: 1fr;
+    &--head {
+      min-height: 56px;
+      background: none;
+
+      .features__cap,
+      .features__cell {
+        font-family: var(--font-body);
+        font-size: 1.0625rem;
+        font-weight: 600;
+      }
+
+      .features__cell.is-ours {
+        margin-top: -24px;
+        padding-top: 24px;
+      }
     }
+  }
+
+  &__cap {
+    display: flex;
+    align-items: center;
+    padding: 12px 24px 12px 20px;
+    font-size: var(--step-lead);
+    line-height: 1.25;
+    color: var(--text-primary);
+  }
+
+  &__cell {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    font-size: 1.0625rem;
+    line-height: 1.35;
+    color: var(--text-secondary);
+
+    &.is-ours {
+      background: var(--field-gold);
+      color: var(--on-gold);
+      font-weight: 600;
+    }
+  }
+
+  &__col-name {
+    display: none;
   }
 }
 
-.feature-card {
-  padding: 2rem;
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  transition: all 0.3s ease;
+// Teléfono: un bloque por capacidad, con el nombre de cada columna delante de su respuesta.
+@media (max-width: 700px) {
+  .features {
+    &__head {
+      grid-template-columns: 1fr;
+      row-gap: 16px;
+      margin-bottom: 32px;
+    }
 
-  &:hover {
-    border-color: var(--gold);
-    background: var(--bg-surface-elevated);
-    transform: translateY(-2px);
-  }
+    &__lead {
+      font-size: 1.0625rem;
+    }
 
-  &__icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 10px;
-    background: rgba(201, 168, 76, 0.1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--gold);
-    margin-bottom: 1.25rem;
-  }
+    &__row {
+      grid-template-columns: 1fr;
+      padding: 20px 0;
+      background: var(--bg-primary);
 
-  &__title {
-    font-size: 1.0625rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 0.5rem;
-  }
+      &:nth-child(even) {
+        background: var(--bg-surface);
+      }
 
-  &__description {
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-    line-height: 1.6;
+      &--head {
+        display: none;
+      }
+    }
+
+    &__cap {
+      padding: 0 16px 10px;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    &__cell {
+      gap: 8px;
+      padding: 6px 16px;
+      font-size: 1rem;
+
+      &.is-ours {
+        padding: 10px 16px;
+      }
+    }
+
+    &__col-name {
+      display: inline;
+      flex: 0 0 96px;
+      font-weight: 600;
+      color: inherit;
+    }
   }
 }

@@ -1,0 +1,190 @@
+<app-legal-page
+  titulo="Política de privacidad"
+  actualizado="4 de noviembre de 2026"
+  rutaActual="/privacidad"
+  [secciones]="secciones"
+>
+  <section id="responsable">
+    <h2>Responsable</h2>
+    <p>
+      El responsable del tratamiento de tus datos es <strong>Jose Vergara Alvarez</strong>, creador
+      de AgendaFlow. Para cualquier consulta sobre privacidad puedes escribir a
+      <a href="mailto:jjosemiguel.jv@gmail.com">jjosemiguel.jv&#64;gmail.com</a>.
+    </p>
+    <p>
+      Esta política explica qué datos personales tratamos cuando usas AgendaFlow, para qué y qué
+      derechos tienes, conforme a la Ley 19.628 sobre protección de la vida privada y su reforma, la
+      Ley 21.719.
+    </p>
+  </section>
+
+  <section id="datos">
+    <h2>Qué datos tratamos</h2>
+    <h3>Si tienes un negocio en AgendaFlow</h3>
+    <ul>
+      <li>Tu nombre, apellido, correo electrónico y contraseña (guardada cifrada).</li>
+      <li>
+        Los datos de tu negocio y sus sucursales: nombre, nombre comercial, correo, teléfono,
+        dirección y ubicación en el mapa.
+      </li>
+      <li>
+        Los datos de tu equipo y tu catálogo: nombre, correo y teléfono de cada profesional, y los
+        servicios con su duración y precio.
+      </li>
+      <li>Tus horarios, bloqueos de agenda, reservas y los pagos que registres.</li>
+    </ul>
+    <h3>Si reservas una hora en un negocio</h3>
+    <ul>
+      <li>Tu nombre, apellido, correo electrónico y teléfono.</li>
+      <li>El servicio, el profesional, el día y la hora que elegiste, y la observación que escribas.</li>
+    </ul>
+    <p>
+      AgendaFlow no procesa pagos con tarjeta. Los pagos que ves en el panel son registros que el
+      negocio ingresa a mano (monto, método y estado).
+    </p>
+  </section>
+
+  <section id="finalidad">
+    <h2>Para qué los usamos</h2>
+    <ul>
+      <li>Crear y administrar tu cuenta y la de tu negocio.</li>
+      <li>Mostrar las horas disponibles, registrar las reservas y organizar la agenda del día.</li>
+      <li>Enviar confirmaciones y recordatorios de las reservas.</li>
+      <li>Administrar tu plan (Prueba, Gratis o Pro) y sus límites.</li>
+      <li>Mantener el servicio seguro, prevenir abusos y resolver problemas técnicos.</li>
+    </ul>
+    <p>No usamos tus datos para publicidad ni los vendemos.</p>
+  </section>
+
+  <section id="base">
+    <h2>Base de licitud</h2>
+    <p>
+      Tratamos los datos de los negocios porque son necesarios para cumplir el contrato de servicio
+      que aceptas al crear tu cuenta. Tratamos los datos de quienes reservan porque son necesarios
+      para registrar la reserva que esa persona solicita y para que el negocio pueda atenderla.
+    </p>
+  </section>
+
+  <section id="roles">
+    <h2>El negocio y sus clientes</h2>
+    <p>
+      Cada negocio decide qué servicios ofrece y gestiona los datos de sus propios clientes. Respecto
+      de esos datos, el negocio es el responsable y AgendaFlow actúa como encargado: los trata por
+      cuenta del negocio y solo para prestarle el servicio.
+    </p>
+    <p>
+      Si reservaste una hora y quieres consultar, corregir o eliminar tus datos, puedes escribir al
+      negocio o a nosotros. Te ayudamos a canalizar la solicitud.
+    </p>
+  </section>
+
+  <section id="terceros">
+    <h2>Con quién se comparten</h2>
+    <ul>
+      <li>
+        <strong>Proveedores de infraestructura</strong> (servidores y base de datos) que alojan la
+        información por cuenta nuestra.
+      </li>
+      <li>
+        <strong>Google Fonts</strong>, que entrega las tipografías e íconos de la página. Al
+        cargarlas, tu navegador envía tu dirección IP a Google.
+      </li>
+      <li>
+        <strong>OpenStreetMap</strong>, que entrega el mapa para ubicar una sucursal. Al cargarlo, tu
+        navegador envía tu dirección IP a sus servidores.
+      </li>
+      <li>Autoridades, solo cuando la ley lo exija.</li>
+    </ul>
+  </section>
+
+  <section id="cookies">
+    <h2>Cookies y almacenamiento</h2>
+    <p>
+      <strong>AgendaFlow no usa cookies</strong> ni herramientas de analítica o publicidad. Para que
+      el panel funcione, guardamos algunos datos en el almacenamiento de tu navegador
+      (<em>localStorage</em> y <em>sessionStorage</em>). Son estrictamente necesarios: sin ellos no
+      se puede mantener tu sesión, por eso no pedimos un consentimiento aparte.
+    </p>
+    <div class="tabla-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Clave</th>
+            <th scope="col">Tipo</th>
+            <th scope="col">Para qué</th>
+            <th scope="col">Duración</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (a of almacenamiento; track a.clave) {
+            <tr>
+              <td><code>{{ a.clave }}</code></td>
+              <td>{{ a.tipo }}</td>
+              <td>{{ a.para }}</td>
+              <td>{{ a.duracion }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <p>
+      La página pública de reservas no guarda nada en tu navegador. Puedes borrar estos datos cuando
+      quieras desde la configuración de tu navegador; si lo haces, tendrás que iniciar sesión de
+      nuevo.
+    </p>
+  </section>
+
+  <section id="conservacion">
+    <h2>Cuánto tiempo los guardamos</h2>
+    <p>
+      Conservamos los datos mientras la cuenta del negocio esté activa. Si la cuenta se elimina,
+      borramos o anonimizamos los datos en un plazo razonable, salvo lo que debamos conservar para
+      cumplir obligaciones legales o resolver reclamos.
+    </p>
+  </section>
+
+  <section id="derechos">
+    <h2>Tus derechos</h2>
+    <p>Conforme a la Ley 21.719, puedes ejercer en cualquier momento tus derechos de:</p>
+    <ul>
+      <li><strong>Acceso:</strong> saber qué datos tuyos tratamos.</li>
+      <li><strong>Rectificación:</strong> corregir datos inexactos o incompletos.</li>
+      <li><strong>Supresión:</strong> pedir que eliminemos tus datos.</li>
+      <li><strong>Oposición:</strong> oponerte a un tratamiento determinado.</li>
+      <li><strong>Portabilidad:</strong> recibir tus datos en un formato de uso común.</li>
+      <li><strong>Bloqueo:</strong> pedir la suspensión temporal de un tratamiento.</li>
+    </ul>
+    <p>
+      Para ejercerlos escribe a
+      <a href="mailto:jjosemiguel.jv@gmail.com">jjosemiguel.jv&#64;gmail.com</a> indicando tu
+      nombre, el correo con el que usas AgendaFlow y qué solicitas. Respondemos dentro de 30 días
+      corridos. Si no quedas conforme, puedes recurrir a la Agencia de Protección de Datos
+      Personales.
+    </p>
+  </section>
+
+  <section id="seguridad">
+    <h2>Seguridad</h2>
+    <p>
+      Usamos conexiones cifradas, guardamos las contraseñas cifradas y limitamos el acceso a los
+      datos de cada negocio a sus propios usuarios. Ningún sistema es infalible: si detectamos un
+      incidente que afecte tus datos, te avisaremos según lo exige la ley.
+    </p>
+  </section>
+
+  <section id="cambios">
+    <h2>Cambios a esta política</h2>
+    <p>
+      Si cambiamos esta política, publicaremos la nueva versión en esta página con su fecha de
+      actualización. Si el cambio es importante, también lo avisaremos en el panel.
+    </p>
+  </section>
+
+  <section id="contacto">
+    <h2>Contacto</h2>
+    <p>
+      Jose Vergara Alvarez ·
+      <a href="mailto:jjosemiguel.jv@gmail.com">jjosemiguel.jv&#64;gmail.com</a>
+    </p>
+  </section>
+</app-legal-page>

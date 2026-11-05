@@ -2,7 +2,7 @@
   @if (cargando()) {
     <div class="reservar-loading">
       <div class="loading-spinner"></div>
-      <span>Cargando informacion...</span>
+      <span>Cargando información...</span>
     </div>
   } @else if (error()) {
     <div class="reservar-error">
@@ -26,7 +26,7 @@
           </div>
         </div>
         <div class="reservar-header__ubicacion">
-          <span class="ubicacion-icon">📍</span>
+          <span class="ubicacion-icon material-icons" aria-hidden="true">place</span>
           <span>{{ formatearDireccion() }}</span>
         </div>
       </div>
