@@ -32,8 +32,8 @@ export interface SucursalDialogResult {
   template: `
     <div class="dialog">
       <div class="dialog__header">
-        <h2 class="dialog__title">{{ data.sucursal ? 'Editar' : 'Crear' }} sucursal</h2>
-        <button class="dialog__close" (click)="cerrar()" aria-label="Cerrar">
+        <h2 class="dialog__title" mat-dialog-title>{{ data.sucursal ? 'Editar' : 'Agregar' }} sucursal</h2>
+        <button type="button" class="dialog__close" (click)="cerrar()" aria-label="Cerrar">
           <mat-icon>close</mat-icon>
         </button>
       </div>
@@ -48,9 +48,11 @@ export interface SucursalDialogResult {
             placeholder="Nombre de la sucursal"
             formControlName="nombre"
             [class.form-input--error]="fieldError('nombre')"
+            [attr.aria-invalid]="fieldError('nombre')"
+            [attr.aria-describedby]="fieldError('nombre') ? 'nombre-error' : null"
           />
           @if (fieldError('nombre')) {
-            <span class="form-error">El nombre es requerido.</span>
+            <span class="form-error" id="nombre-error">El nombre es requerido.</span>
           }
         </div>
 
@@ -104,7 +106,7 @@ export interface SucursalDialogResult {
         <div class="dialog__actions">
           <button type="button" class="btn btn--secondary" (click)="cerrar()">Cancelar</button>
           <button type="submit" class="btn btn--primary" [disabled]="form.invalid || guardando()">
-            {{ guardando() ? 'Guardando...' : data.sucursal ? 'Actualizar' : 'Crear' }}
+            {{ guardando() ? 'Guardando...' : data.sucursal ? 'Guardar cambios' : 'Agregar sucursal' }}
           </button>
         </div>
       </form>

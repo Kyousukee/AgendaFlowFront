@@ -131,3 +131,23 @@
     font-variant-numeric: tabular-nums;
   }
 }
+
+// mat-dialog-title (SPEC 04) le da nombre accesible al diálogo; se anulan sus estilos de MDC
+// para conservar el título del sistema.
+.dialog-title.mat-mdc-dialog-title {
+  margin: 0;
+  padding: 0;
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  line-height: 1.1;
+  letter-spacing: normal;
+
+  &::before {
+    display: none;
+  }
+}
+
+.dialog-header .estado-badge {
+  margin-left: auto;
+}

@@ -1,27 +1,65 @@
 import { Component, Input } from '@angular/core';
+import { ReservaResumen } from '../../interfaces/reserva-resumen.interface';
 
 @Component({
   selector: 'app-reservar-confirmacion',
   standalone: true,
   template: `
-    <div class="confirmacion">
+    <div class="confirmacion" role="status">
       <span class="confirmacion__icon material-icons" aria-hidden="true">check</span>
       <h2 class="confirmacion__title">Reserva confirmada</h2>
-      <p class="confirmacion__desc">Tu reserva quedó registrada.</p>
+      <p class="confirmacion__desc">Tu hora quedó registrada en la agenda del negocio.</p>
 
       <div class="confirmacion__codigo">
         <span class="codigo-label">Código de reserva</span>
-        <span class="codigo-value">{{ codigo }}</span>
+        <span class="codigo-value">{{ resumen.codigo }}</span>
       </div>
 
+      <!-- SPEC 04: el comprobante dice qué, cuándo, con quién y dónde. -->
+      <dl class="confirmacion__detalle">
+        <div><dt>Servicio</dt><dd>{{ resumen.servicio }}</dd></div>
+        <div><dt>Cuándo</dt><dd>{{ resumen.fecha }}, de {{ resumen.horaInicio }} a {{ resumen.horaFin }}</dd></div>
+        <div><dt>Con</dt><dd>{{ resumen.profesional }}</dd></div>
+        @if (direccion) {
+          <div><dt>Dónde</dt><dd>{{ sucursalNombre }}, {{ direccion }}</dd></div>
+        }
+      </dl>
+
       <div class="confirmacion__info">
-        <p>Recibirás una confirmación en tu correo electrónico.</p>
-        <p>Presenta este código al momento de tu cita en <strong>{{ empresaNombre }}</strong> - {{ sucursalNombre }}.</p>
+        <p>
+          Guarda esta pantalla o toma una captura. Te pueden pedir el código al llegar a
+          <strong>{{ empresaNombre }}</strong>, {{ sucursalNombre }}.
+        </p>
       </div>
     </div>
   `,
   // Estilos en línea heredados: se restilizan en su lugar (SPEC 03, Decisiones).
   styles: `
+    .confirmacion__detalle {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      max-width: 480px;
+      margin: 4px 0;
+    }
+
+    .confirmacion__detalle div {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .confirmacion__detalle dt {
+      color: var(--text-secondary);
+    }
+
+    .confirmacion__detalle dd {
+      font-weight: 600;
+      text-align: right;
+    }
+
     .confirmacion {
       display: flex;
       flex-direction: column;
@@ -112,7 +150,8 @@ import { Component, Input } from '@angular/core';
   `,
 })
 export class ReservarConfirmacionComponent {
-  @Input({ required: true }) codigo = '';
+  @Input({ required: true }) resumen!: ReservaResumen;
+  @Input() direccion = '';
   @Input({ required: true }) empresaNombre = '';
   @Input({ required: true }) sucursalNombre = '';
 }

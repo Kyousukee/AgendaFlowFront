@@ -70,6 +70,25 @@
   &__body {
     max-width: 68ch;
   }
+
+  &__see-also {
+    margin-top: 56px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border); // taste-skill-ignore: regla de cierre del documento
+    font-size: 1rem;
+    color: var(--text-secondary);
+
+    a {
+      color: var(--gold-light);
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
+  }
+
+  // Solo en el teléfono (ver la media query).
+  &__to-toc {
+    display: none;
+  }
 }
 
 .legal__body ::ng-deep {
@@ -91,16 +110,18 @@
     color: var(--text-primary);
   }
 
+  // El h3 no puede quedar más chico que el cuerpo: mismo tamaño, peso 600 y más aire arriba.
   h3 {
-    margin: 20px 0 8px;
-    font-size: 1.0625rem;
+    margin: 28px 0 8px;
+    font-size: var(--step-body);
     font-weight: 600;
+    line-height: 1.3;
   }
 
   p,
   li {
-    font-size: 1.125rem;
-    line-height: 1.6;
+    font-size: var(--step-body);
+    line-height: 1.55;
     color: var(--text-primary);
   }
 
@@ -154,7 +175,9 @@
     code {
       font-size: 0.875rem;
       color: var(--gold-light);
-      word-break: break-all;
+      // Corta solo si no cabe, y nunca a mitad de palabra cuando hay un "_" disponible.
+      word-break: normal;
+      overflow-wrap: anywhere;
     }
   }
 }
@@ -162,6 +185,8 @@
 @media (max-width: 900px) {
   .legal {
     padding-top: calc(56px + 48px);
+    // Deja libre el atajo fijo "Volver al índice" al final del documento.
+    padding-bottom: 96px;
 
     &__head {
       margin-left: 0;
@@ -173,18 +198,75 @@
       row-gap: 32px;
     }
 
+    // Índice en el registro de imprenta: reglas de 1px, sin panel ni radio (Regla de los Dos
+    // Registros), y en dos columnas de filas de 44px para que ocupe la mitad de alto.
     &__toc {
       position: static;
-      padding: 20px;
-      border-radius: 10px;
-      background: var(--bg-surface);
+      padding: 16px 0;
+      border-block: 1px solid var(--border); // taste-skill-ignore: reglas del índice
     }
+
+    &__toc-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0 16px;
+    }
+
+    &__toc-link {
+      display: flex;
+      align-items: center;
+      min-height: var(--target-min);
+    }
+
+    &__to-toc {
+      position: fixed;
+      right: var(--margin);
+      bottom: 16px;
+      z-index: 10;
+      display: inline-flex;
+      align-items: center;
+      min-height: var(--target-min);
+      padding: 0 16px;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-field);
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+  }
+}
+
+// Impresión: solo el documento, en negro sobre blanco.
+@media print {
+  app-navbar,
+  app-footer,
+  .legal__toc,
+  .legal__to-toc {
+    display: none;
+  }
+
+  .legal {
+    padding: 0;
+    background: #fff;
+    color: #000;
+  }
+
+  .legal__head {
+    margin-left: 0;
+  }
+
+  .legal__layout {
+    display: block;
   }
 
   .legal__body ::ng-deep {
+    h2,
     p,
-    li {
-      font-size: 1.0625rem;
+    li,
+    td,
+    code,
+    a {
+      color: #000;
     }
   }
 }

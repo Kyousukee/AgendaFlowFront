@@ -1,0 +1,330 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-05T18:00:00Z",
+  "title": "Design System: AgendaFlow",
+  "extensions": {
+    "colorMeta": {
+      "tinta-de-libreta": {
+        "role": "neutral",
+        "displayName": "Tinta de libreta",
+        "canonical": "#0a0a0a",
+        "tonalRamp": [
+          "#0a0a0a",
+          "#141414",
+          "#1a1a1a",
+          "#242424",
+          "#333333",
+          "#4a4a4a",
+          "#858a93",
+          "#e6e4df"
+        ]
+      },
+      "dorado-de-meson": {
+        "role": "primary",
+        "displayName": "Dorado de mesón",
+        "canonical": "#c9a84c",
+        "tonalRamp": [
+          "#2a2310",
+          "#3a3118",
+          "#6b5a28",
+          "#a8893d",
+          "#c9a84c",
+          "#e0c872",
+          "#ecdca4",
+          "#f7f0d8"
+        ]
+      },
+      "hueso": {
+        "role": "neutral",
+        "displayName": "Hueso",
+        "canonical": "#e6e4df",
+        "tonalRamp": [
+          "#2b2a28",
+          "#4a4845",
+          "#6d6b66",
+          "#918e88",
+          "#b6b3ad",
+          "#d2d0ca",
+          "#e6e4df",
+          "#f4f3f0"
+        ]
+      },
+      "carbon": {
+        "role": "neutral",
+        "displayName": "Carbón",
+        "canonical": "#161513"
+      },
+      "texto-secundario": {
+        "role": "neutral",
+        "displayName": "Texto secundario",
+        "canonical": "#9ca3af"
+      },
+      "texto-tenue": {
+        "role": "neutral",
+        "displayName": "Texto tenue",
+        "canonical": "#858a93"
+      },
+      "borde-control": {
+        "role": "neutral",
+        "displayName": "Borde de control",
+        "canonical": "#6b6b6b"
+      },
+      "borde-control-hover": {
+        "role": "neutral",
+        "displayName": "Borde de control (hover)",
+        "canonical": "#858a93"
+      },
+      "estado-error": {
+        "role": "error",
+        "displayName": "Error",
+        "canonical": "#f87171"
+      },
+      "estado-error-texto": {
+        "role": "error",
+        "displayName": "Error texto",
+        "canonical": "#fca5a5"
+      },
+      "estado-ok": {
+        "role": "success",
+        "displayName": "Ok",
+        "canonical": "#6ee7b7"
+      },
+      "estado-pendiente": {
+        "role": "warning",
+        "displayName": "Pendiente",
+        "canonical": "#fbbf24"
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Solo el h1 del hero, en dos líneas desde el eje."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Títulos de sección de la landing."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Títulos de página del admin y de los diálogos."
+      },
+      "lead": {
+        "displayName": "Lead",
+        "purpose": "Texto de apoyo bajo los títulos públicos."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Texto corrido de la landing y de los legales, con medida de 60 a 70ch."
+      },
+      "body-app": {
+        "displayName": "Body app",
+        "purpose": "Texto, campos y botones del admin."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Labels de formulario y metadatos."
+      },
+      "title-dialog": {
+        "displayName": "Title dialog",
+        "purpose": "Título de los diálogos."
+      },
+      "title-empty": {
+        "displayName": "Title empty",
+        "purpose": "Título de los estados vacíos."
+      },
+      "body-ui": {
+        "displayName": "Body UI",
+        "purpose": "Botones y enlaces públicos; nombre de ítems seleccionables."
+      },
+      "body-ui-sm": {
+        "displayName": "Body UI sm",
+        "purpose": "Campos públicos e ítems de lista del admin."
+      },
+      "label-sm": {
+        "displayName": "Label sm",
+        "purpose": "Labels de filtro, badges, errores y notas chicas."
+      }
+    },
+    "shadows": [
+      {
+        "name": "shadow-float",
+        "value": "0 12px 32px rgba(0, 0, 0, 0.5)",
+        "purpose": "Solo para menús y diálogos que flotan. Nada tiene sombra en reposo."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Curva por defecto para hover, foco y aparición."
+      },
+      {
+        "name": "duration-fast",
+        "value": "160ms",
+        "purpose": "Hover y cambios de color."
+      },
+      {
+        "name": "duration-base",
+        "value": "240ms",
+        "purpose": "Aparición de diálogos y estados."
+      },
+      {
+        "name": "duration-reveal",
+        "value": "900ms",
+        "purpose": "Reveals de GSAP, solo en la landing."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "form-stack",
+        "value": "520px"
+      },
+      {
+        "name": "admin-header",
+        "value": "600px"
+      },
+      {
+        "name": "axis-collapse",
+        "value": "900px"
+      },
+      {
+        "name": "target-min",
+        "value": "44px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primario público",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Acción principal en la landing, la auth y la reserva. Bloque dorado recto.",
+      "html": "<a class=\"ds-btn-public\" href=\"#\">Empezar gratis</a>",
+      "css": ".ds-btn-public { display: inline-flex; align-items: center; min-height: 52px; padding: 0 28px; background: var(--gold, #c9a84c); color: var(--on-gold, #0a0a0a); font-family: 'Source Serif 4', Georgia, serif; font-size: 1.0625rem; font-weight: 600; text-decoration: none; border-radius: 0; transition: background-color 160ms cubic-bezier(0.16, 1, 0.3, 1), transform 160ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-public:hover { background: var(--gold-light, #e0c872); } .ds-btn-public:active { transform: translateY(1px) scale(0.98); } .ds-btn-public:focus-visible { outline: 2px solid var(--gold-light, #e0c872); outline-offset: 4px; }"
+    },
+    {
+      "name": "Enlace público",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Acción secundaria pública: un texto con subrayado dorado.",
+      "html": "<a class=\"ds-link-public\" href=\"#\">Ver cómo se ve</a>",
+      "css": ".ds-link-public { font-family: 'Source Serif 4', Georgia, serif; font-size: 1.0625rem; font-weight: 600; color: var(--text-primary, #fff); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 6px; text-decoration-color: var(--gold, #c9a84c); transition: text-underline-offset 160ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-link-public:hover { text-underline-offset: 9px; } .ds-link-public:focus-visible { outline: 2px solid var(--gold-light, #e0c872); outline-offset: 4px; }"
+    },
+    {
+      "name": "Primario app",
+      "kind": "button",
+      "refersTo": "button-app-primary",
+      "description": "Acción principal del admin y de los diálogos.",
+      "html": "<button class=\"ds-btn-app ds-btn-app--primary\">Agregar servicio</button>",
+      "css": ".ds-btn-app { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 36px; padding: 0 14px; border: 1px solid transparent; border-radius: 6px; background: none; color: var(--text-primary, #fff); font-family: 'Source Serif 4', Georgia, serif; font-size: 0.9375rem; font-weight: 600; cursor: pointer; transition: background-color 160ms cubic-bezier(0.16, 1, 0.3, 1), transform 160ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-app:active { transform: scale(0.98); } .ds-btn-app:focus-visible { outline: 2px solid var(--gold-light, #e0c872); outline-offset: 2px; } .ds-btn-app--primary { background: var(--gold, #c9a84c); color: var(--on-gold, #0a0a0a); } .ds-btn-app--primary:hover { background: var(--gold-light, #e0c872); }"
+    },
+    {
+      "name": "Secundario app",
+      "kind": "button",
+      "refersTo": "button-app-secondary",
+      "description": "Acciones secundarias del admin (cancelar, filtros).",
+      "html": "<button class=\"ds-btn-app2\">Cancelar</button>",
+      "css": ".ds-btn-app2 { display: inline-flex; align-items: center; min-height: 36px; padding: 0 14px; border: 1px solid var(--border-light, #333); border-radius: 6px; background: var(--bg-surface, #141414); color: var(--text-primary, #fff); font-family: 'Source Serif 4', Georgia, serif; font-size: 0.9375rem; font-weight: 600; cursor: pointer; transition: background-color 160ms cubic-bezier(0.16, 1, 0.3, 1), border-color 160ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-app2:hover { border-color: #4a4a4a; background: var(--bg-surface-elevated, #1a1a1a); } .ds-btn-app2:focus-visible { outline: 2px solid var(--gold-light, #e0c872); outline-offset: 2px; }"
+    },
+    {
+      "name": "Campo app",
+      "kind": "input",
+      "refersTo": "input-app",
+      "description": "Campo de texto en los diálogos del admin.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field__label\">Nombre del servicio</span><input class=\"ds-input\" placeholder=\"Corte clásico\" /></label>",
+      "css": ".ds-field { display: flex; flex-direction: column; gap: 6px; font-family: 'Source Serif 4', Georgia, serif; } .ds-field__label { font-size: 0.875rem; font-weight: 600; color: var(--text-primary, #fff); } .ds-input { height: 40px; padding: 0 12px; border: 1px solid var(--border-field, #6b6b6b); border-radius: 6px; background: var(--bg-primary, #0a0a0a); color: var(--text-primary, #fff); font-family: inherit; font-size: 0.9375rem; transition: border-color 160ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-input::placeholder { color: var(--text-muted, #858a93); } .ds-input:hover { border-color: var(--border-field-hover, #858a93); } .ds-input:focus { outline: 2px solid rgba(201, 168, 76, 0.35); border-color: var(--gold, #c9a84c); }"
+    },
+    {
+      "name": "Badge de estado",
+      "kind": "chip",
+      "refersTo": "empty-state",
+      "description": "Estado de un pago o una reserva, como una marca por fila.",
+      "html": "<span class=\"ds-badge ds-badge--ok\">Pagado</span> <span class=\"ds-badge ds-badge--pend\">Pendiente</span> <span class=\"ds-badge ds-badge--err\">Cancelada</span>",
+      "css": ".ds-badge { display: inline-flex; align-items: center; padding: 2px 10px; border-radius: 999px; font-family: 'Source Serif 4', Georgia, serif; font-size: 0.8125rem; font-weight: 600; } .ds-badge--ok { background: rgba(52, 211, 153, 0.14); color: #6ee7b7; } .ds-badge--pend { background: rgba(245, 158, 11, 0.14); color: #fbbf24; } .ds-badge--err { background: rgba(239, 68, 68, 0.14); color: #f87171; }"
+    },
+    {
+      "name": "Estado vacío",
+      "kind": "card",
+      "refersTo": "empty-state",
+      "description": "Lista sin datos en el admin: título, una frase que dice qué hacer y la acción.",
+      "html": "<div class=\"ds-empty\"><p class=\"ds-empty__title\">Aún no hay servicios</p><p class=\"ds-empty__text\">Agrega el primero con su duración y su precio para que tus clientes puedan reservarlo.</p><button class=\"ds-empty__cta\">Agregar servicio</button></div>",
+      "css": ".ds-empty { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 56px 24px; border-radius: 10px; background: var(--bg-surface, #141414); text-align: center; font-family: 'Source Serif 4', Georgia, serif; } .ds-empty__title { font-family: 'Young Serif', Georgia, serif; font-size: 1.375rem; color: var(--text-primary, #fff); } .ds-empty__text { max-width: 44ch; font-size: 0.9375rem; line-height: 1.5; color: var(--text-secondary, #9ca3af); } .ds-empty__cta { min-height: 36px; padding: 0 14px; border: none; border-radius: 6px; background: var(--gold, #c9a84c); color: var(--on-gold, #0a0a0a); font-family: inherit; font-weight: 600; cursor: pointer; } .ds-empty__cta:hover { background: var(--gold-light, #e0c872); } .ds-empty__cta:focus-visible { outline: 2px solid var(--gold-light, #e0c872); outline-offset: 2px; }"
+    },
+    {
+      "name": "Navbar de la landing",
+      "kind": "nav",
+      "refersTo": "button-primary",
+      "description": "Barra fija, delgada y opaca: logo, anclas, Iniciar sesión y el primario.",
+      "html": "<nav class=\"ds-nav\"><span class=\"ds-nav__brand\">AgendaFlow</span><a class=\"ds-nav__link\" href=\"#\">Cómo funciona</a><a class=\"ds-nav__link\" href=\"#\">Precios</a><a class=\"ds-nav__link\" href=\"#\">Iniciar sesión</a><a class=\"ds-nav__cta\" href=\"#\">Empezar gratis</a></nav>",
+      "css": ".ds-nav { display: flex; align-items: center; gap: 24px; height: 64px; padding: 0 24px; background: var(--bg-primary, #0a0a0a); border-bottom: 1px solid var(--border, #2a2a2a); font-family: 'Source Serif 4', Georgia, serif; } .ds-nav__brand { margin-right: auto; font-family: 'Young Serif', Georgia, serif; font-size: 1.25rem; color: var(--text-primary, #fff); } .ds-nav__link { color: var(--text-secondary, #9ca3af); text-decoration: none; transition: color 160ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-nav__link:hover { color: var(--text-primary, #fff); } .ds-nav__link:focus-visible, .ds-nav__cta:focus-visible { outline: 2px solid var(--gold-light, #e0c872); outline-offset: 4px; } .ds-nav__cta { display: inline-flex; align-items: center; min-height: 40px; padding: 0 18px; background: var(--gold, #c9a84c); color: var(--on-gold, #0a0a0a); font-weight: 600; text-decoration: none; } .ds-nav__cta:hover { background: var(--gold-light, #e0c872); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "La libreta del mesón",
+    "overview": "AgendaFlow toma la libreta de turnos que está sobre el mesón de una barbería y la convierte en sistema. La columna de horas de la libreta es el eje: una línea vertical al 42% del ancho. A la izquierda queda el margen de las horas (notas, cifras y horarios) y el contenido se anota a la derecha, como un turno. Es un sistema editorial e impreso: serifas en todo, tinta casi negra, un solo dorado y bloques de color planos en vez de degradados.\n\nTiene dos registros. Las superficies públicas (landing, auth y reserva) son de imprenta: esquinas rectas, tipografía grande y campos de color a sangre. Las superficies de trabajo (panel admin y diálogos) son de mesón: más densas, con esquinas suaves de 6px, texto de 15px y paneles repetidos. Las une el mismo par tipográfico, la misma paleta y la misma regla del dorado.\n\nSobre fondos oscuros, la profundidad se construye con un paso de tono o una regla de 1px, nunca con sombras en reposo. Las fotos van en escala de grises para que el dorado sea el único color con voz.",
+    "keyCharacteristics": [
+      "Eje vertical al 42% en las superficies públicas. En móvil colapsa al margen.",
+      "Young Serif para display y títulos, y Source Serif 4 para todo el texto, incluido el admin.",
+      "Un solo acento, el dorado de mesón, sobre la tinta.",
+      "Bloques planos de color (tinta, carbón, dorado y hueso) sin degradados.",
+      "Fotos en gris: `grayscale(1) contrast(1.05)`.",
+      "Sin sombras en reposo. `--shadow-float` solo para menús y diálogos.",
+      "Motion rico (GSAP) solo en la landing, y transiciones CSS cortas en el resto."
+    ],
+    "rules": [
+      {
+        "name": "La Regla del Dorado Único",
+        "body": "El dorado pleno va en la acción principal y en un solo campo de color por pantalla. En el admin, el dorado pleno solo aparece en el botón primario y en marcas chicas; las áreas usan sus tintes.",
+        "section": "colors"
+      },
+      {
+        "name": "La Regla de la Identidad Fija",
+        "body": "`#0a0a0a` y `#c9a84c` no cambian de valor nunca. Los neutros pueden ajustarse para cumplir el contraste AA, y cada cambio se anota aquí.",
+        "section": "colors"
+      },
+      {
+        "name": "La Regla de la Serifa Completa",
+        "body": "Todo el texto va en serifa, también en el admin. No se agrega una sans ni una mono.",
+        "section": "typography"
+      },
+      {
+        "name": "La Regla del Sentence Case",
+        "body": "Los títulos van en sentence case, sin mayúsculas sostenidas ni tracking abierto.",
+        "section": "typography"
+      },
+      {
+        "name": "La Regla del Plano en Reposo",
+        "body": "Nada tiene sombra en reposo. Si algo necesita separarse, sube un paso de tono o gana una regla.",
+        "section": "elevation"
+      },
+      {
+        "name": "La Regla de los Dos Registros",
+        "body": "Lo público es recto y lo de trabajo es suave. Una superficie no mezcla los dos.",
+        "section": "shapes"
+      },
+      {
+        "name": "La Regla del Borde de Control",
+        "body": "Todo lo que se llena o se elige lleva un borde de 3:1 o más (--border-field). Las reglas decorativas siguen en --border.",
+        "section": "colors"
+      }
+    ],
+    "dos": [
+      "**Do** usar `--bg-primary` (#0a0a0a) como fondo y `--gold` (#c9a84c) como único acento, siempre con sus valores fijos.",
+      "**Do** arrancar los títulos públicos desde el eje (42vw) y colapsarlo al margen en 900px o menos.",
+      "**Do** separar las superficies con un paso de tono o una regla de 1px.",
+      "**Do** poner las fotos en escala de grises con `grayscale(1) contrast(1.05)`.",
+      "**Do** respetar `prefers-reduced-motion`: el contenido es visible sin animaciones y el estado oculto inicial lo aplica GSAP en el navegador, nunca el CSS.",
+      "**Do** dejar en los estados vacíos del admin un título, una frase que diga qué hacer y la acción."
+    ],
+    "donts": [
+      "**Don't** agregar otra familia tipográfica ni volver a Inter o Playfair Display.",
+      "**Don't** usar degradados, texto con degradado ni sombras de brillo.",
+      "**Don't** usar sombras en reposo. `--shadow-float` es solo para lo que flota.",
+      "**Don't** poner esquinas redondeadas en la landing, la auth o la reserva, ni esquinas rectas en el admin.",
+      "**Don't** poner más de un campo dorado por pantalla.",
+      "**Don't** inventar prueba social (testimonios, contadores ni logos de clientes).",
+      "**Don't** usar otra librería de iconos que no sea Material Icons (`<mat-icon>`).",
+      "**Don't** usar GSAP fuera de `src/app/features/landing/`."
+    ]
+  }
+}

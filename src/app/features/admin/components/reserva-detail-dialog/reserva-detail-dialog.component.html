@@ -1,12 +1,15 @@
 <div class="reserva-dialog">
   <div class="dialog-header">
     <div class="dialog-header__info">
-      <h2 class="dialog-title">Detalle de reserva</h2>
+      <h2 class="dialog-title" mat-dialog-title>Detalle de reserva</h2>
       <span class="dialog-codigo">{{ data.reserva.codigo }}</span>
     </div>
     <span class="estado-badge" [attr.data-estado]="data.estado.nombre.toLowerCase()">
       {{ data.estado.nombre }}
     </span>
+    <button type="button" class="dialog__close" mat-dialog-close aria-label="Cerrar">
+      <mat-icon>close</mat-icon>
+    </button>
   </div>
 
   <div class="dialog-body">

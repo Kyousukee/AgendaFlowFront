@@ -40,7 +40,7 @@ export class RubrosComponent {
       ancho: 1100,
       alto: 1650,
     },
-    { tipo: 'palabra', palabra: 'Tatuaje', detalle: 'Sesiones largas y abonos', tono: 'bone' },
+    { tipo: 'palabra', palabra: 'Tatuaje', detalle: 'Sesiones largas por duración', tono: 'bone' },
     { tipo: 'palabra', palabra: 'Uñas', detalle: 'Manicure y esmaltado', tono: 'ink' },
     {
       tipo: 'foto',
@@ -64,7 +64,7 @@ export class RubrosComponent {
       ancho: 1600,
       alto: 1067,
     },
-    { tipo: 'palabra', palabra: 'Masajes', detalle: 'Por sesión o por plan', tono: 'bone' },
+    { tipo: 'palabra', palabra: 'Masajes', detalle: 'Sesiones de 30 a 90 minutos', tono: 'bone' },
     { tipo: 'palabra', palabra: 'Pestañas', detalle: 'Cejas, lifting y extensiones', tono: 'ink' },
     {
       tipo: 'foto',

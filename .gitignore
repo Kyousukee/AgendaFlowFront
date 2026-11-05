@@ -42,3 +42,9 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+
+# Design tooling (local)
+.taste-skill/
+.impeccable/config.local.json
+.claude/settings.local.json
+.impeccable/hook.cache.json

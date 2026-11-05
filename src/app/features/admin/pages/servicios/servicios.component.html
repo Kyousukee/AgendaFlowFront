@@ -2,7 +2,7 @@
   <div class="page-header">
     <div>
       <h1 class="page-title">Servicios</h1>
-      <p class="page-subtitle">Catálogo de servicios que ofreces</p>
+      <p class="page-subtitle">Lo que tus clientes pueden reservar, con su duración y su precio</p>
     </div>
     <span
       class="tooltip-wrapper"
@@ -10,8 +10,10 @@
       [matTooltipDisabled]="!suscripcion.limiteAlcanzado('servicios')"
     >
       <button
+        type="button"
         class="btn btn--primary"
         [disabled]="suscripcion.limiteAlcanzado('servicios')"
+        [attr.aria-describedby]="suscripcion.limiteAlcanzado('servicios') ? 'limite-servicios' : null"
         (click)="abrirDialogo()"
       >
         <mat-icon>add</mat-icon>
@@ -20,17 +22,25 @@
     </span>
   </div>
 
+  @if (suscripcion.limiteAlcanzado('servicios')) {
+    <p class="limite-nota" id="limite-servicios">
+      <mat-icon>lock</mat-icon>
+      <span>Llegaste al límite de servicios del plan Gratis. Revisa tu plan en <strong>Configuración</strong>.</span>
+    </p>
+  }
+
   @if (cargando()) {
-    <div class="loading-state">
+    <div class="loading-state" role="status">
       <mat-icon class="loading-icon">hourglass_empty</mat-icon>
       <span>Cargando servicios...</span>
     </div>
   } @else if (servicios().length === 0) {
     <div class="empty-state">
       <mat-icon class="empty-icon">content_cut</mat-icon>
-      <h3 class="empty-title">Sin servicios</h3>
+      <h2 class="empty-title">Aún no tienes servicios</h2>
       <p class="empty-text">
-        Agrega tu primer servicio para que tus clientes puedan agendar citas.
+        Agrega el primero con su duración y su precio. Después lo asignas a cada profesional en
+        Empleados y tus clientes ya pueden reservarlo.
       </p>
       <span
         class="tooltip-wrapper"
@@ -38,6 +48,7 @@
         [matTooltipDisabled]="!suscripcion.limiteAlcanzado('servicios')"
       >
         <button
+          type="button"
           class="btn btn--primary"
           [disabled]="suscripcion.limiteAlcanzado('servicios')"
           (click)="abrirDialogo()"
@@ -51,7 +62,7 @@
     <div class="servicios-grid">
       @for (servicio of servicios(); track servicio.id) {
         <mat-card class="servicio-card">
-          <div class="servicio-color-bar" [style.background]="servicio.color || '#C9A84C'"></div>
+          <div class="servicio-color-bar" aria-hidden="true" [style.background]="servicio.color || '#C9A84C'"></div>
           <div class="servicio-body">
             <div class="servicio-header">
               <div class="servicio-info">
@@ -71,20 +82,24 @@
                 <mat-icon>schedule</mat-icon>
                 <span>{{ servicio.duracionMinutos }} min</span>
               </div>
-              <div class="meta-chip">
-                <div class="meta-color-dot" [style.background]="servicio.color || '#C9A84C'"></div>
-                <span>Color</span>
-              </div>
             </div>
 
             <div class="servicio-actions">
-              <button class="action-btn" (click)="editarServicio(servicio)" matTooltip="Editar">
+              <button
+                type="button"
+                class="action-btn"
+                (click)="editarServicio(servicio)"
+                matTooltip="Editar"
+                [attr.aria-label]="'Editar ' + servicio.nombre"
+              >
                 <mat-icon>edit</mat-icon>
               </button>
               <button
+                type="button"
                 class="action-btn action-btn--danger"
                 (click)="eliminarServicio(servicio)"
                 matTooltip="Eliminar"
+                [attr.aria-label]="'Eliminar ' + servicio.nombre"
               >
                 <mat-icon>delete</mat-icon>
               </button>

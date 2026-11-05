@@ -83,18 +83,31 @@
       min-height: 460px;
     }
 
+    // El campo de color pasa a la etapa entera y el texto va en el flujo (SPEC 04):
+    // ya no se monta encima del segmento y crece con el copy sin salirse.
     &__stage {
-      position: relative;
       min-width: 0;
       min-height: 128px;
-      gap: 0;
+      gap: 8px;
+      padding: 16px;
+
+      &--bone {
+        background: var(--field-bone);
+      }
+      &--char {
+        background: var(--bg-surface-hover);
+      }
+      &--gold {
+        background: var(--field-gold);
+      }
     }
 
     &__segment {
-      flex: 1;
+      flex: none;
       height: auto;
       min-height: 0;
-      padding: 16px;
+      padding: 0;
+      background: none;
     }
 
     &__duration {
@@ -102,9 +115,6 @@
     }
 
     &__text {
-      position: absolute;
-      left: 16px;
-      top: 48px;
       max-width: 30ch;
       font-size: 1rem;
     }

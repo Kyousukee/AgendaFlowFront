@@ -2,7 +2,7 @@
   <div class="page-header">
     <div>
       <h1 class="page-title">Sucursales</h1>
-      <p class="page-subtitle">Gestión de locales de tu negocio</p>
+      <p class="page-subtitle">Los locales de tu negocio, cada uno con su dirección y su horario</p>
     </div>
     <span
       class="tooltip-wrapper"
@@ -10,38 +10,51 @@
       [matTooltipDisabled]="!suscripcion.limiteAlcanzado('sucursales')"
     >
       <button
+        type="button"
         class="btn btn--primary"
         [disabled]="suscripcion.limiteAlcanzado('sucursales')"
+        [attr.aria-describedby]="suscripcion.limiteAlcanzado('sucursales') ? 'limite-sucursales' : null"
         (click)="abrirDialogo()"
       >
         <mat-icon>add</mat-icon>
-        Crear sucursal
+        Agregar sucursal
       </button>
     </span>
   </div>
 
+  @if (suscripcion.limiteAlcanzado('sucursales')) {
+    <p class="limite-nota" id="limite-sucursales">
+      <mat-icon>lock</mat-icon>
+      <span>Llegaste al límite de sucursales del plan Gratis. Revisa tu plan en <strong>Configuración</strong>.</span>
+    </p>
+  }
+
   @if (cargando()) {
-    <div class="loading-state">
+    <div class="loading-state" role="status">
       <mat-icon class="loading-icon">hourglass_empty</mat-icon>
       <span>Cargando sucursales...</span>
     </div>
   } @else if (sucursales().length === 0) {
     <div class="empty-state">
       <mat-icon class="empty-icon">storefront</mat-icon>
-      <h3 class="empty-title">Sin sucursales</h3>
-      <p class="empty-text">Crea tu primera sucursal para comenzar a gestionar tus locales.</p>
+      <h2 class="empty-title">Aún no tienes sucursales</h2>
+      <p class="empty-text">
+        Agrega tu local con su dirección. Cada sucursal tiene su propio horario y su propio enlace
+        de reserva.
+      </p>
       <span
         class="tooltip-wrapper"
         matTooltip="Alcanzaste el límite del plan Gratis"
         [matTooltipDisabled]="!suscripcion.limiteAlcanzado('sucursales')"
       >
         <button
+          type="button"
           class="btn btn--primary"
           [disabled]="suscripcion.limiteAlcanzado('sucursales')"
           (click)="abrirDialogo()"
         >
           <mat-icon>add</mat-icon>
-          Crear sucursal
+          Agregar sucursal
         </button>
       </span>
     </div>
@@ -50,7 +63,7 @@
       @for (sucursal of sucursales(); track sucursal.id) {
         <mat-card class="sucursal-card">
           <div class="sucursal-header">
-            <div class="sucursal-icon">
+            <div class="sucursal-icon" aria-hidden="true">
               <mat-icon>store</mat-icon>
             </div>
             <div class="sucursal-info">
@@ -84,13 +97,21 @@
           </div>
 
           <div class="sucursal-actions">
-            <button class="action-btn" (click)="editarSucursal(sucursal)" matTooltip="Editar">
+            <button
+              type="button"
+              class="action-btn"
+              (click)="editarSucursal(sucursal)"
+              matTooltip="Editar"
+              [attr.aria-label]="'Editar ' + (sucursal.nombre || 'sucursal')"
+            >
               <mat-icon>edit</mat-icon>
             </button>
             <button
+              type="button"
               class="action-btn action-btn--danger"
               (click)="eliminarSucursal(sucursal)"
               matTooltip="Eliminar"
+              [attr.aria-label]="'Eliminar ' + (sucursal.nombre || 'sucursal')"
             >
               <mat-icon>delete</mat-icon>
             </button>

@@ -2,50 +2,67 @@
   <div class="page-header">
     <div>
       <h1 class="page-title">Horarios del negocio</h1>
-      <p class="page-subtitle">Configura los horarios de apertura y cierre de tu negocio</p>
+      <p class="page-subtitle">Los días y horas en que atiendes. Tus clientes solo reservan dentro de este horario.</p>
     </div>
     <div class="page-actions">
-      <button class="btn btn--primary" (click)="guardar()" [disabled]="guardando()">
+      <button
+        type="button"
+        class="btn btn--primary"
+        (click)="guardar()"
+        [disabled]="guardando()"
+        [attr.aria-busy]="guardando()"
+      >
         <mat-icon>save</mat-icon>
         {{ guardando() ? 'Guardando...' : 'Guardar cambios' }}
       </button>
-      @if (exito()) {
-        <span class="save-success">
-          <mat-icon>check_circle</mat-icon>
-          Guardado
-        </span>
-      }
+      <span class="save-status" role="status">
+        @if (exito()) {
+          <span class="save-success">
+            <mat-icon>check_circle</mat-icon>
+            Guardado
+          </span>
+        }
+      </span>
     </div>
   </div>
 
   @if (cargando()) {
-    <div class="loading-state">
+    <div class="loading-state" role="status">
       <mat-icon class="loading-icon">hourglass_empty</mat-icon>
       <span>Cargando horarios...</span>
     </div>
   } @else {
     <div class="horarios-layout">
       <div class="dias-panel">
-        @for (horario of horarios; track horario.dia) {
+        @for (horario of horarios; track horario.dia; let i = $index) {
           <mat-card class="dia-card" [class.dia-card--inactivo]="!horario.activo">
             <div class="dia-header">
               <div class="dia-info">
-                <span class="dia-nombre">{{ horario.dia }}</span>
+                <span class="dia-nombre" [id]="'dia-' + i">{{ horario.dia }}</span>
                 @if (horario.activo) {
-                  <span class="dia-horas">{{ horario.apertura }} - {{ horario.cierre }}</span>
+                  <span class="dia-horas">{{ horario.apertura }} a {{ horario.cierre }}</span>
                 } @else {
                   <span class="dia-horas dia-horas--cerrado">Cerrado</span>
                 }
               </div>
-              <mat-slide-toggle [(ngModel)]="horario.activo" color="primary" />
+              <mat-slide-toggle
+                [(ngModel)]="horario.activo"
+                color="primary"
+                [aria-label]="'Abierto el ' + horario.dia"
+              />
             </div>
 
             @if (horario.activo) {
               <div class="dia-config">
                 <div class="time-row">
                   <div class="time-field">
-                    <label class="time-label">Apertura</label>
-                    <select class="time-select" [(ngModel)]="horario.apertura">
+                    <label class="time-label" [attr.for]="'apertura-' + i">Apertura</label>
+                    <select
+                      class="time-select"
+                      [id]="'apertura-' + i"
+                      [attr.aria-describedby]="'dia-' + i"
+                      [(ngModel)]="horario.apertura"
+                    >
                       @for (hora of horas; track hora) {
                         <option [value]="hora">{{ hora }}</option>
                       }
@@ -53,8 +70,13 @@
                   </div>
                   <mat-icon class="time-separator">arrow_forward</mat-icon>
                   <div class="time-field">
-                    <label class="time-label">Cierre</label>
-                    <select class="time-select" [(ngModel)]="horario.cierre">
+                    <label class="time-label" [attr.for]="'cierre-' + i">Cierre</label>
+                    <select
+                      class="time-select"
+                      [id]="'cierre-' + i"
+                      [attr.aria-describedby]="'dia-' + i"
+                      [(ngModel)]="horario.cierre"
+                    >
                       @for (hora of horas; track hora) {
                         <option [value]="hora">{{ hora }}</option>
                       }
@@ -62,24 +84,29 @@
                   </div>
                 </div>
 
-                <div class="descanso-row">
+                <div class="descanso-row" role="group" [attr.aria-labelledby]="'descanso-' + i">
                   <div class="descanso-label">
-                    <mat-icon class="descanso-icon">coffee_maker</mat-icon>
-                    <span>Descanso / Almuerzo</span>
+                    <mat-icon class="descanso-icon">restaurant</mat-icon>
+                    <span [id]="'descanso-' + i">Descanso o almuerzo (opcional)</span>
                   </div>
                   <div class="time-row time-row--small">
                     <select
                       class="time-select time-select--sm"
+                      [attr.aria-label]="'Inicio del descanso del ' + horario.dia"
                       [(ngModel)]="horario.descansoInicio"
                     >
-                      <option value="">Inicio</option>
+                      <option value="">Desde</option>
                       @for (hora of horas; track hora) {
                         <option [value]="hora">{{ hora }}</option>
                       }
                     </select>
-                    <span class="time-divider">-</span>
-                    <select class="time-select time-select--sm" [(ngModel)]="horario.descansoFin">
-                      <option value="">Fin</option>
+                    <span class="time-divider" aria-hidden="true">a</span>
+                    <select
+                      class="time-select time-select--sm"
+                      [attr.aria-label]="'Fin del descanso del ' + horario.dia"
+                      [(ngModel)]="horario.descansoFin"
+                    >
+                      <option value="">Hasta</option>
                       @for (hora of horas; track hora) {
                         <option [value]="hora">{{ hora }}</option>
                       }
@@ -94,11 +121,11 @@
 
       <div class="resumen-panel">
         <mat-card class="resumen-card">
-          <h3 class="panel-title">Resumen semanal</h3>
+          <h2 class="panel-title">Resumen semanal</h2>
           <div class="resumen-stats">
             <div class="stat">
               <span class="stat-value">{{ diasActivos }}</span>
-              <span class="stat-label">Días activos</span>
+              <span class="stat-label">Días abiertos</span>
             </div>
             <div class="stat">
               <span class="stat-value">{{ 7 - diasActivos }}</span>
@@ -107,22 +134,21 @@
           </div>
         </mat-card>
 
+        <!-- SPEC 04: el horario sale de los datos reales (antes era un texto fijo que no coincidía). -->
         <mat-card class="resumen-card">
-          <h3 class="panel-title">Horario habitual</h3>
+          <h2 class="panel-title">Tu semana</h2>
           <div class="horario-info">
-            <div class="info-row">
-              <mat-icon>schedule</mat-icon>
-              <span>Lunes a Viernes: 09:00 - 18:00</span>
-            </div>
-            <div class="info-row">
-              <mat-icon>schedule</mat-icon>
-              <span>Sábado: 10:00 - 15:00</span>
-            </div>
-            <div class="info-row info-row--cerrado">
-              <mat-icon>event_busy</mat-icon>
-              <span>Domingo: Cerrado</span>
-            </div>
+            @for (horario of horarios; track horario.dia) {
+              <div class="info-row" [class.info-row--cerrado]="!horario.activo">
+                <mat-icon>{{ horario.activo ? 'schedule' : 'event_busy' }}</mat-icon>
+                <span>
+                  {{ horario.dia }}:
+                  {{ horario.activo ? horario.apertura + ' a ' + horario.cierre : 'Cerrado' }}
+                </span>
+              </div>
+            }
           </div>
+          <p class="resumen-nota">Muestra lo que tienes en pantalla. Guarda para aplicar los cambios.</p>
         </mat-card>
       </div>
     </div>

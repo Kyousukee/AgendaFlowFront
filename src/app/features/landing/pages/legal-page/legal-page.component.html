@@ -7,8 +7,8 @@
   </header>
 
   <div class="legal__layout">
-    <nav class="legal__toc" aria-label="Contenido">
-      <p class="legal__toc-title">En esta página</p>
+    <nav class="legal__toc" id="indice" aria-label="Contenido">
+      <p class="legal__toc-title">En esta página · {{ secciones().length }} secciones</p>
       <ol class="legal__toc-list">
         @for (s of secciones(); track s.id) {
           <li>
@@ -22,8 +22,20 @@
 
     <article class="legal__body">
       <ng-content />
+
+      <p class="legal__see-also">
+        Ver también:
+        @if (rutaActual() === '/privacidad') {
+          <a routerLink="/terminos">Términos y condiciones</a>
+        } @else {
+          <a routerLink="/privacidad">Política de privacidad</a>
+        }
+      </p>
     </article>
   </div>
+
+  <!-- En el teléfono el índice queda arriba: este atajo lleva de vuelta desde cualquier punto. -->
+  <a [routerLink]="rutaActual()" fragment="indice" class="legal__to-toc">Volver al índice</a>
 </main>
 
 <app-footer />

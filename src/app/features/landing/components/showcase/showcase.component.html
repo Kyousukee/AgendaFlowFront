@@ -19,8 +19,20 @@
     </div>
   </div>
 
+  <!-- Anuncio corto de lo que cambió, en vez de releer la hoja entera (SPEC 04). -->
+  <p class="sr-only" aria-live="polite">
+    @for (s of salidas; track s.id) {
+      @if (salida() === s.id) {
+        {{ s.label }}.
+      }
+    }
+    @if (salida() === 'reservas') {
+      {{ servicio().nombre }}{{ horaElegida() !== null ? ', a las ' + hora(horaElegida()!) : '' }}.
+    }
+  </p>
+
   <div class="showcase__stage" data-reveal>
-    <div class="showcase__sheet-wrap" id="showcase-sheet" aria-live="polite">
+    <div class="showcase__sheet-wrap" id="showcase-sheet">
       @switch (salida()) {
         @case ('reservas') {
           <article class="sheet sheet--reservas" data-ui>
@@ -72,6 +84,8 @@
             >
               @if (horaElegida() !== null) {
                 Confirmar {{ servicio().nombre.toLowerCase() }} a las {{ hora(horaElegida()!) }}
+              } @else if (libres().length) {
+                Elige una hora
               } @else {
                 Elige otro servicio
               }

@@ -146,7 +146,7 @@
   width: 100%;
   height: 46px;
   padding: 0 14px;
-  border: 1px solid var(--border-light); // taste-skill-ignore: campo de formulario
+  border: 1px solid var(--border-field);
   border-radius: 0;
   background: var(--bg-surface);
   color: var(--text-primary);
@@ -161,7 +161,7 @@
   }
 
   &:hover {
-    border-color: #4a4a4a;
+    border-color: var(--border-field-hover);
   }
 
   &:focus {
@@ -177,7 +177,7 @@
 
   &--error,
   &--error:focus {
-    border-color: #f87171;
+    border-color: var(--error);
     outline-color: rgba(248, 113, 113, 0.35);
   }
 }
@@ -206,15 +206,41 @@
 
 .form-error {
   font-size: 0.8125rem;
-  color: #fca5a5;
+  color: var(--error-text);
 }
 
 .form-error-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 16px;
   margin-bottom: 20px;
   padding: 12px 14px;
-  background: rgba(220, 38, 38, 0.14);
-  color: #fecaca;
+  background: var(--error-surface);
+  color: var(--error-text);
   font-size: 0.9375rem;
+
+  // Lleva de vuelta al paso donde se corrige el dato (p. ej. "el correo ya está registrado").
+  &__action {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+}
+
+// Ayuda permanente bajo un campo (el requisito no vive en el placeholder).
+.form-hint {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+// Aviso de un paso entero (p. ej. "todo este paso es opcional").
+.form-note {
+  padding: 12px 14px;
+  border-left: 2px solid var(--gold-dark); // taste-skill-ignore: nota del paso, no tarjeta
+  background: var(--bg-surface);
+  font-size: 0.9375rem;
+  color: var(--text-secondary);
 }
 
 .form-row {
@@ -230,32 +256,52 @@
   gap: 14px;
 }
 
+// El label entero es el objetivo táctil (44px); el cuadro no se encoge con textos largos.
 .form-checkbox {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  align-items: flex-start;
+  gap: 12px;
+  min-height: var(--target-min);
+  padding-block: 10px;
   font-size: 0.9375rem;
+  line-height: 1.5;
   color: var(--text-secondary);
   cursor: pointer;
 
   input {
-    width: 18px;
-    height: 18px;
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    margin-top: 2px;
     accent-color: var(--gold);
+  }
+
+  &--error input {
+    outline: 2px solid var(--error);
+    outline-offset: 2px;
   }
 }
 
+// Enlace de formulario: subrayado siempre visible, así no depende solo del color (WCAG 1.4.1).
 .form-link {
   color: var(--gold-light);
   font-size: 0.9375rem;
   text-decoration: underline;
-  text-decoration-color: transparent;
+  text-decoration-color: color-mix(in srgb, currentColor 55%, transparent);
   text-underline-offset: 4px;
   transition: text-decoration-color var(--duration-fast) var(--ease-out);
 
   &:hover {
     text-decoration-color: currentColor;
   }
+}
+
+// Enlaces dentro de una frase: área táctil de 44px de alto sin mover el texto.
+.form-checkbox .form-link,
+.auth__footer-text .form-link {
+  display: inline-block;
+  padding-block: 11px;
+  margin-block: -11px;
 }
 
 .form-nav {
@@ -325,6 +371,7 @@
 
 // Pasos del registro: el dorado pleno solo en la marca del paso activo.
 .steps {
+  list-style: none;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -399,7 +446,7 @@
       position: relative;
       min-height: 0;
       max-height: none;
-      grid-template-rows: 30svh auto;
+      grid-template-rows: 18svh auto;
     }
 
     &__logo {
@@ -431,4 +478,31 @@
   .form-row-2 {
     grid-template-columns: 1fr;
   }
+}
+
+// Teléfono chico: la frase de marca cede su lugar para que el formulario empiece en pantalla.
+@media (max-width: 600px) {
+  .auth__promo-text {
+    display: none;
+  }
+
+  .auth__promo {
+    padding-block: 16px;
+  }
+
+  .auth__promo-title {
+    margin-bottom: 0;
+    font-size: 1.75rem;
+  }
+}
+
+// Teléfono: las filas no se estiran para llenar 100svh; la banda de marca queda a su alto.
+@media (max-width: 900px) {
+  .auth {
+    align-content: start;
+  }
+}
+
+.form-error-banner__action {
+  min-height: var(--target-min);
 }

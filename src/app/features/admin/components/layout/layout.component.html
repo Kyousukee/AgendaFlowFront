@@ -69,6 +69,7 @@
             @if (auth.esAdmin() && auth.sucursales().length > 1) {
               <select
                 class="sucursal-select"
+                aria-label="Sucursal"
                 [value]="auth.sucursalActual()?.id"
                 (change)="cambiarSucursal($event)"
               >

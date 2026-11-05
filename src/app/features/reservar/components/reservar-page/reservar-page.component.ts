@@ -13,6 +13,7 @@ import { ConfiguracionEmpresa } from '../../../../core/interfaces/configuracion-
 import { Reserva } from '../../../../core/interfaces/reserva.interface';
 import { ReservarFormComponent } from '../reservar-form/reservar-form.component';
 import { ReservarConfirmacionComponent } from '../reservar-confirmacion/reservar-confirmacion.component';
+import { ReservaResumen } from '../../interfaces/reserva-resumen.interface';
 
 @Component({
   selector: 'app-reservar-page',
@@ -36,7 +37,7 @@ export class ReservarPageComponent implements OnInit {
   configuracion = signal<ConfiguracionEmpresa | null>(null);
   cargando = signal(true);
   reservaConfirmada = signal(false);
-  reservaCodigo = signal('');
+  reservaResumen = signal<ReservaResumen | null>(null);
   error = signal('');
 
   ngOnInit(): void {
@@ -121,8 +122,8 @@ export class ReservarPageComponent implements OnInit {
     });
   }
 
-  onReservaConfirmada(codigo: string): void {
-    this.reservaCodigo.set(codigo);
+  onReservaConfirmada(resumen: ReservaResumen): void {
+    this.reservaResumen.set(resumen);
     this.reservaConfirmada.set(true);
   }
 

@@ -36,7 +36,7 @@
     line-height: 1.1;
     letter-spacing: -0.02em;
     text-align: left;
-    color: #80858d;
+    color: var(--text-muted);
     transition:
       color var(--duration-base) var(--ease-out),
       transform var(--duration-base) var(--ease-out);
@@ -56,18 +56,28 @@
     }
   }
 
+  // El escenario crece con la hoja y la recorta solo por abajo, donde el papel sigue en blanco
+  // (SPEC 04): el recorte nunca tapa una opción, una fila ni el botón.
   &__stage {
     grid-column: 7 / span 6;
-    position: relative;
-    height: clamp(560px, 64svh, 640px);
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: clamp(560px, 64svh, 640px);
+    padding: 72px 0 0 64px;
     overflow: hidden;
     background: var(--field-char);
   }
 
+  // El papel llena el escenario y sigue 48px bajo su borde inferior, donde queda recortado.
   &__sheet-wrap {
-    position: absolute;
-    top: 72px;
-    left: 64px;
+    display: flex;
+    flex: 1;
+    margin-bottom: -48px;
+
+    > .sheet {
+      flex: 0 1 auto;
+    }
   }
 }
 
@@ -84,9 +94,18 @@
 
 // La hoja: un fragmento real de la app, en papel claro.
 .sheet {
-  width: 560px;
-  min-height: 680px;
-  padding: 32px;
+  // Tintas de la hoja de papel (fragmento de la app, data-ui). Todas pasan AA sobre el hueso.
+  --sheet-rule: #cfccc4;
+  --sheet-tint: #f2f0ec;
+  --sheet-block: #dcd9d1;
+  --sheet-muted: #55524b;
+  --sheet-muted-on-ink: #c9c6bf;
+  --sheet-pending: #8a5a00;
+
+  width: min(560px, 100%);
+  min-height: 560px;
+  // 80px abajo: el papel sigue 48px bajo el borde del escenario sin cortar contenido.
+  padding: 32px 32px 80px;
   background: var(--field-bone);
   color: var(--on-bone);
   font-size: 1rem;
@@ -94,7 +113,7 @@
   animation: sheet-in 200ms var(--ease-out);
 
   &--confirmacion {
-    width: 440px;
+    width: min(440px, 100%);
   }
 
   &__head {
@@ -103,7 +122,7 @@
     gap: 2px;
     padding-bottom: 20px;
     margin-bottom: 20px;
-    border-bottom: 1px solid #cfccc4; // taste-skill-ignore: fragmento de la app (data-ui)
+    border-bottom: 1px solid var(--sheet-rule);
   }
 
   &__brand {
@@ -113,7 +132,7 @@
   }
 
   &__muted {
-    color: #55524b;
+    color: var(--sheet-muted);
     font-size: 0.9375rem;
   }
 
@@ -134,8 +153,8 @@
     align-items: flex-start;
     gap: 2px;
     padding: 12px 14px;
-    border: 1px solid #cfccc4; // taste-skill-ignore: fragmento de la app (data-ui)
-    background: #f2f0ec;
+    border: 1px solid var(--sheet-rule);
+    background: var(--sheet-tint);
     color: inherit;
     text-align: left;
     transition:
@@ -152,7 +171,7 @@
       color: var(--field-bone);
 
       .sheet__muted {
-        color: #c9c6bf;
+        color: var(--sheet-muted-on-ink);
       }
     }
   }
@@ -169,9 +188,10 @@
 
   &__slot {
     min-width: 72px;
+    min-height: var(--target-min);
     padding: 10px 12px;
-    border: 1px solid #cfccc4; // taste-skill-ignore: fragmento de la app (data-ui)
-    background: #f2f0ec;
+    border: 1px solid var(--sheet-rule);
+    background: var(--sheet-tint);
     color: inherit;
     font-variant-numeric: tabular-nums;
     transition: border-color var(--duration-fast) var(--ease-out);
@@ -211,7 +231,7 @@
   &__slot,
   &__confirm {
     &:focus-visible {
-      outline: 2px solid var(--gold-dark);
+      outline: 2px solid var(--on-bone);
       outline-offset: 2px;
     }
   }
@@ -225,11 +245,11 @@
       justify-content: space-between;
       gap: 16px;
       padding: 12px 0;
-      border-bottom: 1px solid #cfccc4; // taste-skill-ignore: fragmento de la app (data-ui)
+      border-bottom: 1px solid var(--sheet-rule);
     }
 
     dt {
-      color: #55524b;
+      color: var(--sheet-muted);
     }
 
     dd {
@@ -259,11 +279,11 @@
     gap: 12px;
     align-items: baseline;
     padding: 14px 0;
-    border-bottom: 1px solid #cfccc4; // taste-skill-ignore: fragmento de la app (data-ui)
+    border-bottom: 1px solid var(--sheet-rule);
 
     &.is-block {
-      color: #55524b;
-      background: #dcd9d1;
+      color: var(--sheet-muted);
+      background: var(--sheet-block);
       padding-inline: 8px;
       margin-inline: -8px;
     }
@@ -292,13 +312,13 @@
       padding: 0 0 10px;
       font-size: 0.875rem;
       font-weight: 600;
-      color: #55524b;
+      color: var(--sheet-muted);
       text-align: left;
     }
 
     td {
       padding: 12px 0;
-      border-top: 1px solid #cfccc4; // taste-skill-ignore: fragmento de la app (data-ui)
+      border-top: 1px solid var(--sheet-rule);
     }
 
     .num {
@@ -310,7 +330,7 @@
     }
 
     .is-pending {
-      color: #8a5a00;
+      color: var(--sheet-pending);
       font-weight: 600;
     }
   }
@@ -332,11 +352,14 @@
     &__names {
       flex-direction: row;
       flex-wrap: wrap;
-      gap: 6px 18px;
+      gap: 0 18px;
     }
 
     &__name {
       flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      min-height: var(--target-min);
       font-size: 1.375rem;
       white-space: nowrap;
 
@@ -345,21 +368,21 @@
       }
     }
 
+    // La hoja ocupa el ancho del teléfono (menos 16px por lado): nada queda cortado a la derecha.
     &__stage {
       grid-column: 1;
-      height: 70svh;
       min-height: 0;
-      height: 600px;
+      padding: 16px 16px 0;
       margin-inline: calc(var(--margin) * -1);
-    }
-
-    &__sheet-wrap {
-      top: 16px;
-      left: 16px;
     }
   }
 
   .sheet {
-    min-height: 640px;
+    min-height: 0;
+    padding: 24px 20px 72px;
+  }
+
+  .sheet__services {
+    grid-template-columns: 1fr;
   }
 }
