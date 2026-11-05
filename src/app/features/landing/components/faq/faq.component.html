@@ -1,0 +1,11 @@
+<section class="faq" id="faq" aria-labelledby="faq-title" appScrollReveal [revealStagger]="0.04">
+  <h2 class="faq__title" id="faq-title" data-reveal>Preguntas frecuentes</h2>
+
+  <div class="faq__text">
+    @for (p of preguntas; track p.pregunta) {
+      <p class="faq__item" data-reveal>
+        <strong class="faq__q">{{ p.pregunta }}</strong> {{ p.respuesta }}
+      </p>
+    }
+  </div>
+</section>

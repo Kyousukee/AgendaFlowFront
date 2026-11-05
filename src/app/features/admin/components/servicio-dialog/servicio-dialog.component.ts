@@ -15,11 +15,11 @@ const COLORES_PREDEFINIDOS = [
   '#60A5FA',
   '#F472B6',
   '#34D399',
-  '#A78BFA',
+  '#A78BFA', // taste-skill-ignore: color elegible por el dueño para un servicio
   '#F97316',
   '#EF4444',
   '#14B8A6',
-  '#8B5CF6',
+  '#8B5CF6', // taste-skill-ignore: color elegible por el dueño para un servicio
   '#EC4899',
 ];
 
@@ -31,7 +31,7 @@ const COLORES_PREDEFINIDOS = [
     <div class="dialog">
       <div class="dialog__header">
         <h2 class="dialog__title">{{ data.servicio ? 'Editar' : 'Agregar' }} servicio</h2>
-        <button class="dialog__close" (click)="cerrar()">
+        <button class="dialog__close" (click)="cerrar()" aria-label="Cerrar">
           <mat-icon>close</mat-icon>
         </button>
       </div>
@@ -53,7 +53,7 @@ const COLORES_PREDEFINIDOS = [
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="descripcion">Descripcion</label>
+          <label class="form-label" for="descripcion">Descripción</label>
           <textarea
             id="descripcion"
             class="form-input form-textarea"
@@ -65,7 +65,7 @@ const COLORES_PREDEFINIDOS = [
 
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label" for="duracion">Duracion (minutos) *</label>
+            <label class="form-label" for="duracion">Duración (minutos) *</label>
             <input
               id="duracion"
               type="number"
@@ -77,7 +77,7 @@ const COLORES_PREDEFINIDOS = [
               [class.form-input--error]="fieldError('duracionMinutos')"
             />
             @if (fieldError('duracionMinutos')) {
-              <span class="form-error">Requerido, minimo 5 min.</span>
+              <span class="form-error">Requerido, mínimo 5 min.</span>
             }
           </div>
           <div class="form-group">
@@ -122,182 +122,37 @@ const COLORES_PREDEFINIDOS = [
       </form>
     </div>
   `,
+  // Armazón del diálogo y campos: features/admin/styles/_admin.scss (.dialog-panel).
+  // Aquí solo lo propio de este diálogo (SPEC 03: se restiliza en su lugar).
   styles: `
-    .dialog {
-      padding: 0;
-      min-width: 480px;
-    }
-
-    .dialog__header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1.25rem 1.5rem;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .dialog__title {
-      font-size: 1.125rem;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin: 0;
-    }
-
-    .dialog__close {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 32px;
-      height: 32px;
-      border-radius: 6px;
-      border: none;
-      background: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      transition: all 0.15s ease;
-
-      &:hover {
-        background: var(--bg-surface-hover);
-        color: var(--text-primary);
-      }
-    }
-
-    .dialog__form {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      padding: 1.5rem;
-    }
-
-    .dialog__actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 0.75rem;
-      padding-top: 0.5rem;
-    }
-
-    .form-row {
-      display: flex;
-      gap: 0.75rem;
-
-      .form-group {
-        flex: 1;
-      }
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.375rem;
-    }
-
-    .form-label {
-      font-size: 0.8125rem;
-      font-weight: 500;
-      color: var(--text-secondary);
-    }
-
-    .form-input {
-      width: 100%;
-      padding: 0.625rem 0.875rem;
-      background: var(--bg-primary);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font-size: 0.875rem;
-      color: var(--text-primary);
-      font-family: inherit;
-      transition: border-color 0.15s ease;
-      outline: none;
-      box-sizing: border-box;
-
-      &:focus {
-        border-color: var(--gold);
-      }
-    }
-
-    .form-input::placeholder {
-      color: var(--text-muted);
-    }
-
-    .form-input--error {
-      border-color: #ef4444;
-    }
-
-    .form-textarea {
-      resize: vertical;
-      min-height: 60px;
-    }
-
-    .form-error {
-      font-size: 0.75rem;
-      color: #ef4444;
-    }
-
     .color-picker {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.5rem;
+      gap: 8px;
     }
 
     .color-swatch {
       width: 32px;
       height: 32px;
-      border-radius: 50%;
-      border: 2px solid transparent;
-      cursor: pointer;
-      transition: all 0.15s ease;
       padding: 0;
+      border: 2px solid transparent;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: transform var(--duration-fast) var(--ease-out);
 
       &:hover {
-        transform: scale(1.15);
+        transform: scale(1.1);
+      }
+
+      &:focus-visible {
+        outline: 2px solid var(--gold-light);
+        outline-offset: 2px;
       }
     }
 
     .color-swatch--selected {
-      border-color: var(--text-primary);
-      box-shadow:
-        0 0 0 2px var(--bg-primary),
-        0 0 0 4px currentColor;
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      padding: 0.625rem 1.25rem;
-      border-radius: 8px;
-      font-size: 0.875rem;
-      font-weight: 500;
-      cursor: pointer;
-      border: none;
-      font-family: inherit;
-      transition: all 0.15s ease;
-    }
-
-    .btn--primary {
-      background: var(--gold);
-      color: var(--bg-primary);
-
-      &:hover:not(:disabled) {
-        background: var(--gold-light);
-      }
-
-      &:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-      }
-    }
-
-    .btn--secondary {
-      background: var(--bg-surface-elevated);
-      color: var(--text-secondary);
-      border: 1px solid var(--border);
-
-      &:hover {
-        color: var(--text-primary);
-        border-color: var(--border-light);
-      }
+      outline: 2px solid var(--text-primary);
+      outline-offset: 2px;
     }
   `,
 })

@@ -1,32 +1,36 @@
 import { Component } from '@angular/core';
+import { ScrollRevealDirective } from '../../directives/scroll-reveal.directive';
 
+interface Etapa {
+  duracion: string;
+  texto: string;
+  tono: 'bone' | 'char' | 'gold';
+}
+
+/** Cómo funciona — las etapas como una sola barra de progreso, proporcional a su duración. */
 @Component({
   selector: 'app-how-it-works',
   standalone: true,
+  imports: [ScrollRevealDirective],
   templateUrl: './how-it-works.component.html',
   styleUrl: './how-it-works.component.scss',
 })
 export class HowItWorksComponent {
-  steps = [
+  readonly etapas: Etapa[] = [
     {
-      number: '01',
-      title: 'Crea tu cuenta',
-      description: 'Registrate en menos de 2 minutos. Importa tus clientes y servicios existentes con un solo clic.',
+      duracion: 'Dos minutos',
+      texto: 'Primero, creas la cuenta con tu correo y el nombre del negocio.',
+      tono: 'bone',
     },
     {
-      number: '02',
-      title: 'Configura tu horario',
-      description: 'Define horas de trabajo, duracion de servicios y disponibilidad del personal. Nuestra IA optimiza tu calendario.',
+      duracion: 'Una tarde',
+      texto: 'Después, cargas servicios, equipo, sucursales y horarios.',
+      tono: 'char',
     },
     {
-      number: '03',
-      title: 'Comparte tu enlace de reservas',
-      description: 'Envia a tus clientes tu pagina de reservas con marca propia. Reservan cuando quieran &mdash; tu recibes la notificacion al instante.',
-    },
-    {
-      number: '04',
-      title: 'Haz crecer tu negocio',
-      description: 'Observa las analiticas, reduce inasistencias y concentrate en lo que mejor haces mientras nosotros nos encargamos del resto.',
+      duracion: 'Desde ese día',
+      texto: 'Y desde entonces, tus clientes reservan solos con tu enlace.',
+      tono: 'gold',
     },
   ];
 }

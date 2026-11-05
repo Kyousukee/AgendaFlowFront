@@ -1,80 +1,90 @@
+// Cierre — campo invertido a sangre (hueso con tinta negra), titular grande arriba
+// y, sobre una misma línea base al pie, la frase a la izquierda y el botón a la derecha.
 .cta {
-  position: relative;
-  padding: 6rem 1.5rem;
-  text-align: center;
-  overflow: hidden;
-
-  &__glow {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 600px;
-    height: 400px;
-    background: radial-gradient(ellipse, rgba(201, 168, 76, 0.06) 0%, transparent 70%);
-    pointer-events: none;
-  }
-
-  &__container {
-    position: relative;
-    max-width: 640px;
-    margin: 0 auto;
-  }
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 64px;
+  min-height: 90svh;
+  margin-top: var(--space-section);
+  padding: clamp(64px, 8vw, 120px) var(--margin) 40px;
+  background: var(--field-bone);
+  color: var(--on-bone);
 
   &__title {
-    font-family: 'Playfair Display', serif;
-    font-size: 2.75rem;
-    font-weight: 700;
-    line-height: 1.2;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(4rem, 10vw, 10rem);
+    line-height: 0.9;
     letter-spacing: -0.02em;
-    color: var(--text-primary);
-    margin-bottom: 1rem;
-
-    @media (max-width: 768px) {
-      font-size: 2rem;
-    }
   }
 
-  &__subtitle {
+  &__line {
+    display: block;
+  }
+
+  &__foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+  }
+
+  &__text {
+    max-width: 38ch;
+    font-size: var(--step-lead);
+    line-height: 1.4;
+  }
+
+  &__btn {
+    display: inline-flex;
+    align-items: center;
+    min-height: 56px;
+    padding: 0 32px;
+    background: var(--gold);
+    color: var(--on-gold);
     font-size: 1.0625rem;
-    color: var(--text-secondary);
-    line-height: 1.7;
-    margin-bottom: 2rem;
-  }
+    font-weight: 600;
+    transition:
+      background-color var(--duration-fast) var(--ease-out),
+      transform var(--duration-fast) var(--ease-out);
 
-  &__actions {
-    margin-bottom: 1rem;
-  }
+    &:hover {
+      background: var(--gold-dark);
+    }
 
-  &__note {
-    font-size: 0.8125rem;
-    color: var(--text-muted);
+    &:active {
+      transform: scale(0.98);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--on-bone);
+      outline-offset: 4px;
+    }
   }
 }
 
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-size: 0.9375rem;
-  font-weight: 500;
-  transition: all 0.2s ease;
+@media (max-width: 900px) {
+  .cta {
+    min-height: 64svh;
+    padding: 48px var(--margin) 20px;
 
-  &--primary {
-    background: var(--gold);
-    color: var(--bg-primary);
-
-    &:hover {
-      background: var(--gold-light);
-      transform: translateY(-1px);
+    &__title {
+      font-size: 15vw;
     }
-  }
 
-  &--lg {
-    padding: 1rem 2rem;
-    font-size: 1rem;
+    &__text {
+      font-size: 1.0625rem;
+    }
+
+    &__foot {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    &__btn {
+      justify-content: center;
+    }
   }
 }

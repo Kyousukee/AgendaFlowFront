@@ -1,41 +1,53 @@
-<section class="hero">
-  <div class="hero__glow"></div>
-  <div class="hero__container">
-    <div class="hero__badge">
-      <span class="hero__badge-dot"></span>
-      En Beta &mdash; Prueba Gratis
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero__mosaic" aria-hidden="true">
+    <div class="hero__cell hero__cell--p1">
+      <img
+        src="images/landing/barberia-navaja.webp"
+        alt=""
+        width="1100"
+        height="1648"
+        fetchpriority="high"
+      />
     </div>
+    <div class="hero__cell hero__cell--tall"></div>
+    <div class="hero__cell hero__cell--p2">
+      <img
+        #drift
+        src="images/landing/barberia-sillon.webp"
+        alt=""
+        width="1600"
+        height="1063"
+        fetchpriority="high"
+      />
+    </div>
+    <div class="hero__cell hero__cell--char"></div>
+    <div class="hero__cell hero__cell--p3">
+      <img src="images/landing/peluqueria-brushing.webp" alt="" width="1600" height="1068" />
+    </div>
+    <div class="hero__cell hero__cell--c2"></div>
+    <div class="hero__cell hero__cell--p4">
+      <img src="images/landing/barberia-herramientas.webp" alt="" width="1600" height="1067" />
+    </div>
+    <div class="hero__cell hero__cell--gold"></div>
+    <div class="hero__cell hero__cell--c3"></div>
+  </div>
 
-    <h1 class="hero__title">
-      Agenda que se<br />
-      <span class="hero__title-accent">administra sola.</span>
+  <div class="hero__body">
+    <h1 class="hero__title" id="hero-title">
+      <span class="hero__line"><span class="hero__line-inner">Tu agenda,</span></span>
+      <span class="hero__line"><span class="hero__line-inner">sin libreta.</span></span>
     </h1>
 
-    <p class="hero__subtitle">
-      La plataforma todo-en-uno para barberias, salones y centros de bienestar.
-      Administra citas, clientes y pagos &mdash; sin el caos.
-    </p>
-
-    <div class="hero__actions">
-      <a routerLink="/register" class="btn btn--primary btn--lg">
-        Empezar Gratis
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </a>
-      <a href="#how-it-works" class="btn btn--outline btn--lg">Ver Como Funciona</a>
-    </div>
-
-    <div class="hero__proof">
-      <div class="hero__avatars">
-        <div class="hero__avatar" style="background: linear-gradient(135deg, #C9A84C, #A8893D);">J</div>
-        <div class="hero__avatar" style="background: linear-gradient(135deg, #7C3AED, #5B21B6);">M</div>
-        <div class="hero__avatar" style="background: linear-gradient(135deg, #059669, #047857);">A</div>
-        <div class="hero__avatar" style="background: linear-gradient(135deg, #DC2626, #B91C1C);">R</div>
+    <div class="hero__aside">
+      <p class="hero__standfirst" data-hero-fade>
+        Agenda online para barberías y peluquerías. Tus clientes reservan su hora solos, a
+        cualquier hora, y tú ves el día completo en un panel.
+      </p>
+      <div class="hero__actions" data-hero-fade>
+        <a routerLink="/register" class="hero__cta">Empezar gratis</a>
+        <a href="#showcase" class="hero__link">Ver cómo se ve</a>
       </div>
-      <span class="hero__proof-text">
-        <strong>500+</strong> negocios ya registrados
-      </span>
+      <p class="hero__note" data-hero-fade>Plan Gratis para siempre. Pro a $19.990 al mes.</p>
     </div>
   </div>
 </section>

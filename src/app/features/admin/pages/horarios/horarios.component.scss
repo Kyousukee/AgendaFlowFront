@@ -1,143 +1,64 @@
+// Horarios — un día por fila y un riel con el resumen (SPEC 03, paso 14).
+// Cabecera, botones y estados vienen de features/admin/styles/_admin.scss.
+
 .horarios-page {
-  max-width: 1200px;
-}
-
-.loading-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  padding: 4rem 2rem;
-  color: var(--text-muted);
-  font-size: 0.875rem;
-
-  .loading-icon {
-    font-size: 32px;
-    width: 32px;
-    height: 32px;
-    color: var(--gold);
-    animation: spin 1.2s linear infinite;
-  }
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 2rem;
-}
-
-.page-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: 0.25rem;
-}
-
-.page-subtitle {
-  font-size: 0.875rem;
-  color: var(--text-muted);
-}
-
-.page-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.625rem 1.25rem;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  border: none;
-  font-family: inherit;
-  transition: all 0.15s ease;
-
-  mat-icon {
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
-  }
-
-  &--primary {
-    background: var(--gold);
-    color: var(--bg-primary);
-
-    &:hover {
-      background: var(--gold-light);
-    }
-
-    &:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-  }
+  max-width: 1280px;
 }
 
 .save-success {
   display: inline-flex;
   align-items: center;
-  gap: 0.375rem;
-  font-size: 0.8125rem;
-  color: #34d399;
-  font-weight: 500;
-  animation: fadeIn 0.2s ease;
+  gap: 6px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #6ee7b7;
+  animation: save-in 200ms var(--ease-out);
 
   mat-icon {
-    font-size: 16px;
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
   }
 }
 
-@keyframes fadeIn {
+@keyframes save-in {
   from {
     opacity: 0;
-    transform: translateY(-4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+    transform: translateY(4px);
   }
 }
 
 .horarios-layout {
   display: grid;
-  grid-template-columns: 1fr 280px;
-  gap: 1.5rem;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 24px;
   align-items: start;
 }
 
+// Días: filas sobre una superficie, separadas por reglas de 1px.
 .dias-panel {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  overflow: hidden;
+  border-radius: 10px;
+  background: var(--bg-surface);
 }
 
 .dia-card {
-  background: var(--bg-surface) !important;
-  border: 1px solid var(--border);
-  border-radius: 12px !important;
-  padding: 1.25rem !important;
-  transition: opacity 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none; // taste-skill-ignore: quita la sombra por defecto de mat-card
 
-  &--inactivo {
-    opacity: 0.5;
+  & + & {
+    border-top: 1px solid var(--border); // taste-skill-ignore: filas de una lista
+  }
+
+  &--inactivo .dia-nombre {
+    color: var(--text-secondary);
   }
 }
 
@@ -145,193 +66,214 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
 }
 
 .dia-info {
   display: flex;
-  flex-direction: column;
+  align-items: baseline;
+  gap: 16px;
+  min-width: 0;
 }
 
 .dia-nombre {
+  min-width: 96px;
   font-size: 1rem;
   font-weight: 600;
   color: var(--text-primary);
 }
 
 .dia-horas {
-  font-size: 0.8125rem;
-  color: var(--gold);
-  font-weight: 500;
+  font-size: 0.9375rem;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
 
   &--cerrado {
     color: var(--text-muted);
-    font-style: italic;
   }
 }
 
 .dia-config {
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--border);
   display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px 32px;
+  padding-left: 112px;
 }
 
 .time-row {
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
+  align-items: flex-end;
+  gap: 10px;
 
   &--small {
-    gap: 0.5rem;
+    align-items: center;
   }
 }
 
 .time-field {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 4px;
 }
 
 .time-label {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  font-weight: 500;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
 }
 
 .time-select {
-  padding: 0.5rem 0.75rem;
-  background: var(--bg-primary);
-  border: 1px solid var(--border);
+  min-width: 104px;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--border-light); // taste-skill-ignore: campo de formulario
   border-radius: 6px;
+  background: var(--bg-primary);
   color: var(--text-primary);
-  font-size: 0.875rem;
-  font-family: inherit;
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  font-variant-numeric: tabular-nums;
   cursor: pointer;
-  min-width: 100px;
-  outline: none;
-  transition: border-color 0.15s ease;
 
-  &:focus {
+  &:hover {
+    border-color: #4a4a4a;
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(201, 168, 76, 0.35);
     border-color: var(--gold);
   }
 
-  option {
-    background: var(--bg-primary);
-    color: var(--text-primary);
+  &--sm {
+    min-width: 92px;
   }
 
-  &--sm {
-    min-width: 80px;
-    padding: 0.4rem 0.5rem;
-    font-size: 0.8125rem;
+  option {
+    background: var(--bg-surface);
   }
 }
 
 .time-separator {
-  color: var(--text-muted);
-  font-size: 18px;
   width: 18px;
-  height: 18px;
-  margin-top: 1rem;
-}
-
-.time-divider {
+  height: 36px;
+  font-size: 18px;
+  line-height: 36px;
   color: var(--text-muted);
-  font-size: 0.875rem;
 }
 
 .descanso-row {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.625rem 0.75rem;
-  background: var(--bg-surface-elevated);
-  border-radius: 8px;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .descanso-label {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 6px;
   font-size: 0.8125rem;
   color: var(--text-secondary);
 }
 
 .descanso-icon {
-  font-size: 16px;
   width: 16px;
   height: 16px;
+  font-size: 16px;
+}
+
+.time-divider {
   color: var(--text-muted);
 }
 
+// Riel derecho
 .resumen-panel {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  position: sticky;
-  top: 2rem;
+  gap: 24px;
 }
 
 .resumen-card {
-  background: var(--bg-surface) !important;
-  border: 1px solid var(--border);
-  border-radius: 12px !important;
-  padding: 1.25rem !important;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none; // taste-skill-ignore: quita la sombra por defecto de mat-card
 }
 
 .panel-title {
-  font-size: 0.8125rem;
+  margin-bottom: 8px;
+  font-size: 1rem;
   font-weight: 600;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 1rem;
+  color: var(--text-primary);
 }
 
 .resumen-stats {
-  display: flex;
-  gap: 1.5rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-radius: 10px;
+  background: var(--bg-surface);
 }
 
 .stat {
   display: flex;
   flex-direction: column;
+  gap: 2px;
+  padding: 14px 16px;
+
+  & + & {
+    border-left: 1px solid var(--border); // taste-skill-ignore: divisor de cifras
+  }
 }
 
 .stat-value {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: var(--gold);
+  font-family: var(--font-display);
+  font-size: 2rem;
+  line-height: 1;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
 }
 
 .stat-label {
-  font-size: 0.75rem;
-  color: var(--text-muted);
+  font-size: 0.875rem;
+  color: var(--text-secondary);
 }
 
 .horario-info {
   display: flex;
   flex-direction: column;
-  gap: 0.625rem;
+  border-radius: 10px;
+  background: var(--bg-surface);
 }
 
 .info-row {
   display: flex;
   align-items: center;
-  gap: 0.625rem;
-  font-size: 0.8125rem;
-  color: var(--text-secondary);
+  gap: 10px;
+  padding: 12px 14px;
+  font-size: 0.9375rem;
+  color: var(--text-primary);
+
+  & + & {
+    border-top: 1px solid var(--border); // taste-skill-ignore: filas de una lista
+  }
 
   mat-icon {
-    font-size: 16px;
-    width: 16px;
-    height: 16px;
-    color: var(--text-muted);
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+    color: var(--text-secondary);
   }
 
   &--cerrado {
-    color: var(--text-muted);
+    color: var(--text-secondary);
+  }
+}
+
+@media (max-width: 900px) {
+  .horarios-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dia-config {
+    padding-left: 0;
   }
 }

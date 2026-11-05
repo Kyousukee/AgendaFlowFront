@@ -12,12 +12,12 @@
       <input
         type="text"
         class="search-input"
-        placeholder="Buscar por cliente, servicio o codigo..."
+        placeholder="Buscar por cliente, servicio o código..."
         [ngModel]="busqueda()"
         (ngModelChange)="busqueda.set($event)"
       />
       @if (busqueda()) {
-        <button class="search-clear" (click)="busqueda.set('')">
+        <button class="search-clear" (click)="busqueda.set('')" aria-label="Limpiar búsqueda">
           <mat-icon>close</mat-icon>
         </button>
       }
@@ -74,7 +74,7 @@
       <mat-icon class="empty-icon">payments</mat-icon>
       <h3 class="empty-title">Sin pagos registrados</h3>
       <p class="empty-text">
-        Aun no hay pagos registrados en el sistema.
+        Aún no hay pagos registrados en el sistema.
       </p>
     </div>
   } @else if (pagosFiltrados().length === 0) {
@@ -101,7 +101,7 @@
             <th>Empleado</th>
             <th>Sucursal</th>
             <th class="th-monto">Monto</th>
-            <th>Metodo</th>
+            <th>Método</th>
             <th>Estado</th>
             <th class="th-acciones">Acciones</th>
           </tr>

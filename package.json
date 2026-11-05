@@ -23,6 +23,7 @@
     "@angular/router": "^22.0.0",
     "@angular/ssr": "^22.0.6",
     "express": "^5.1.0",
+    "gsap": "^3.15.1",
     "leaflet": "^1.9.4",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
@@ -38,5 +39,11 @@
     "prettier": "^3.8.1",
     "typescript": "~6.0.2",
     "vitest": "^4.0.8"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "lmdb@3.5.6": true,
+    "msgpackr-extract@3.0.6": true,
+    "@parcel/watcher@2.6.0": true
   }
 }

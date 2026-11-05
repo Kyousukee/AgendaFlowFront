@@ -1,366 +1,267 @@
+// Configuración — ajustes en dos columnas (SPEC 03, paso 14): a la izquierda el título y la
+// descripción de cada sección; a la derecha su panel. Secciones separadas por una regla de 1px.
+// Cabecera, botones y estados vienen de features/admin/styles/_admin.scss.
+
 .config-page {
-  max-width: 900px;
-}
-
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 2rem;
-}
-
-.page-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: 0.25rem;
-}
-
-.page-subtitle {
-  font-size: 0.875rem;
-  color: var(--text-muted);
-}
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.625rem 1.25rem;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  border: none;
-  font-family: inherit;
-  transition: all 0.15s ease;
-  white-space: nowrap;
-
-  mat-icon {
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
-  }
-
-  &--primary {
-    background: var(--gold);
-    color: var(--bg-primary);
-
-    &:hover:not(:disabled) {
-      background: var(--gold-light);
-    }
-
-    &:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-  }
+  max-width: 1152px;
 }
 
 .spin {
-  animation: spin 1.2s linear infinite;
+  animation: config-spin 1s linear infinite;
 }
 
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.loading-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  padding: 4rem 2rem;
-  color: var(--text-muted);
-  font-size: 0.875rem;
-
-  .loading-icon {
-    font-size: 32px;
-    width: 32px;
-    height: 32px;
-    color: var(--gold);
-    animation: spin 1.2s linear infinite;
+@keyframes config-spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 
+.config-form,
 .config-grid {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
 }
 
+// Cada sección: columna de rótulo (≈360px) junto a su panel.
 .config-card {
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  overflow: hidden;
-  transition: border-color 0.15s ease;
+  display: grid;
+  grid-template-columns: minmax(0, 360px) minmax(0, 1fr);
+  gap: 24px 48px;
+  padding: 32px 0;
 
-  &:hover {
-    border-color: var(--border-light);
+  & + & {
+    border-top: 1px solid var(--border); // taste-skill-ignore: separa secciones de ajustes
+  }
+
+  &__header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  &__icon {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    margin-top: 2px;
+    font-size: 20px;
+    color: var(--gold);
+  }
+
+  &__title {
+    font-size: 1.0625rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  &__desc {
+    margin-top: 4px;
+    font-size: 0.9375rem;
+    line-height: 1.45;
+    color: var(--text-secondary);
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 18px 20px;
+    border-radius: 12px;
+    background: var(--bg-surface);
   }
 }
 
-.config-card__header {
-  display: flex;
-  align-items: center;
-  gap: 0.875rem;
-  padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid var(--border);
+// La sección "Tu plan" (SPEC 02) va primero y sin regla arriba.
+.plan-card {
+  padding-top: 8px;
 }
 
-.config-card__icon {
-  font-size: 22px;
-  width: 22px;
-  height: 22px;
-  color: var(--gold);
+.plan-card + .config-form .config-card:first-child {
+  border-top: 1px solid var(--border); // taste-skill-ignore: separa secciones de ajustes
 }
 
-.config-card__title {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin: 0;
-}
-
-.config-card__desc {
-  font-size: 0.8125rem;
-  color: var(--text-muted);
-  margin: 0.125rem 0 0;
-}
-
-.config-card__body {
-  padding: 1.25rem 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.config-toggle {
-  padding: 0;
+// Interruptores: el checkbox queda accesible por teclado y el riel lo dibuja.
+.config-toggle + .config-toggle {
+  padding-top: 16px;
+  border-top: 1px solid var(--border); // taste-skill-ignore: filas de ajustes
 }
 
 .toggle-label {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 16px;
   cursor: pointer;
 }
 
 .toggle-text {
   display: flex;
   flex-direction: column;
-  gap: 0.125rem;
+  gap: 2px;
 }
 
 .toggle-title {
-  font-size: 0.875rem;
-  font-weight: 500;
+  font-size: 0.9375rem;
+  font-weight: 600;
   color: var(--text-primary);
 }
 
 .toggle-desc {
-  font-size: 0.8125rem;
-  color: var(--text-muted);
+  font-size: 0.875rem;
+  color: var(--text-secondary);
 }
 
 .toggle-input {
-  display: none;
+  position: absolute;
+  width: 1px;
+  height: 1px; // taste-skill-ignore: checkbox oculto pero accesible (visually hidden)
+  opacity: 0;
+  pointer-events: none;
 }
 
 .toggle-switch {
   position: relative;
-  width: 44px;
-  height: 24px;
-  background: var(--bg-surface-elevated);
-  border: 1px solid var(--border);
-  border-radius: 12px;
   flex-shrink: 0;
-  transition: all 0.2s ease;
+  width: 40px;
+  height: 22px;
+  border-radius: 11px;
+  background: var(--bg-surface-hover);
+  transition: background-color var(--duration-base) var(--ease-out);
 
   &::after {
     content: '';
     position: absolute;
-    top: 2px;
-    left: 2px;
-    width: 18px;
-    height: 18px;
-    background: var(--text-muted);
+    top: 3px;
+    left: 3px;
+    width: 16px;
+    height: 16px;
     border-radius: 50%;
-    transition: all 0.2s ease;
+    background: var(--text-secondary);
+    transition:
+      transform var(--duration-base) var(--ease-out),
+      background-color var(--duration-base) var(--ease-out);
   }
 }
 
 .toggle-input:checked + .toggle-switch {
   background: var(--gold);
-  border-color: var(--gold);
 
   &::after {
-    transform: translateX(20px);
-    background: var(--bg-primary);
+    transform: translateX(18px);
+    background: var(--on-gold);
   }
 }
 
-.config-row {
-  display: flex;
-  gap: 1rem;
+.toggle-input:focus-visible + .toggle-switch {
+  outline: 2px solid var(--gold-light);
+  outline-offset: 2px;
+}
 
-  @media (max-width: 640px) {
-    flex-direction: column;
-  }
+// Campos
+.config-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
 }
 
 .config-field {
-  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 0.375rem;
+  gap: 6px;
 }
 
 .config-label {
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
-.config-input {
+.config-input,
+.config-select {
   width: 100%;
-  padding: 0.625rem 0.875rem;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--border-light); // taste-skill-ignore: campo de formulario
+  border-radius: 6px;
   background: var(--bg-primary);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  font-size: 0.875rem;
   color: var(--text-primary);
-  font-family: inherit;
-  outline: none;
-  box-sizing: border-box;
-  transition: border-color 0.15s ease;
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  transition: border-color var(--duration-fast) var(--ease-out);
+
+  &:hover {
+    border-color: #4a4a4a;
+  }
 
   &:focus {
+    outline: 2px solid rgba(201, 168, 76, 0.35);
     border-color: var(--gold);
   }
 
   &:disabled {
     opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  &::-webkit-inner-spin-button,
-  &::-webkit-outer-spin-button {
-    opacity: 1;
   }
 }
 
-.config-select {
-  width: 100%;
-  padding: 0.625rem 0.875rem;
-  background: var(--bg-primary);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  font-size: 0.875rem;
-  color: var(--text-primary);
-  font-family: inherit;
-  outline: none;
-  box-sizing: border-box;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%236b7280' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 0.75rem center;
-  padding-right: 2rem;
-  cursor: pointer;
-  transition: border-color 0.15s ease;
-
-  &:focus {
-    border-color: var(--gold);
-  }
-
-  option {
-    background: var(--bg-surface);
-    color: var(--text-primary);
-  }
-}
-
-.config-input-with-prefix {
+.config-input-with-prefix,
+.config-input-with-suffix {
+  position: relative;
   display: flex;
   align-items: center;
+}
+
+.config-prefix,
+.config-suffix {
+  position: absolute;
+  font-size: 0.9375rem;
+  color: var(--text-secondary);
+  pointer-events: none;
 }
 
 .config-prefix {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 40px;
-  background: var(--bg-surface-elevated);
-  border: 1px solid var(--border);
-  border-right: none;
-  border-radius: 8px 0 0 8px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--text-muted);
-}
-
-.config-input--prefixed {
-  border-radius: 0 8px 8px 0;
-}
-
-.config-input-with-suffix {
-  display: flex;
-  align-items: center;
-}
-
-.config-input--suffixed {
-  border-radius: 8px 0 0 8px;
-  border-right: none;
+  left: 12px;
 }
 
 .config-suffix {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 60px;
-  height: 40px;
-  background: var(--bg-surface-elevated);
-  border: 1px solid var(--border);
-  border-left: none;
-  border-radius: 0 8px 8px 0;
-  font-size: 0.8125rem;
-  color: var(--text-muted);
+  right: 12px;
+}
+
+.config-input--prefixed {
+  padding-left: 30px;
+}
+
+.config-input--suffixed {
+  padding-right: 76px;
 }
 
 .config-hint {
-  font-size: 0.75rem;
-  color: var(--text-muted);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: var(--text-secondary);
 }
 
-.plan-card {
-  margin-bottom: 1.25rem;
-}
-
+// Tu plan (SPEC 02): plan, fecha de fin y uso por recurso.
 .plan-resumen {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2.5rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
 }
 
 .plan-dato {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 2px;
 
   &__label {
-    font-size: 0.6875rem;
-    font-weight: 500;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
   }
 
   &__valor {
-    font-size: 1rem;
-    font-weight: 600;
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    line-height: 1.1;
     color: var(--text-primary);
   }
 }
@@ -368,52 +269,65 @@
 .plan-uso {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 14px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border); // taste-skill-ignore: separa el uso del resumen
 
   &__fila {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 6px;
   }
 
   &__texto {
     display: flex;
     justify-content: space-between;
-    gap: 1rem;
-    font-size: 0.875rem;
+    gap: 12px;
+    font-size: 0.9375rem;
   }
 
   &__recurso {
-    color: var(--text-secondary);
+    color: var(--text-primary);
   }
 
   &__cantidad {
-    color: var(--text-primary);
-    font-weight: 600;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
   }
 
   mat-progress-bar {
     --mat-progress-bar-active-indicator-color: var(--gold);
-    --mat-progress-bar-track-color: var(--border);
+    --mat-progress-bar-track-color: rgba(201, 168, 76, 0.16);
     --mat-progress-bar-track-shape: 999px;
     --mat-progress-bar-track-height: 6px;
     --mat-progress-bar-active-indicator-height: 6px;
+    border-radius: 999px;
   }
 }
 
 .plan-cta {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin: 0;
-  padding-top: 1rem;
-  border-top: 1px solid var(--border);
-  font-size: 0.875rem;
-  color: var(--gold);
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: rgba(201, 168, 76, 0.12);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-primary);
 
   mat-icon {
-    font-size: 18px;
     width: 18px;
     height: 18px;
+    font-size: 18px;
+    color: var(--gold);
+  }
+}
+
+@media (max-width: 900px) {
+  .config-card {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+    padding: 24px 0;
   }
 }

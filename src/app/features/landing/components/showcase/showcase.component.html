@@ -1,0 +1,168 @@
+<section class="showcase" id="showcase" aria-labelledby="showcase-title" appScrollReveal>
+  <div class="showcase__index">
+    <h2 class="showcase__title" id="showcase-title" data-reveal>
+      Así se ve AgendaFlow, por dentro y por fuera.
+    </h2>
+    <div class="showcase__names" role="group" aria-label="Elegir qué hoja ver" data-reveal>
+      @for (s of salidas; track s.id) {
+        <button
+          type="button"
+          class="showcase__name"
+          [class.is-active]="salida() === s.id"
+          [attr.aria-pressed]="salida() === s.id"
+          aria-controls="showcase-sheet"
+          (click)="elegirSalida(s.id)"
+        >
+          {{ s.label }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="showcase__stage" data-reveal>
+    <div class="showcase__sheet-wrap" id="showcase-sheet" aria-live="polite">
+      @switch (salida()) {
+        @case ('reservas') {
+          <article class="sheet sheet--reservas" data-ui>
+            <header class="sheet__head">
+              <p class="sheet__brand">{{ negocio.nombre }}</p>
+              <p class="sheet__muted">{{ negocio.sucursal }} · {{ negocio.direccion }}</p>
+            </header>
+
+            <p class="sheet__label">Elige tu servicio</p>
+            <div class="sheet__services">
+              @for (s of servicios; track s.id) {
+                <button
+                  type="button"
+                  class="sheet__service"
+                  [class.is-active]="servicioId() === s.id"
+                  [attr.aria-pressed]="servicioId() === s.id"
+                  (click)="elegirServicio(s.id)"
+                >
+                  <span class="sheet__service-name">{{ s.nombre }}</span>
+                  <span class="sheet__muted">{{ s.duracion }} min · {{ pesos(s.precio) }}</span>
+                </button>
+              }
+            </div>
+
+            <p class="sheet__label">
+              {{ negocio.dia }}, con {{ negocio.profesional }}
+            </p>
+            <div class="sheet__slots">
+              @for (t of libres(); track t) {
+                <button
+                  type="button"
+                  class="sheet__slot"
+                  [class.is-active]="horaElegida() === t"
+                  [attr.aria-pressed]="horaElegida() === t"
+                  (click)="elegirHora(t)"
+                >
+                  {{ hora(t) }}
+                </button>
+              } @empty {
+                <p class="sheet__muted">No quedan horas para este servicio hoy.</p>
+              }
+            </div>
+
+            <button
+              type="button"
+              class="sheet__confirm"
+              [disabled]="horaElegida() === null"
+              (click)="confirmar()"
+            >
+              @if (horaElegida() !== null) {
+                Confirmar {{ servicio().nombre.toLowerCase() }} a las {{ hora(horaElegida()!) }}
+              } @else {
+                Elige otro servicio
+              }
+            </button>
+          </article>
+        }
+
+        @case ('confirmacion') {
+          <article class="sheet sheet--confirmacion" data-ui>
+            <header class="sheet__head">
+              <p class="sheet__brand">Reserva confirmada</p>
+              <p class="sheet__muted">Te esperamos en {{ negocio.nombre }}.</p>
+            </header>
+            <dl class="sheet__list">
+              <div><dt>Servicio</dt><dd>{{ servicio().nombre }}</dd></div>
+              <div><dt>Con</dt><dd>{{ negocio.profesional }}</dd></div>
+              <div><dt>Día</dt><dd>{{ negocio.dia }}</dd></div>
+              <div>
+                <dt>Hora</dt>
+                <dd>
+                  @if (horaElegida() !== null) {
+                    {{ hora(horaElegida()!) }} a {{ hora(horaElegida()! + servicio().duracion) }}
+                  }
+                </dd>
+              </div>
+              <div><dt>Dónde</dt><dd>{{ negocio.sucursal }}, {{ negocio.direccion }}</dd></div>
+              <div class="sheet__total"><dt>A pagar en el local</dt><dd>{{ pesos(servicio().precio) }}</dd></div>
+            </dl>
+          </article>
+        }
+
+        @case ('agenda') {
+          <article class="sheet sheet--agenda" data-ui>
+            <header class="sheet__head">
+              <p class="sheet__brand">{{ negocio.dia }}</p>
+              <p class="sheet__muted">
+                {{ negocio.profesional }} · {{ citas.length }} reservas · {{ pesos(totalDia) }}
+              </p>
+            </header>
+            <ol class="sheet__agenda">
+              @for (r of reservas; track r.inicio) {
+                <li class="sheet__appt" [class.is-block]="r.cliente === null">
+                  <span class="sheet__time">{{ hora(r.inicio) }}</span>
+                  <span class="sheet__appt-body">
+                    <span class="sheet__service-name">{{ r.titulo }}</span>
+                    <span class="sheet__muted">
+                      @if (r.cliente) {
+                        {{ r.cliente }} · {{ r.fin - r.inicio }} min
+                      } @else {
+                        Bloqueo de agenda
+                      }
+                    </span>
+                  </span>
+                  @if (r.cliente) {
+                    <span class="sheet__amount">{{ pesos(r.precio) }}</span>
+                  }
+                </li>
+              }
+            </ol>
+          </article>
+        }
+
+        @case ('pago') {
+          <article class="sheet sheet--pago" data-ui>
+            <header class="sheet__head">
+              <p class="sheet__brand">Pagos del día</p>
+              <p class="sheet__muted">{{ negocio.dia }} · {{ negocio.sucursal }}</p>
+            </header>
+            <table class="sheet__table">
+              <thead>
+                <tr><th scope="col">Hora</th><th scope="col">Cliente</th><th scope="col">Estado</th><th scope="col" class="num">Monto</th></tr>
+              </thead>
+              <tbody>
+                @for (r of citas; track r.inicio) {
+                  <tr>
+                    <td>{{ hora(r.inicio) }}</td>
+                    <td>{{ r.cliente }}</td>
+                    <td [class.is-pending]="!r.pago">{{ r.pago ?? 'Pendiente' }}</td>
+                    <td class="num">{{ pesos(r.precio) }}</td>
+                  </tr>
+                }
+              </tbody>
+              <tfoot>
+                <tr><td colspan="3">Cobrado</td><td class="num">{{ pesos(cobrado) }}</td></tr>
+                <tr><td colspan="3">Pendiente</td><td class="num">{{ pesos(pendiente) }}</td></tr>
+                <tr class="sheet__total"><td colspan="3">Total del día</td><td class="num">{{ pesos(totalDia) }}</td></tr>
+              </tfoot>
+            </table>
+          </article>
+        }
+      }
+    </div>
+  </div>
+</section>

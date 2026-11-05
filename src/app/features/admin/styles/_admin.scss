@@ -1,0 +1,485 @@
+// Clases compartidas del panel admin (SPEC 03, pasos 12–14). Se cargan desde src/styles.scss.
+// Van acotadas al layout del admin y a los diálogos (que Material renderiza fuera del layout,
+// con panelClass 'dialog-panel'). Las páginas solo guardan en su SCSS lo que es propio.
+// Estilo "Accent ladder": el dorado pleno solo en marcas chicas y en la acción principal;
+// sus tintes en las áreas. Superficies separadas por un paso de tono o una regla de 1px.
+
+app-admin-layout,
+.dialog-panel {
+  // Cabecera de cada página: título de 24px, una línea gris y la acción a la derecha.
+  .page-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .page-title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 1.75rem;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+  }
+
+  .page-subtitle {
+    margin-top: 4px;
+    font-size: 0.9375rem;
+    color: var(--text-secondary);
+  }
+
+  .page-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+  }
+
+  // Botones: una sola forma (6px), 36px de alto; el dorado solo en el primario.
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 36px;
+    padding: 0 14px;
+    border: 1px solid transparent; // taste-skill-ignore: reserva el borde de los botones
+    border-radius: 6px;
+    background: none;
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+      background-color var(--duration-fast) var(--ease-out),
+      border-color var(--duration-fast) var(--ease-out),
+      color var(--duration-fast) var(--ease-out),
+      transform var(--duration-fast) var(--ease-out);
+
+    mat-icon {
+      width: 18px;
+      height: 18px;
+      font-size: 18px;
+    }
+
+    &:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+
+    &:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--gold-light);
+      outline-offset: 2px;
+    }
+
+    &--primary {
+      background: var(--gold);
+      color: var(--on-gold);
+
+      &:hover:not(:disabled) {
+        background: var(--gold-light);
+      }
+    }
+
+    &--outline,
+    &--secondary {
+      border-color: var(--border-light);
+      background: var(--bg-surface);
+      color: var(--text-primary);
+
+      &:hover:not(:disabled) {
+        border-color: #4a4a4a;
+        background: var(--bg-surface-elevated);
+      }
+    }
+
+    &--sm {
+      min-height: 30px;
+      padding: 0 10px;
+      font-size: 0.875rem;
+    }
+  }
+
+  // Botón de ícono en filas y tarjetas (editar, eliminar).
+  .action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    background: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition:
+      background-color var(--duration-fast) var(--ease-out),
+      color var(--duration-fast) var(--ease-out);
+
+    mat-icon {
+      width: 18px;
+      height: 18px;
+      font-size: 18px;
+    }
+
+    &:hover {
+      background: var(--bg-surface-hover);
+      color: var(--text-primary);
+    }
+
+    &--danger:hover {
+      background: rgba(239, 68, 68, 0.14);
+      color: #f87171;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--gold-light);
+      outline-offset: 1px;
+    }
+  }
+
+  .tooltip-wrapper {
+    display: inline-flex;
+  }
+
+  // Barra de filtros de las listas (pagos, bloqueos).
+  .filters-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px 16px;
+    margin-bottom: 20px;
+  }
+
+  .filter-select,
+  .filter-date-input {
+    height: 36px;
+    padding: 0 10px;
+    border: 1px solid var(--border-light); // taste-skill-ignore: campo de formulario
+    border-radius: 6px;
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 0.9375rem;
+    color-scheme: dark;
+    transition: border-color var(--duration-fast) var(--ease-out);
+
+    &:hover {
+      border-color: #4a4a4a;
+    }
+
+    &:focus {
+      outline: 2px solid rgba(201, 168, 76, 0.35);
+      border-color: var(--gold);
+    }
+  }
+
+  .filter-date {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .filter-date-label {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+  }
+
+  .filter-clear {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 36px;
+    padding: 0 12px;
+    border-radius: 6px;
+    background: none;
+    color: var(--text-secondary);
+    font-family: var(--font-body);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:hover {
+      background: var(--bg-surface-hover);
+      color: var(--text-primary);
+    }
+
+    mat-icon {
+      width: 18px;
+      height: 18px;
+      font-size: 18px;
+    }
+  }
+
+  .table-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 14px;
+  }
+
+  .result-count {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+  }
+
+  // Estado de un pago o una reserva: una marca por fila, color con significado.
+  .estado-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 10px;
+    border-radius: 999px;
+    background: rgba(156, 163, 175, 0.14);
+    color: var(--text-secondary);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    white-space: nowrap;
+
+    &[data-estado='pagado'],
+    &[data-estado='completada'] {
+      background: rgba(52, 211, 153, 0.14);
+      color: #6ee7b7;
+    }
+
+    &[data-estado='pendiente'],
+    &[data-estado='programada'] {
+      background: rgba(245, 158, 11, 0.14);
+      color: #fbbf24;
+    }
+
+    &[data-estado='rechazado'],
+    &[data-estado='cancelada'] {
+      background: rgba(239, 68, 68, 0.14);
+      color: #f87171;
+    }
+
+    &[data-estado='anulado'] {
+      background: rgba(156, 163, 175, 0.14);
+      color: var(--text-secondary);
+    }
+  }
+
+  // Dato chico con ícono (duración, teléfono, dirección).
+  .meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+
+    mat-icon {
+      width: 16px;
+      height: 16px;
+      font-size: 16px;
+    }
+  }
+
+  // Estados: cargando y vacío. El vacío conserva su marco y dice qué hacer.
+  .loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 64px 24px;
+    font-size: 0.9375rem;
+    color: var(--text-secondary);
+
+    .loading-icon {
+      width: 28px;
+      height: 28px;
+      font-size: 28px;
+      color: var(--gold);
+      animation: admin-spin 1s linear infinite;
+    }
+  }
+
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 56px 24px;
+    border-radius: 10px;
+    background: var(--bg-surface);
+    text-align: center;
+  }
+
+  .empty-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 40px;
+    color: var(--text-muted);
+  }
+
+  .empty-title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 1.375rem;
+    color: var(--text-primary);
+  }
+
+  .empty-text {
+    max-width: 44ch;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--text-secondary);
+  }
+}
+
+// Diálogos de crear y editar (servicio, empleado, sucursal, bloqueo): armazón y campos.
+.dialog-panel {
+  .dialog {
+    width: min(480px, calc(100vw - 32px));
+    color: var(--text-primary);
+  }
+
+  .dialog__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 20px 24px 8px;
+  }
+
+  .dialog__title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 1.5rem;
+    line-height: 1.1;
+  }
+
+  .dialog__close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    background: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background-color var(--duration-fast) var(--ease-out);
+
+    &:hover {
+      background: var(--bg-surface-hover);
+      color: var(--text-primary);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--gold-light);
+      outline-offset: 1px;
+    }
+  }
+
+  .dialog__form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px 24px 24px;
+  }
+
+  .dialog__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 8px;
+  }
+
+  .form-row {
+    display: flex;
+    gap: 12px;
+
+    .form-group {
+      flex: 1;
+      min-width: 0;
+    }
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .form-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .form-input {
+    width: 100%;
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid var(--border-light); // taste-skill-ignore: campo de formulario
+    border-radius: 6px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 0.9375rem;
+    color-scheme: dark;
+    transition: border-color var(--duration-fast) var(--ease-out);
+
+    &::placeholder {
+      color: var(--text-muted);
+    }
+
+    &:hover {
+      border-color: #4a4a4a;
+    }
+
+    &:focus {
+      outline: 2px solid rgba(201, 168, 76, 0.35);
+      border-color: var(--gold);
+    }
+
+    &--error,
+    &--error:focus {
+      border-color: #f87171;
+      outline-color: rgba(248, 113, 113, 0.35);
+    }
+  }
+
+  .form-textarea {
+    height: auto;
+    padding: 10px 12px;
+    line-height: 1.5;
+    resize: vertical;
+  }
+
+  .form-error {
+    font-size: 0.8125rem;
+    color: #fca5a5;
+  }
+
+  @media (max-width: 520px) {
+    .form-row {
+      flex-direction: column;
+    }
+  }
+}
+
+@keyframes admin-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 600px) {
+  app-admin-layout .page-header {
+    align-items: flex-start;
+  }
+
+  app-admin-layout .page-title {
+    font-size: 1.5rem;
+  }
+}

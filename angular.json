@@ -27,8 +27,7 @@
             ],
             "styles": [
               "node_modules/leaflet/dist/leaflet.css",
-              "@angular/material/prebuilt-themes/pink-bluegrey.css",
-              "src/styles.css"
+              "src/styles.scss"
             ],
             "server": "src/main.server.ts",
             "outputMode": "server",
