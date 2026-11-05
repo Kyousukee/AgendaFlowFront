@@ -26,8 +26,8 @@ export type EmpleadoDialogResult = Omit<Empleado, 'id' | 'fechaCreacion' | 'foto
   template: `
     <div class="dialog">
       <div class="dialog__header">
-        <h2 class="dialog__title">{{ data.empleado ? 'Editar' : 'Agregar' }} empleado</h2>
-        <button class="dialog__close" (click)="cerrar()" aria-label="Cerrar">
+        <h2 class="dialog__title" mat-dialog-title>{{ data.empleado ? 'Editar' : 'Agregar' }} empleado</h2>
+        <button type="button" class="dialog__close" (click)="cerrar()" aria-label="Cerrar">
           <mat-icon>close</mat-icon>
         </button>
       </div>
@@ -43,9 +43,11 @@ export type EmpleadoDialogResult = Omit<Empleado, 'id' | 'fechaCreacion' | 'foto
               placeholder="Nombre del empleado"
               formControlName="nombre"
               [class.form-input--error]="fieldError('nombre')"
+            [attr.aria-invalid]="fieldError('nombre')"
+            [attr.aria-describedby]="fieldError('nombre') ? 'nombre-error' : null"
             />
             @if (fieldError('nombre')) {
-              <span class="form-error">El nombre es requerido.</span>
+              <span class="form-error" id="nombre-error">El nombre es requerido.</span>
             }
           </div>
           <div class="form-group">
@@ -70,9 +72,11 @@ export type EmpleadoDialogResult = Omit<Empleado, 'id' | 'fechaCreacion' | 'foto
               placeholder="empleado&#64;email.com"
               formControlName="email"
               [class.form-input--error]="fieldError('email')"
+            [attr.aria-invalid]="fieldError('email')"
+            [attr.aria-describedby]="fieldError('email') ? 'email-error' : null"
             />
             @if (fieldError('email')) {
-              <span class="form-error">Ingresa un correo valido.</span>
+              <span class="form-error" id="email-error">Escribe un correo válido.</span>
             }
           </div>
           <div class="form-group">
@@ -92,7 +96,7 @@ export type EmpleadoDialogResult = Omit<Empleado, 'id' | 'fechaCreacion' | 'foto
           <textarea
             id="descripcion"
             class="form-input form-textarea"
-            placeholder="Ej: Barbero senior, especialista en cortes clasicos"
+            placeholder="Ej: Barbero senior, especialista en cortes clásicos"
             formControlName="descripcion"
             rows="3"
           ></textarea>
@@ -122,7 +126,7 @@ export type EmpleadoDialogResult = Omit<Empleado, 'id' | 'fechaCreacion' | 'foto
         <div class="dialog__actions">
           <button type="button" class="btn btn--secondary" (click)="cerrar()">Cancelar</button>
           <button type="submit" class="btn btn--primary" [disabled]="form.invalid || guardando()">
-            {{ guardando() ? 'Guardando...' : data.empleado ? 'Actualizar' : 'Agregar' }}
+            {{ guardando() ? 'Guardando...' : data.empleado ? 'Guardar cambios' : 'Agregar' }}
           </button>
         </div>
       </form>

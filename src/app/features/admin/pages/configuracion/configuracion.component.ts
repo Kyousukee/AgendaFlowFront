@@ -173,8 +173,10 @@ export class ConfiguracionComponent {
         this.guardado.set(true);
         setTimeout(() => this.guardado.set(false), 3000);
       },
+      // SPEC 04 (TS mínimo autorizado): el guardado fallido se avisa.
       error: () => {
         this.guardando.set(false);
+        this.snackBar.open('No pudimos guardar la configuración. Tus cambios siguen en pantalla: inténtalo de nuevo.', 'Cerrar', { duration: 8000 });
       },
     });
   }

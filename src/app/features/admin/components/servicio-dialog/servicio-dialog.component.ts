@@ -30,8 +30,8 @@ const COLORES_PREDEFINIDOS = [
   template: `
     <div class="dialog">
       <div class="dialog__header">
-        <h2 class="dialog__title">{{ data.servicio ? 'Editar' : 'Agregar' }} servicio</h2>
-        <button class="dialog__close" (click)="cerrar()" aria-label="Cerrar">
+        <h2 class="dialog__title" mat-dialog-title>{{ data.servicio ? 'Editar' : 'Agregar' }} servicio</h2>
+        <button type="button" class="dialog__close" (click)="cerrar()" aria-label="Cerrar">
           <mat-icon>close</mat-icon>
         </button>
       </div>
@@ -46,9 +46,11 @@ const COLORES_PREDEFINIDOS = [
             placeholder="Ej: Corte de pelo"
             formControlName="nombre"
             [class.form-input--error]="fieldError('nombre')"
+            [attr.aria-invalid]="fieldError('nombre')"
+            [attr.aria-describedby]="fieldError('nombre') ? 'nombre-error' : null"
           />
           @if (fieldError('nombre')) {
-            <span class="form-error">El nombre es requerido.</span>
+            <span class="form-error" id="nombre-error">El nombre es requerido.</span>
           }
         </div>
 
@@ -75,9 +77,11 @@ const COLORES_PREDEFINIDOS = [
               min="5"
               step="5"
               [class.form-input--error]="fieldError('duracionMinutos')"
+            [attr.aria-invalid]="fieldError('duracionMinutos')"
+            [attr.aria-describedby]="fieldError('duracionMinutos') ? 'duracionMinutos-error' : null"
             />
             @if (fieldError('duracionMinutos')) {
-              <span class="form-error">Requerido, mínimo 5 min.</span>
+              <span class="form-error" id="duracionMinutos-error">Requerido, mínimo 5 min.</span>
             }
           </div>
           <div class="form-group">
@@ -91,22 +95,26 @@ const COLORES_PREDEFINIDOS = [
               min="0"
               step="500"
               [class.form-input--error]="fieldError('precio')"
+            [attr.aria-invalid]="fieldError('precio')"
+            [attr.aria-describedby]="fieldError('precio') ? 'precio-error' : null"
             />
             @if (fieldError('precio')) {
-              <span class="form-error">Requerido.</span>
+              <span class="form-error" id="precio-error">Requerido.</span>
             }
           </div>
         </div>
 
         <div class="form-group">
-          <label class="form-label">Color</label>
-          <div class="color-picker">
-            @for (color of colores; track color) {
+          <span class="form-label" id="color-label">Color en la agenda</span>
+          <div class="color-picker" role="group" aria-labelledby="color-label">
+            @for (color of colores; track color; let i = $index) {
               <button
                 type="button"
                 class="color-swatch"
                 [style.background]="color"
                 [class.color-swatch--selected]="form.get('color')?.value === color"
+                [attr.aria-pressed]="form.get('color')?.value === color"
+                [attr.aria-label]="'Color ' + (i + 1) + ' de ' + colores.length"
                 (click)="form.get('color')?.setValue(color)"
               ></button>
             }
@@ -116,7 +124,7 @@ const COLORES_PREDEFINIDOS = [
         <div class="dialog__actions">
           <button type="button" class="btn btn--secondary" (click)="cerrar()">Cancelar</button>
           <button type="submit" class="btn btn--primary" [disabled]="form.invalid || guardando()">
-            {{ guardando() ? 'Guardando...' : data.servicio ? 'Actualizar' : 'Agregar' }}
+            {{ guardando() ? 'Guardando...' : data.servicio ? 'Guardar cambios' : 'Agregar' }}
           </button>
         </div>
       </form>

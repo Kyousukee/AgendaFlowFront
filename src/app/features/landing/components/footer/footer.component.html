@@ -39,6 +39,6 @@
         <a [href]="c.url" target="_blank" rel="noopener">{{ c.autor }}</a>{{ last ? ' en Unsplash.' : ', ' }}
       }
     </p>
-    <a href="#" class="footer__top-link">Volver arriba</a>
+    <a [routerLink]="[]" fragment="inicio" class="footer__top-link">Volver arriba</a>
   </div>
 </footer>

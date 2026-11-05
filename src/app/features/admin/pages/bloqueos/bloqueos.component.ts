@@ -3,6 +3,8 @@ import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../../../core/services/auth.service';
 import { EmpleadosService } from '../../services/empleados.service';
 import { BloqueosService } from '../../services/bloqueos.service';
@@ -39,6 +41,7 @@ export class BloqueosComponent {
   private empleadosService = inject(EmpleadosService);
   private bloqueosService = inject(BloqueosService);
   private dialog = inject(MatDialog);
+  private snackBar = inject(MatSnackBar);
 
   bloqueos = signal<BloqueoNormalizado[]>([]);
   empleados = signal<Empleado[]>([]);
@@ -105,9 +108,11 @@ export class BloqueosComponent {
         this.bloqueos.set(bloqueos.map((b) => this.normalizar(b)));
         this.cargando.set(false);
       },
-      error: () => {
+      error: (err: HttpErrorResponse) => {
         this.bloqueos.set([]);
         this.cargando.set(false);
+        // SPEC 04: una carga fallida no se confunde con "todavía no tienes nada".
+        this.avisarError(err, 'No pudimos cargar los bloqueos. Recarga la página para intentarlo de nuevo.');
       },
     });
   }
@@ -122,8 +127,11 @@ export class BloqueosComponent {
 
     dialogRef.afterClosed().subscribe((resultado) => {
       if (resultado) {
-        this.bloqueosService.crear(resultado).subscribe(() => {
-          this.cargarDatos();
+        this.bloqueosService.crear(resultado).subscribe({
+          next: () => {
+              this.cargarDatos();
+          },
+          error: (err: HttpErrorResponse) => this.avisarError(err, 'No pudimos agregar el bloqueo. Revisa tu conexión e inténtalo de nuevo.'),
         });
       }
     });
@@ -146,16 +154,29 @@ export class BloqueosComponent {
 
     dialogRef.afterClosed().subscribe((resultado) => {
       if (resultado) {
-        this.bloqueosService.actualizar(bloqueo.id, resultado).subscribe(() => {
-          this.cargarDatos();
+        this.bloqueosService.actualizar(bloqueo.id, resultado).subscribe({
+          next: () => {
+              this.cargarDatos();
+          },
+          error: (err: HttpErrorResponse) => this.avisarError(err, 'No pudimos guardar los cambios del bloqueo. Revisa tu conexión e inténtalo de nuevo.'),
         });
       }
     });
   }
 
+  // SPEC 04 (TS mínimo autorizado): confirmar antes de borrar y avisar si falla.
   eliminarBloqueo(bloqueo: BloqueoNormalizado): void {
-    this.bloqueosService.eliminar(bloqueo.id).subscribe(() => {
-      this.cargarDatos();
+    const cuando = `${this.formatearFecha(bloqueo.fecha)}, ${bloqueo.horaInicio}–${bloqueo.horaFin}`;
+    if (!confirm(`¿Eliminar el bloqueo de ${bloqueo.empleadoNombre} (${cuando})? Esas horas vuelven a ofrecerse.`)) return;
+    this.bloqueosService.eliminar(bloqueo.id).subscribe({
+      next: () => {
+        this.cargarDatos();
+      },
+      error: () => {
+        this.snackBar.open('No pudimos eliminar el bloqueo. Inténtalo de nuevo.', 'Cerrar', {
+          duration: 6000,
+        });
+      },
     });
   }
 
@@ -186,5 +207,12 @@ export class BloqueosComponent {
       horaFin: b.horaFin.substring(0, 5),
       motivo: b.motivo,
     };
+  }
+
+  // SPEC 04 (TS mínimo autorizado): un guardado fallido ya no se pierde en silencio.
+  // El límite del plan lo avisa el interceptor de suscripción; aquí no se repite.
+  private avisarError(err: HttpErrorResponse, mensaje: string): void {
+    if (err?.error?.code === 'SUSCRIPCION_LIMITE') return;
+    this.snackBar.open(mensaje, 'Cerrar', { duration: 6000 });
   }
 }

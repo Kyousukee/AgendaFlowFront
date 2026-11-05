@@ -2,7 +2,7 @@
   <div class="page-header">
     <div>
       <h1 class="page-title">Agenda del día</h1>
-      <p class="page-subtitle">Vista general de citas y disponibilidad</p>
+      <p class="page-subtitle">Las citas y las horas libres del día que elijas</p>
     </div>
     <div class="page-actions">
       <button class="btn btn--outline" (click)="diaAnterior()" aria-label="Día anterior">
@@ -20,44 +20,49 @@
       <div class="link-card__info">
         <mat-icon class="link-card__icon">link</mat-icon>
         <div class="link-card__text">
-          <span class="link-card__title">Link de reserva para clientes</span>
-          <span class="link-card__url">{{ getLinkReserva() }}</span>
+          <span class="link-card__title">Enlace de reserva para tus clientes</span>
+          <span class="link-card__url" [attr.title]="getLinkReserva()">{{ getLinkReserva() }}</span>
         </div>
       </div>
-      <button class="btn-copy" (click)="copiarLink()">
+      <button type="button" class="btn-copy" (click)="copiarLink()">
         @if (linkCopiado()) {
           <mat-icon>check</mat-icon>
           <span>Copiado</span>
         } @else {
           <mat-icon>content_copy</mat-icon>
-          <span>Copiar link</span>
+          <span>Copiar enlace</span>
         }
       </button>
+      <span class="sr-only" aria-live="polite">{{ linkCopiado() ? 'Enlace copiado' : '' }}</span>
     </div>
   }
 
   @if (cargando()) {
-    <div class="horarios-grid">
-      <div class="servicios-panel">
-        <p class="empty-text">Cargando datos...</p>
-      </div>
-      <div class="timeline-panel">
-        <mat-card class="timeline-card">
-          <p class="empty-text">Cargando agenda...</p>
-        </mat-card>
-      </div>
+    <div class="loading-state" role="status">
+      <mat-icon class="loading-icon">hourglass_empty</mat-icon>
+      <span>Cargando la agenda del día...</span>
     </div>
   } @else {
+    @if (errorCarga()) {
+      <div class="carga-error" role="alert">
+        <mat-icon>error_outline</mat-icon>
+        <span>No pudimos cargar todo el día: la agenda puede no mostrar citas que sí existen.</span>
+        <button type="button" class="btn btn--outline btn--sm" (click)="cargarDatos()">Reintentar</button>
+      </div>
+    }
     <div class="horarios-grid">
       <div class="servicios-panel">
-        <h3 class="panel-title">Servicios</h3>
+        <h2 class="panel-title">Servicios</h2>
         @if (servicios().length === 0) {
-          <p class="empty-text">No hay servicios configurados</p>
+          <p class="empty-text">
+            Aún no tienes servicios. Agrégalos en <strong>Servicios</strong>
+            para que tus clientes puedan reservar.
+          </p>
         } @else {
           <div class="servicios-list">
             @for (servicio of servicios(); track servicio.id) {
               <div class="servicio-item">
-                <div class="servicio-color" [style.background]="servicio.color || '#6B7280'"></div>
+                <div class="servicio-color" aria-hidden="true" [style.background]="servicio.color || '#6B7280'"></div>
                 <div class="servicio-info">
                   <span class="servicio-nombre">{{ servicio.nombre }}</span>
                   <span class="servicio-duracion">{{ servicio.duracionMinutos }} min</span>
@@ -68,7 +73,7 @@
         }
 
         <div class="resumen">
-          <h3 class="panel-title">Resumen del día</h3>
+          <h2 class="panel-title">Resumen del día</h2>
           <div class="resumen-stats">
             <div class="stat">
               <span class="stat-value stat-value--ocupado">{{ totalOcupados() }}</span>
@@ -76,7 +81,7 @@
             </div>
             <div class="stat">
               <span class="stat-value stat-value--disponible">{{ totalDisponibles() }}</span>
-              <span class="stat-label">Slots libres</span>
+              <span class="stat-label">Horas libres</span>
             </div>
           </div>
         </div>
@@ -85,7 +90,10 @@
       <div class="timeline-panel">
         <mat-card class="timeline-card">
           @if (timeline().length === 0) {
-            <p class="empty-text">No hay horarios configurados para este día</p>
+            <p class="empty-text">
+              Este día no tiene horario de atención.
+              Si debería abrir, revisa <strong>Horarios</strong>.
+            </p>
           } @else {
             <div class="timeline">
               @for (row of timeline(); track row.hora) {
@@ -98,9 +106,18 @@
                     <div class="slot__items" [class.slot__items--multi]="row.items.length > 1">
                       @for (item of row.items; track item.hora + item.empleado) {
                         @if (item.type === 'reserva' && item.servicio) {
-                          <div class="slot__item" [style.borderLeftColor]="item.servicio.color || '#6B7280'" (click)="item.reserva && abrirModalPago(item.reserva)" role="button" tabindex="0">
+                          <div
+                            class="slot__item"
+                            [style.borderLeftColor]="item.servicio.color || '#6B7280'"
+                            (click)="item.reserva && abrirModalPago(item.reserva)"
+                            (keydown.enter)="item.reserva && abrirModalPago(item.reserva)"
+                            (keydown.space)="$event.preventDefault(); item.reserva && abrirModalPago(item.reserva)"
+                            role="button"
+                            tabindex="0"
+                            [attr.aria-label]="row.hora + ', ' + item.servicio.nombre + ', ' + item.cliente + '. Ver pago y estado'"
+                          >
                             <div class="slot__item-main">
-                              <span class="slot__servicio" [style.color]="item.servicio.color || '#6B7280'">{{ item.servicio.nombre }}</span>
+                              <span class="slot__servicio">{{ item.servicio.nombre }}</span>
                               <span class="slot__cliente">{{ item.cliente }}</span>
                             </div>
                             @if (item.empleado) {
@@ -128,23 +145,40 @@
   }
 
   @if (modalPagoAbierto()) {
-    <div class="modal-overlay" (click)="cerrarModalPago()">
-      <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-overlay" (click)="cerrarModalPago()" (keydown.escape)="cerrarModalPago()">
+      <div
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-pago-titulo"
+        cdkTrapFocus
+        [cdkTrapFocusAutoCapture]="true"
+        (click)="$event.stopPropagation()"
+      >
         @if (pagoExitoso()) {
-          <div class="modal__exito">
+          <div class="modal__exito" role="status">
             <mat-icon class="modal__exito-icon">check_circle</mat-icon>
-            <span>Pago registrado</span>
+            <span id="modal-pago-titulo">Pago registrado</span>
+            @if (actualizandoEstadoReserva()) {
+              <span class="modal__exito-detalle">Guardando el estado de la reserva...</span>
+            } @else if (estadoReservaActualizado()) {
+              <span class="modal__exito-detalle">El estado de la reserva también quedó guardado.</span>
+            }
+            @if (pagoError()) {
+              <p class="modal__error" role="alert">{{ pagoError() }}</p>
+            }
+            <button type="button" class="btn btn--primary" (click)="cerrarModalPago()">Listo</button>
           </div>
         } @else {
           <div class="modal__header">
             @if (reservaSeleccionada(); as reserva) {
               @if (tienePago(reserva)) {
-                <h3 class="modal__title">Pagos de la reserva</h3>
+                <h2 class="modal__title" id="modal-pago-titulo">Pagos de la reserva</h2>
               } @else {
-                <h3 class="modal__title">Registrar pago</h3>
+                <h2 class="modal__title" id="modal-pago-titulo">Registrar pago</h2>
               }
             }
-            <button class="modal__close" (click)="cerrarModalPago()" aria-label="Cerrar">
+            <button type="button" class="modal__close" (click)="cerrarModalPago()" aria-label="Cerrar">
               <mat-icon>close</mat-icon>
             </button>
           </div>
@@ -179,10 +213,15 @@
                   } @else {
                     <div class="modal__pago-detalle">
                       <div class="modal__pago-detalle-header">
-                        <button class="modal__back" (click)="cerrarDetallePago()">
+                        <button
+                          type="button"
+                          class="modal__back"
+                          (click)="cerrarDetallePago()"
+                          aria-label="Volver a la lista de pagos"
+                        >
                           <mat-icon>arrow_back</mat-icon>
                         </button>
-                        <span class="modal__pago-detalle-title">Modificar estado</span>
+                        <h3 class="modal__pago-detalle-title">Modificar estado del pago</h3>
                       </div>
                       <div class="modal__pago-info">
                         <div class="modal__resumen-row">
@@ -199,8 +238,8 @@
                         </div>
                       </div>
                       <div class="modal__field">
-                        <label class="modal__label">Nuevo estado</label>
-                        <select class="modal__select" [ngModel]="nuevoEstadoPago()" (ngModelChange)="nuevoEstadoPago.set($event)">
+                        <label class="modal__label" for="modal-estado-pago">Nuevo estado</label>
+                        <select id="modal-estado-pago" class="modal__select" [ngModel]="nuevoEstadoPago()" (ngModelChange)="nuevoEstadoPago.set($event)">
                           <option value="">Seleccionar estado</option>
                           <option value="6">Pendiente</option>
                           <option value="7">Pagado</option>
@@ -214,7 +253,14 @@
                   <div class="modal__pagos-lista">
                     <p class="modal__pagos-label">Pagos registrados</p>
                     @for (pago of reserva.pagos; track pago.id) {
-                      <div class="modal__pago-item" (click)="seleccionarPago(pago)" role="button" tabindex="0">
+                      <div
+                        class="modal__pago-item"
+                        (click)="seleccionarPago(pago)"
+                        (keydown.enter)="seleccionarPago(pago)"
+                        (keydown.space)="$event.preventDefault(); seleccionarPago(pago)"
+                        role="button"
+                        tabindex="0"
+                      >
                         <div class="modal__pago-item-info">
                           <span class="modal__pago-item-metodo">{{ pago.metodoPago }}</span>
                           <span class="modal__pago-item-monto">{{ formatearPrecio(pago.monto) }}</span>
@@ -231,12 +277,12 @@
               } @else {
                 <div class="modal__form">
                   <div class="modal__field">
-                    <label class="modal__label">Monto</label>
-                    <input class="modal__input" type="number" [ngModel]="montoPago()" (ngModelChange)="montoPago.set($event)" />
+                    <label class="modal__label" for="modal-monto">Monto</label>
+                    <input id="modal-monto" class="modal__input" type="number" inputmode="numeric" [ngModel]="montoPago()" (ngModelChange)="montoPago.set($event)" />
                   </div>
                   <div class="modal__field">
-                    <label class="modal__label">Método de pago</label>
-                    <select class="modal__select" [ngModel]="metodoPago()" (ngModelChange)="metodoPago.set($event)">
+                    <label class="modal__label" for="modal-metodo">Método de pago</label>
+                    <select id="modal-metodo" class="modal__select" [ngModel]="metodoPago()" (ngModelChange)="metodoPago.set($event)">
                       <option value="Efectivo">Efectivo</option>
                       <option value="Tarjeta de credito">Tarjeta de crédito</option>
                       <option value="Tarjeta de debito">Tarjeta de débito</option>
@@ -245,20 +291,20 @@
                     </select>
                   </div>
                   <div class="modal__field">
-                    <label class="modal__label">Código de transacción</label>
-                    <input class="modal__input" type="text" [ngModel]="codigoTransaccion()" (ngModelChange)="codigoTransaccion.set($event)" placeholder="Opcional" />
+                    <label class="modal__label" for="modal-codigo">Código de transacción</label>
+                    <input id="modal-codigo" class="modal__input" type="text" [ngModel]="codigoTransaccion()" (ngModelChange)="codigoTransaccion.set($event)" placeholder="Opcional" />
                   </div>
                 </div>
               }
 
               @if (pagoError()) {
-                <p class="modal__error">{{ pagoError() }}</p>
+                <p class="modal__error" role="alert">{{ pagoError() }}</p>
               }
 
               <div class="modal__divider"></div>
 
               <div class="modal__section">
-                <h4 class="modal__section-title">Estado de la reserva</h4>
+                <h3 class="modal__section-title">Estado de la reserva</h3>
                 @if (estadoReservaActualizado()) {
                   <div class="modal__exito modal__exito--inline">
                     <mat-icon class="modal__exito-icon--sm">check_circle</mat-icon>
@@ -270,8 +316,8 @@
                     <span class="modal__resumen-value">{{ reservaSeleccionada()?.estado?.nombre }}</span>
                   </div>
                   <div class="modal__field">
-                    <label class="modal__label">Cambiar estado</label>
-                    <select class="modal__select" [ngModel]="nuevoEstadoReserva()" (ngModelChange)="nuevoEstadoReserva.set($event)">
+                    <label class="modal__label" for="modal-estado-reserva">Cambiar estado</label>
+                    <select id="modal-estado-reserva" class="modal__select" [ngModel]="nuevoEstadoReserva()" (ngModelChange)="nuevoEstadoReserva.set($event)">
                       <option value="">Sin cambios</option>
                       <option value="1">Pendiente</option>
                       <option value="2">Confirmada</option>
@@ -285,7 +331,7 @@
             }
           </div>
           <div class="modal__footer">
-            <button class="btn btn--outline" (click)="cerrarModalPago()">Cerrar</button>
+            <button type="button" class="btn btn--outline" (click)="cerrarModalPago()">Cerrar</button>
             @if (pagoSeleccionado(); as pago) {
               @if (!estadoActualizado()) {
                 <button class="btn btn--primary" (click)="actualizarEstadoPago()" [disabled]="!nuevoEstadoPago() || actualizandoEstado()">
@@ -308,7 +354,7 @@
               }
             }
             @if (nuevoEstadoReserva() && reservaSeleccionada()?.estado?.id?.toString() !== nuevoEstadoReserva() && !estadoReservaActualizado()) {
-              <button class="btn btn--primary" (click)="actualizarEstadoReserva()" [disabled]="actualizandoEstadoReserva()">
+              <button type="button" class="btn btn--outline" (click)="actualizarEstadoReserva()" [disabled]="actualizandoEstadoReserva()">
                 @if (actualizandoEstadoReserva()) {
                   <span>Actualizando...</span>
                 } @else {

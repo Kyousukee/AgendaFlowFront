@@ -1,43 +1,51 @@
 <div class="reservar-form">
-  <div class="steps-bar">
+  <ol class="steps-bar" aria-label="Pasos de la reserva">
     @for (step of [1, 2, 3, 4]; track step) {
       @if (step <= totalPasos()) {
-        <div
+        <li
           class="step"
           [class.step--active]="paso() === step"
           [class.step--done]="paso() > step"
+          [attr.aria-current]="paso() === step ? 'step' : null"
         >
-          <div class="step__circle">
+          <div class="step__circle" aria-hidden="true">
             @if (paso() > step) {
-              <span class="step__check material-icons" aria-hidden="true">check</span>
+              <span class="step__check material-icons">check</span>
             } @else {
               <span>{{ step }}</span>
             }
           </div>
           <span class="step__label">
             @if (step === 1) { Servicio }
-            @else if (step === 2) { Empleado }
-            @else if (step === 3) { Fecha y hora }
+            @else if (step === 2 && configuracion().permiteSeleccionEmpleado) { Profesional }
+            @else if (step === totalPasos() - 1) { Fecha y hora }
             @else { Datos }
           </span>
-        </div>
+          @if (paso() > step) {
+            <span class="sr-only">, completado</span>
+          }
+        </li>
       }
     }
-  </div>
+  </ol>
+
+  <p class="sr-only" aria-live="polite">Paso {{ paso() }} de {{ totalPasos() }}.</p>
 
   @if (paso() === 1) {
     <div class="form-section">
-      <h2 class="form-section__title">Selecciona un servicio</h2>
-      <p class="form-section__desc">Elige el servicio que deseas agendar</p>
+      <h2 class="form-section__title">Elige un servicio</h2>
+      <p class="form-section__desc">Ves la duración y el precio antes de elegir la hora.</p>
 
       <div class="servicios-grid">
         @for (servicio of servicios; track servicio.id) {
           <button
+            type="button"
             class="servicio-card"
             [class.servicio-card--selected]="servicioSeleccionado()?.id === servicio.id"
+            [attr.aria-pressed]="servicioSeleccionado()?.id === servicio.id"
             (click)="seleccionarServicio(servicio)"
           >
-            <div class="servicio-card__color" [style.background]="servicio.color || '#C9A84C'"></div>
+            <div class="servicio-card__color" aria-hidden="true" [style.background]="servicio.color || '#C9A84C'"></div>
             <div class="servicio-card__body">
               <span class="servicio-card__nombre">{{ servicio.nombre }}</span>
               @if (servicio.descripcion) {
@@ -49,6 +57,8 @@
               </div>
             </div>
           </button>
+        } @empty {
+          <p class="sin-horas">Este negocio todavía no tiene servicios para reservar en línea.</p>
         }
       </div>
     </div>
@@ -56,18 +66,20 @@
 
   @if (paso() === 2 && configuracion().permiteSeleccionEmpleado) {
     <div class="form-section">
-      <h2 class="form-section__title">Selecciona un empleado</h2>
-      <p class="form-section__desc">Elige quién te atenderá</p>
+      <h2 class="form-section__title">Elige quién te atiende</h2>
+      <p class="form-section__desc">Solo ves a quienes hacen este servicio.</p>
 
       <div class="empleados-grid">
         @for (empleado of empleados; track empleado.id) {
           @if (empleadoOfreceServicio(empleado.id, servicioSeleccionado()?.id || 0)) {
             <button
+              type="button"
               class="empleado-card"
               [class.empleado-card--selected]="empleadoSeleccionado()?.id === empleado.id"
+              [attr.aria-pressed]="empleadoSeleccionado()?.id === empleado.id"
               (click)="seleccionarEmpleado(empleado)"
             >
-              <div class="empleado-card__avatar">
+              <div class="empleado-card__avatar" aria-hidden="true">
                 {{ empleado.nombre?.charAt(0) || '?' }}{{ empleado.apellido?.charAt(0) || '' }}
               </div>
               <div class="empleado-card__info">
@@ -85,35 +97,41 @@
 
   @if ((paso() === 2 && !configuracion().permiteSeleccionEmpleado) || paso() === 3) {
     <div class="form-section">
-      <h2 class="form-section__title">Selecciona fecha y hora</h2>
-      <p class="form-section__desc">Elige cuándo quieres tu cita</p>
+      <h2 class="form-section__title">Elige fecha y hora</h2>
+      <p class="form-section__desc">Solo aparecen los días en que el negocio atiende.</p>
 
       <div class="fechas-section">
-        <label class="field-label">Fecha</label>
-        <div class="fechas-scroll">
+        <p class="field-label" id="fecha-label">Fecha</p>
+        <div class="fechas-scroll" role="group" aria-labelledby="fecha-label">
           @for (fecha of fechasDisponibles(); track fecha) {
             <button
+              type="button"
               class="fecha-chip"
               [class.fecha-chip--selected]="fechaSeleccionada() === fecha"
+              [attr.aria-pressed]="fechaSeleccionada() === fecha"
               (click)="seleccionarFecha(fecha)"
             >
               <span class="fecha-chip__dia">{{ formatearFechaCorta(fecha) }}</span>
             </button>
+          } @empty {
+            <p class="sin-horas">El negocio no tiene días abiertos en las próximas semanas.</p>
           }
         </div>
       </div>
 
       @if (fechaSeleccionada()) {
         <div class="horas-section">
-          <label class="field-label">Hora</label>
+          <p class="field-label" id="hora-label">Hora</p>
           @if (horasDisponibles().length === 0) {
-            <p class="sin-horas">No hay horas disponibles para esta fecha</p>
+            <p class="sin-horas" role="status">No quedan horas este día. Prueba con otra fecha.</p>
           } @else {
-            <div class="horas-grid">
+            <div class="horas-grid" role="group" aria-labelledby="hora-label">
               @for (hora of horasDisponibles(); track hora) {
                 <button
+                  type="button"
                   class="hora-chip"
                   [class.hora-chip--selected]="horaSeleccionada() === hora"
+                  [attr.aria-pressed]="horaSeleccionada() === hora"
                   (click)="seleccionarHora(hora)"
                 >
                   {{ hora }}
@@ -127,83 +145,112 @@
   }
 
   @if ((paso() === 3 && !configuracion().permiteSeleccionEmpleado) || paso() === 4) {
+    @let nombreError = fieldError('nombre');
+    @let apellidoError = fieldError('apellido');
+    @let emailError = fieldError('email');
+    @let telefonoError = fieldError('telefono');
+
     <div class="form-section">
       <h2 class="form-section__title">Tus datos</h2>
-      <p class="form-section__desc">Completa tu información de contacto</p>
+      <p class="form-section__desc">El negocio los usa para confirmarte o avisarte de un cambio.</p>
 
-      <form class="cliente-form" [formGroup]="form">
+      <form class="cliente-form" [formGroup]="form" (ngSubmit)="form.markAllAsTouched(); confirmar()">
         <div class="form-row">
           <div class="form-group">
-            <label class="field-label" for="nombre">Nombre *</label>
+            <label class="field-label" for="nombre">Nombre <span aria-hidden="true">*</span></label>
             <input
               id="nombre"
               type="text"
               class="form-input"
               placeholder="Tu nombre"
               formControlName="nombre"
-              [class.form-input--error]="fieldError('nombre')"
+              autocomplete="given-name"
+              aria-required="true"
+              [class.form-input--error]="nombreError"
+              [attr.aria-invalid]="nombreError"
+              [attr.aria-describedby]="nombreError ? 'nombre-error' : null"
             />
-            @if (fieldError('nombre')) {
-              <span class="form-error">Requerido</span>
+            @if (nombreError) {
+              <span class="form-error" id="nombre-error">Escribe tu nombre.</span>
             }
           </div>
           <div class="form-group">
-            <label class="field-label" for="apellido">Apellido *</label>
+            <label class="field-label" for="apellido">Apellido <span aria-hidden="true">*</span></label>
             <input
               id="apellido"
               type="text"
               class="form-input"
               placeholder="Tu apellido"
               formControlName="apellido"
-              [class.form-input--error]="fieldError('apellido')"
+              autocomplete="family-name"
+              aria-required="true"
+              [class.form-input--error]="apellidoError"
+              [attr.aria-invalid]="apellidoError"
+              [attr.aria-describedby]="apellidoError ? 'apellido-error' : null"
             />
-            @if (fieldError('apellido')) {
-              <span class="form-error">Requerido</span>
+            @if (apellidoError) {
+              <span class="form-error" id="apellido-error">Escribe tu apellido.</span>
             }
           </div>
         </div>
 
         <div class="form-row">
           <div class="form-group">
-            <label class="field-label" for="email">Email *</label>
+            <label class="field-label" for="email">Correo <span aria-hidden="true">*</span></label>
             <input
               id="email"
               type="email"
               class="form-input"
-              placeholder="tu@email.com"
+              placeholder="nombre&#64;correo.cl"
               formControlName="email"
-              [class.form-input--error]="fieldError('email')"
+              autocomplete="email"
+              inputmode="email"
+              aria-required="true"
+              [class.form-input--error]="emailError"
+              [attr.aria-invalid]="emailError"
+              [attr.aria-describedby]="emailError ? 'email-error' : null"
             />
-            @if (fieldError('email')) {
-              <span class="form-error">Email inválido</span>
+            @if (emailError) {
+              <span class="form-error" id="email-error">
+                Escribe un correo válido, como nombre&#64;correo.cl.
+              </span>
             }
           </div>
           <div class="form-group">
-            <label class="field-label" for="telefono">Teléfono *</label>
+            <label class="field-label" for="telefono">Teléfono <span aria-hidden="true">*</span></label>
             <input
               id="telefono"
               type="tel"
               class="form-input"
               placeholder="+56 9 1234 5678"
               formControlName="telefono"
-              [class.form-input--error]="fieldError('telefono')"
+              autocomplete="tel"
+              inputmode="tel"
+              aria-required="true"
+              [class.form-input--error]="telefonoError"
+              [attr.aria-invalid]="telefonoError"
+              [attr.aria-describedby]="telefonoError ? 'telefono-error' : null"
             />
-            @if (fieldError('telefono')) {
-              <span class="form-error">Requerido</span>
+            @if (telefonoError) {
+              <span class="form-error" id="telefono-error">
+                Escribe tu teléfono para que el negocio te pueda avisar.
+              </span>
             }
           </div>
         </div>
 
         <div class="form-group">
-          <label class="field-label" for="observacion">Observación (opcional)</label>
+          <label class="field-label" for="observacion">Algo que el negocio deba saber (opcional)</label>
           <textarea
             id="observacion"
             class="form-input form-textarea"
-            placeholder="Alguna indicación especial..."
+            placeholder="Por ejemplo: llego con mi hijo, o prefiero que no usen máquina."
             formControlName="observacion"
             rows="3"
           ></textarea>
         </div>
+
+        <p class="form-required-note"><span aria-hidden="true">*</span> Campo obligatorio.</p>
       </form>
     </div>
   }
@@ -217,7 +264,7 @@
           <span class="resumen-item__value resumen-item__value--gold">{{ servicioSeleccionado()?.nombre }}</span>
         </div>
         <div class="resumen-item">
-          <span class="resumen-item__label">Empleado</span>
+          <span class="resumen-item__label">Profesional</span>
           <span class="resumen-item__value">{{ getNombreEmpleado(empleadoSeleccionado()!) }}</span>
         </div>
         <div class="resumen-item">
@@ -226,7 +273,7 @@
         </div>
         <div class="resumen-item">
           <span class="resumen-item__label">Hora</span>
-          <span class="resumen-item__value">{{ horaSeleccionada() }} - {{ calcularHoraFin() }}</span>
+          <span class="resumen-item__value">{{ horaSeleccionada() }} a {{ calcularHoraFin() }}</span>
         </div>
         <div class="resumen-item resumen-item--total">
           <span class="resumen-item__label">Total</span>
@@ -236,28 +283,41 @@
     </div>
   }
 
+  @if (errorReserva()) {
+    <div class="form-error-banner" role="alert">
+      No pudimos confirmar tu reserva. Revisa tu conexión e inténtalo de nuevo. Si el problema
+      sigue, puede que esa hora se haya tomado: vuelve atrás y elige otra.
+    </div>
+  }
+
   <div class="form-actions">
     @if (paso() > 1) {
-      <button class="btn btn--secondary" (click)="retrocederPaso()">
-        ← Atrás
+      <button type="button" class="btn btn--secondary" (click)="retrocederPaso()">
+        <span aria-hidden="true">←</span> Atrás
       </button>
     }
     <div class="form-actions__spacer"></div>
     @if (paso() < totalPasos()) {
       <button
+        type="button"
         class="btn btn--primary"
         (click)="avanzarPaso()"
-        [disabled]="paso() === 1 && !servicioSeleccionado()"
-        [class.btn--hidden]="paso() === 2 && configuracion().permiteSeleccionEmpleado && !empleadoSeleccionado()"
-        [class.btn--hidden]="paso() === (configuracion().permiteSeleccionEmpleado ? 3 : 2) && (!fechaSeleccionada() || !horaSeleccionada())"
+        [disabled]="
+          (paso() === 1 && !servicioSeleccionado()) ||
+          (paso() === 2 && configuracion().permiteSeleccionEmpleado && !empleadoSeleccionado()) ||
+          (paso() === (configuracion().permiteSeleccionEmpleado ? 3 : 2) &&
+            (!fechaSeleccionada() || !horaSeleccionada()))
+        "
       >
-        Siguiente →
+        Siguiente <span aria-hidden="true">→</span>
       </button>
     } @else {
       <button
+        type="button"
         class="btn btn--primary btn--confirm"
-        (click)="confirmar()"
-        [disabled]="form.invalid || guardando() || !servicioSeleccionado() || !empleadoSeleccionado() || !fechaSeleccionada() || !horaSeleccionada()"
+        (click)="form.markAllAsTouched(); confirmar()"
+        [disabled]="guardando() || !servicioSeleccionado() || !empleadoSeleccionado() || !fechaSeleccionada() || !horaSeleccionada()"
+        [attr.aria-busy]="guardando()"
       >
         @if (guardando()) {
           Confirmando...
@@ -267,4 +327,24 @@
       </button>
     }
   </div>
+
+  @if (paso() === totalPasos()) {
+    <!-- SPEC 04: los Términos se aplican también a quien reserva; deben poder leerse aquí. -->
+    <p class="form-legal">
+      Al confirmar aceptas los
+      <a href="/terminos" target="_blank" rel="noopener"
+        >términos y condiciones<span class="sr-only"> (se abre en otra pestaña)</span></a
+      >
+      y la
+      <a href="/privacidad" target="_blank" rel="noopener"
+        >política de privacidad<span class="sr-only"> (se abre en otra pestaña)</span></a
+      >.
+    </p>
+  }
+
+  @if (paso() === totalPasos() && form.invalid && form.touched) {
+    <p class="form-actions__hint" role="status">
+      Completa nombre, apellido, correo y teléfono para confirmar.
+    </p>
+  }
 </div>

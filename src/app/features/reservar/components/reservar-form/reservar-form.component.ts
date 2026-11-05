@@ -17,6 +17,7 @@ import { BloqueoAgenda } from '../../../../core/interfaces/bloqueo-agenda.interf
 import { ServicioEmpleado } from '../../../../core/interfaces/servicio-empleado.interface';
 import { Reserva } from '../../../../core/interfaces/reserva.interface';
 import { ReservarPublicService } from '../../services/reservar-public.service';
+import { ReservaResumen } from '../../interfaces/reserva-resumen.interface';
 
 @Component({
   selector: 'app-reservar-form',
@@ -34,13 +35,16 @@ export class ReservarFormComponent implements OnChanges {
   @Input({ required: true }) bloqueos: BloqueoAgenda[] = [];
   @Input({ required: true }) serviciosEmpleados: ServicioEmpleado[] = [];
   @Input({ required: true }) reservas: Reserva[] = [];
-  @Output() reservaCreada = new EventEmitter<string>();
+  // SPEC 04 (TS mínimo autorizado): emite el resumen, no solo el código, para la confirmación.
+  @Output() reservaCreada = new EventEmitter<ReservaResumen>();
 
   private fb = inject(FormBuilder);
   private reservarService = inject(ReservarPublicService);
 
   paso = signal(1);
   guardando = signal(false);
+  /** SPEC 04 (TS mínimo autorizado): la falla al confirmar ya no es silenciosa. */
+  errorReserva = signal(false);
   servicioSeleccionado = signal<Servicio | null>(null);
   empleadoSeleccionado = signal<Empleado | null>(null);
   fechaSeleccionada = signal('');
@@ -162,6 +166,7 @@ export class ReservarFormComponent implements OnChanges {
     if (this.form.invalid || this.guardando()) return;
 
     this.guardando.set(true);
+    this.errorReserva.set(false);
     const formValue = this.form.getRawValue();
     const servicio = this.servicioSeleccionado()!;
     const empleado = this.empleadoSeleccionado()!;
@@ -182,10 +187,18 @@ export class ReservarFormComponent implements OnChanges {
     }).subscribe({
       next: (reserva) => {
         this.guardando.set(false);
-        this.reservaCreada.emit(reserva.codigo);
+        this.reservaCreada.emit({
+          codigo: reserva.codigo,
+          servicio: servicio.nombre ?? '',
+          profesional: this.getNombreEmpleado(empleado),
+          fecha: this.formatearFecha(this.fechaSeleccionada()),
+          horaInicio: this.horaSeleccionada(),
+          horaFin: this.calcularHoraFin(),
+        });
       },
       error: () => {
         this.guardando.set(false);
+        this.errorReserva.set(true);
       },
     });
   }

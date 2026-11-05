@@ -1,14 +1,15 @@
 <div class="reservar-page">
   @if (cargando()) {
-    <div class="reservar-loading">
-      <div class="loading-spinner"></div>
-      <span>Cargando información...</span>
-    </div>
+    <main class="reservar-loading">
+      <div class="loading-spinner" aria-hidden="true"></div>
+      <span role="status">Cargando la agenda del negocio...</span>
+    </main>
   } @else if (error()) {
-    <div class="reservar-error">
-      <h2>Sucursal no encontrada</h2>
-      <p>{{ error() }}</p>
-    </div>
+    <main class="reservar-error">
+      <h1>No pudimos abrir esta reserva</h1>
+      <p role="alert">{{ error() }}</p>
+      <p>Revisa que el enlace esté completo o pídele uno nuevo al negocio.</p>
+    </main>
   } @else {
     <header class="reservar-header">
       <div class="reservar-header__content">
@@ -37,9 +38,10 @@
     </header>
 
     <main class="reservar-main">
-      @if (reservaConfirmada()) {
+      @if (reservaConfirmada() && reservaResumen(); as resumen) {
         <app-reservar-confirmacion
-          [codigo]="reservaCodigo()"
+          [resumen]="resumen"
+          [direccion]="formatearDireccion()"
           [empresaNombre]="empresa()?.nombreComercial || empresa()?.nombre || ''"
           [sucursalNombre]="sucursal()?.nombre || ''"
         />

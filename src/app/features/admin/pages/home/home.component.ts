@@ -3,6 +3,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { FormsModule } from '@angular/forms';
+import { A11yModule } from '@angular/cdk/a11y';
 import { AuthService, SUCURSAL_UPDATED } from '../../../../core/services/auth.service';
 import { ServiciosService } from '../../services/servicios.service';
 import { HorariosService } from '../../services/horarios.service';
@@ -31,7 +32,8 @@ interface TimelineRow {
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [MatCardModule, MatIconModule, MatButtonModule, FormsModule],
+  // A11yModule (SPEC 04, TS mínimo autorizado): cdkTrapFocus en el modal de pago.
+  imports: [MatCardModule, MatIconModule, MatButtonModule, FormsModule, A11yModule],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
 })
@@ -47,6 +49,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   horarios = signal<HorarioSucursal[]>([]);
   reservas = signal<Reserva[]>([]);
   cargando = signal(true);
+  /** SPEC 04: una carga fallida se muestra como error, no como agenda libre. */
+  errorCarga = signal(false);
   linkCopiado = signal(false);
 
   modalPagoAbierto = signal(false);
@@ -204,17 +208,24 @@ export class HomeComponent implements OnInit, OnDestroy {
     if (!empresa || !sucursal) return;
 
     this.cargando.set(true);
+    this.errorCarga.set(false);
 
     this.serviciosService.getByEmpresa(empresa.id).subscribe({
       next: (servicios) => {
         this.servicios.set(servicios.filter((s) => s.activo));
       },
-      error: () => this.servicios.set([]),
+      error: () => {
+        this.servicios.set([]);
+        this.errorCarga.set(true);
+      },
     });
 
     this.horariosService.getBySucursal(sucursal.id).subscribe({
       next: (horarios) => this.horarios.set(horarios),
-      error: () => this.horarios.set([]),
+      error: () => {
+        this.horarios.set([]);
+        this.errorCarga.set(true);
+      },
     });
 
     this.cargarReservas();
@@ -230,8 +241,10 @@ export class HomeComponent implements OnInit, OnDestroy {
         this.cargando.set(false);
       },
       error: () => {
+        // SPEC 04: sin esto, la agenda mostraba todo "Disponible" aunque hubiera citas.
         this.reservas.set([]);
         this.cargando.set(false);
+        this.errorCarga.set(true);
       },
     });
   }
@@ -293,6 +306,9 @@ export class HomeComponent implements OnInit, OnDestroy {
     const reserva = this.reservaSeleccionada();
     const estadoId = Number(this.nuevoEstadoReserva());
     if (!reserva || !estadoId || this.actualizandoEstadoReserva()) return;
+    // SPEC 04: cancelar una cita no se hace con un solo clic.
+    const cliente = [reserva.cliente?.nombre, reserva.cliente?.apellido].filter(Boolean).join(' ');
+    if (estadoId === 3 && !confirm(`¿Cancelar la reserva de ${cliente || "este cliente"} de las ${reserva.horaInicio}? La hora vuelve a quedar libre.`)) return;
 
     this.actualizandoEstadoReserva.set(true);
     this.reservarService.actualizarEstadoReserva(reserva.id, estadoId).subscribe({
@@ -303,7 +319,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       },
       error: () => {
         this.actualizandoEstadoReserva.set(false);
-        this.pagoError.set('Error al actualizar el estado de la reserva');
+        this.pagoError.set('No pudimos cambiar el estado de la reserva. Revisa tu conexión e inténtalo de nuevo.');
       },
     });
   }
@@ -340,7 +356,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       },
       error: () => {
         this.actualizandoEstado.set(false);
-        this.pagoError.set('Error al actualizar el estado');
+        this.pagoError.set('No pudimos cambiar el estado del pago. Revisa tu conexión e inténtalo de nuevo.');
       },
     });
   }
@@ -367,11 +383,15 @@ export class HomeComponent implements OnInit, OnDestroy {
         this.guardandoPago.set(false);
         this.pagoExitoso.set(true);
         this.cargarReservas();
-        setTimeout(() => this.cerrarModalPago(), 1500);
+        // SPEC 04: el modal ya no se cierra solo. Si quedó un cambio de estado de la reserva,
+        // se guarda también, en vez de perderse.
+        if (this.nuevoEstadoReserva() && reserva.estado?.id?.toString() !== this.nuevoEstadoReserva()) {
+          this.actualizarEstadoReserva();
+        }
       },
       error: () => {
         this.guardandoPago.set(false);
-        this.pagoError.set('Error al guardar el pago');
+        this.pagoError.set('No pudimos registrar el pago. Revisa tu conexión e inténtalo de nuevo; no se guardó nada.');
       },
     });
   }

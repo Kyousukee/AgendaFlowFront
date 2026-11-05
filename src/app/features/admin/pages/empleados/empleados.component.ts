@@ -4,6 +4,8 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { HttpErrorResponse } from '@angular/common/http';
 import { SuscripcionService } from '../../../../core/services/suscripcion.service';
 import { EtiquetaPlanComponent } from '../../../../shared/components/etiqueta-plan/etiqueta-plan.component';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -29,6 +31,7 @@ export class EmpleadosComponent {
   private empleadosService = inject(EmpleadosService);
   private serviciosService = inject(ServiciosService);
   private dialog = inject(MatDialog);
+  private snackBar = inject(MatSnackBar);
   suscripcion = inject(SuscripcionService);
 
   empleados = signal<Empleado[]>([]);
@@ -75,9 +78,11 @@ export class EmpleadosComponent {
         this.servicioIdsMap.set(map);
         this.cargando.set(false);
       },
-      error: () => {
+      error: (err: HttpErrorResponse) => {
         this.empleados.set([]);
         this.cargando.set(false);
+        // SPEC 04: una carga fallida no se confunde con "todavía no tienes nada".
+        this.avisarError(err, 'No pudimos cargar el equipo. Recarga la página para intentarlo de nuevo.');
       },
     });
   }
@@ -98,9 +103,12 @@ export class EmpleadosComponent {
     dialogRef.afterClosed().subscribe((resultado: EmpleadoDialogResult | undefined) => {
       if (resultado) {
         const { servicioIds, ...empleado } = resultado;
-        this.empleadosService.crear({ ...empleado, servicioIds }).subscribe(() => {
-          this.cargarDatos();
-          this.suscripcion.cargar();
+        this.empleadosService.crear({ ...empleado, servicioIds }).subscribe({
+          next: () => {
+              this.cargarDatos();
+              this.suscripcion.cargar();
+          },
+          error: (err: HttpErrorResponse) => this.avisarError(err, 'No pudimos agregar al profesional. Revisa tu conexión e inténtalo de nuevo.'),
         });
       }
     });
@@ -123,19 +131,32 @@ export class EmpleadosComponent {
     dialogRef.afterClosed().subscribe((resultado: EmpleadoDialogResult | undefined) => {
       if (resultado) {
         const { servicioIds, sucursalId: _, ...body } = resultado;
-        this.empleadosService.actualizar(empleado.id, { ...body, servicioIds }).subscribe(() => {
-          this.cargarDatos();
-          this.suscripcion.cargar();
+        this.empleadosService.actualizar(empleado.id, { ...body, servicioIds }).subscribe({
+          next: () => {
+              this.cargarDatos();
+              this.suscripcion.cargar();
+          },
+          error: (err: HttpErrorResponse) => this.avisarError(err, 'No pudimos guardar los cambios del profesional. Revisa tu conexión e inténtalo de nuevo.'),
         });
       }
     });
   }
 
+  // SPEC 04 (TS mínimo autorizado): confirmar antes de borrar y avisar si falla.
   eliminarEmpleado(empleado: Empleado): void {
     if (!empleado.id) return;
-    this.empleadosService.eliminar(empleado.id).subscribe(() => {
-      this.cargarDatos();
-      this.suscripcion.cargar();
+    const nombre = [empleado.nombre, empleado.apellido].filter(Boolean).join(' ');
+    if (!confirm(`¿Eliminar a «${nombre}» del equipo? No se puede deshacer.`)) return;
+    this.empleadosService.eliminar(empleado.id).subscribe({
+      next: () => {
+        this.cargarDatos();
+        this.suscripcion.cargar();
+      },
+      error: () => {
+        this.snackBar.open(`No pudimos eliminar a «${nombre}». Inténtalo de nuevo.`, 'Cerrar', {
+          duration: 6000,
+        });
+      },
     });
   }
 
@@ -151,5 +172,12 @@ export class EmpleadosComponent {
       .filter((s) => ids.includes(s.id))
       .map((s) => s.nombre);
     return nombres.join(', ') || 'Sin servicios';
+  }
+
+  // SPEC 04 (TS mínimo autorizado): un guardado fallido ya no se pierde en silencio.
+  // El límite del plan lo avisa el interceptor de suscripción; aquí no se repite.
+  private avisarError(err: HttpErrorResponse, mensaje: string): void {
+    if (err?.error?.code === 'SUSCRIPCION_LIMITE') return;
+    this.snackBar.open(mensaje, 'Cerrar', { duration: 6000 });
   }
 }

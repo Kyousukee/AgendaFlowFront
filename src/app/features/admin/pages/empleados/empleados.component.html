@@ -2,7 +2,7 @@
   <div class="page-header">
     <div>
       <h1 class="page-title">Empleados</h1>
-      <p class="page-subtitle">Gestión de tu equipo de trabajo</p>
+      <p class="page-subtitle">Quién atiende y qué servicios hace cada uno</p>
     </div>
     <span
       class="tooltip-wrapper"
@@ -10,8 +10,10 @@
       [matTooltipDisabled]="!suscripcion.limiteAlcanzado('empleados')"
     >
       <button
+        type="button"
         class="btn btn--primary"
         [disabled]="suscripcion.limiteAlcanzado('empleados')"
+        [attr.aria-describedby]="suscripcion.limiteAlcanzado('empleados') ? 'limite-empleados' : null"
         (click)="abrirDialogo()"
       >
         <mat-icon>person_add</mat-icon>
@@ -20,22 +22,33 @@
     </span>
   </div>
 
+  @if (suscripcion.limiteAlcanzado('empleados')) {
+    <p class="limite-nota" id="limite-empleados">
+      <mat-icon>lock</mat-icon>
+      <span>Llegaste al límite de empleados del plan Gratis. Revisa tu plan en <strong>Configuración</strong>.</span>
+    </p>
+  }
+
   @if (cargando()) {
-    <div class="loading-state">
+    <div class="loading-state" role="status">
       <mat-icon class="loading-icon">hourglass_empty</mat-icon>
       <span>Cargando empleados...</span>
     </div>
   } @else if (empleados().length === 0) {
     <div class="empty-state">
       <mat-icon class="empty-icon">people_outline</mat-icon>
-      <h3 class="empty-title">Sin empleados</h3>
-      <p class="empty-text">Agrega tu primer empleado para comenzar a gestionar tu equipo.</p>
+      <h2 class="empty-title">Aún no tienes empleados</h2>
+      <p class="empty-text">
+        Agrega a cada profesional con los servicios que hace. Así tus clientes eligen con quién
+        atenderse y la agenda calcula sus horas libres.
+      </p>
       <span
         class="tooltip-wrapper"
         matTooltip="Alcanzaste el límite del plan Gratis"
         [matTooltipDisabled]="!suscripcion.limiteAlcanzado('empleados')"
       >
         <button
+          type="button"
           class="btn btn--primary"
           [disabled]="suscripcion.limiteAlcanzado('empleados')"
           (click)="abrirDialogo()"
@@ -50,7 +63,7 @@
       @for (empleado of empleados(); track empleado.id) {
         <mat-card class="empleado-card">
           <div class="empleado-header">
-            <div class="empleado-avatar">
+            <div class="empleado-avatar" aria-hidden="true">
               <span>{{ getIniciales(empleado.nombre, empleado.apellido) }}</span>
             </div>
             <div class="empleado-info">
@@ -86,13 +99,21 @@
           </div>
 
           <div class="empleado-actions">
-            <button class="action-btn" (click)="editarEmpleado(empleado)" matTooltip="Editar">
+            <button
+              type="button"
+              class="action-btn"
+              (click)="editarEmpleado(empleado)"
+              matTooltip="Editar"
+              [attr.aria-label]="'Editar a ' + empleado.nombre + ' ' + (empleado.apellido || '')"
+            >
               <mat-icon>edit</mat-icon>
             </button>
             <button
+              type="button"
               class="action-btn action-btn--danger"
               (click)="eliminarEmpleado(empleado)"
               matTooltip="Eliminar"
+              [attr.aria-label]="'Eliminar a ' + empleado.nombre + ' ' + (empleado.apellido || '')"
             >
               <mat-icon>delete</mat-icon>
             </button>

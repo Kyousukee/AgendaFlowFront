@@ -43,11 +43,11 @@
   &__col {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    align-items: flex-start;
   }
 
   &__col-title {
-    margin-bottom: 4px;
+    margin-bottom: 2px;
     font-size: 0.9375rem;
     font-weight: 600;
     color: var(--text-primary);
@@ -64,6 +64,14 @@
     }
   }
 
+  // Cada enlace es una fila de 44px: objetivo táctil completo sin cambiar el ritmo visual.
+  &__link,
+  &__top-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--target-min);
+  }
+
   &__link {
     font-size: 0.9375rem;
   }
@@ -71,7 +79,7 @@
   &__bottom {
     display: flex;
     flex-wrap: wrap;
-    align-items: baseline;
+    align-items: center;
     justify-content: space-between;
     gap: 10px 24px;
     margin-top: 56px;
@@ -117,4 +125,11 @@
       text-align: left;
     }
   }
+}
+
+// Créditos: enlaces dentro de una frase, del mismo color que el texto. El subrayado los
+// distingue sin depender del color (WCAG 1.4.1).
+.footer__credits a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }

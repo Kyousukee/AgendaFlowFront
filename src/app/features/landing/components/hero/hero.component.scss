@@ -137,6 +137,9 @@
   }
 
   &__link {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--target-min);
     font-size: 1.0625rem;
     font-weight: 600;
     color: var(--text-primary);
@@ -202,5 +205,13 @@
     &__standfirst {
       font-size: 1.0625rem;
     }
+  }
+}
+
+// Pantallas de escritorio bajas (1366×768, 1440×800): el mosaico cede alto para que
+// el botón "Empezar gratis" quede dentro del primer viewport (SPEC 04).
+@media (min-width: 901px) and (max-height: 860px) {
+  .hero__mosaic {
+    height: max(38svh, 280px);
   }
 }

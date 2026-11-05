@@ -18,6 +18,26 @@
   --border: #2a2a2a;
   --border-light: #333333;
 
+  // Bordes de controles (SPEC 04): campos, chips y tarjetas seleccionables.
+  // 3:1 o más sobre tinta y superficie (WCAG 1.4.11). Las reglas decorativas siguen en --border.
+  --border-field: #6b6b6b;
+  --border-field-hover: #858a93;
+
+  // Estados (SPEC 04): valores que ya se usaban sueltos, ahora como tokens.
+  --error: #f87171;
+  --error-text: #fca5a5;
+  --error-surface: rgba(239, 68, 68, 0.14);
+  --error-solid: #b91c1c; // botón destructivo: texto blanco a 6.5:1
+  --error-solid-hover: #dc2626;
+  --warning: #fbbf24;
+  --warning-surface: rgba(245, 158, 11, 0.14);
+  --success: #6ee7b7;
+  --success-surface: rgba(52, 211, 153, 0.14);
+  --neutral-surface: rgba(156, 163, 175, 0.14);
+
+  // Objetivo táctil mínimo (SPEC 04, WCAG 2.2 AA + criterio del proyecto).
+  --target-min: 44px;
+
   // Tipografía
   --font-display: 'Young Serif', Georgia, serif;
   --font-body: 'Source Serif 4', Georgia, serif;
@@ -90,7 +110,7 @@ html {
       surface-container-highest: var(--bg-surface-hover),
       inverse-surface: var(--bg-surface-hover),
       inverse-on-surface: var(--text-primary),
-      outline: #4a4a4a,
+      outline: var(--border-field),
       outline-variant: var(--border),
       background: var(--bg-primary),
       on-background: var(--text-primary),
@@ -182,6 +202,32 @@ button {
 ::selection {
   background-color: var(--gold);
   color: var(--bg-primary);
+}
+
+// Foco visible por defecto (SPEC 04): el anillo dorado del sistema en todo lo enfocable.
+// :where() deja la especificidad en 0 para que los componentes puedan afinar el offset.
+:where(a[href], button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--gold-light);
+  outline-offset: 2px;
+}
+
+// Texto corrido sin palabras sueltas al final del párrafo.
+p,
+li {
+  text-wrap: pretty;
+}
+
+// Oculto a la vista, legible para lectores de pantalla (anuncios aria-live, textos de apoyo).
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .dialog-panel {

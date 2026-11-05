@@ -5,6 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSelectModule } from '@angular/material/select';
 import { FormsModule } from '@angular/forms';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { HorariosService } from '../../services/horarios.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { HorarioSucursal } from '../../interfaces/horario-sucursal.interface';
@@ -47,6 +48,7 @@ interface DiaHorario {
 export class HorariosComponent implements OnInit {
   private horariosService = inject(HorariosService);
   private authService = inject(AuthService);
+  private snackBar = inject(MatSnackBar);
 
   horarios: DiaHorario[] = [];
   guardando = signal(false);
@@ -142,7 +144,11 @@ export class HorariosComponent implements OnInit {
         this.exito.set(true);
         setTimeout(() => this.exito.set(false), 3000);
       },
-      error: () => this.guardando.set(false),
+      // SPEC 04 (TS mínimo autorizado): el guardado fallido se avisa; los cambios siguen en pantalla.
+      error: () => {
+        this.guardando.set(false);
+        this.snackBar.open('No pudimos guardar los horarios. Tus cambios siguen en pantalla: inténtalo de nuevo.', 'Cerrar', { duration: 8000 });
+      },
     });
   }
 

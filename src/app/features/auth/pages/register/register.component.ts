@@ -42,6 +42,8 @@ export class RegisterComponent {
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(8)]],
       confirmPassword: ['', [Validators.required]],
+      // SPEC 04 (TS mínimo autorizado): sin aceptar términos y privacidad no se avanza.
+      terms: [false, [Validators.requiredTrue]],
     },
     { validators: this.passwordMatchValidator },
   );

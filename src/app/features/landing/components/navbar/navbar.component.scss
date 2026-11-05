@@ -19,6 +19,8 @@
     display: flex;
     flex-shrink: 0;
     align-items: center;
+    min-width: var(--target-min);
+    min-height: var(--target-min);
   }
 
   &__logo-img {
@@ -31,6 +33,13 @@
     align-items: center;
     gap: clamp(20px, 2.4vw, 36px);
     margin: 0 auto;
+  }
+
+  &__link,
+  &__login {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--target-min);
   }
 
   &__link {
@@ -46,7 +55,7 @@
       position: absolute;
       left: 0;
       right: 0;
-      bottom: -6px;
+      bottom: 4px;
       height: 2px;
       background: var(--gold);
       transform: scaleX(0);
@@ -85,7 +94,7 @@
   &__cta {
     display: inline-flex;
     align-items: center;
-    min-height: 40px;
+    min-height: var(--target-min);
     padding: 0 18px;
     background: var(--gold);
     color: var(--on-gold);
@@ -107,8 +116,11 @@
 
   &__menu {
     display: none;
+    align-items: center;
+    min-width: var(--target-min);
+    min-height: var(--target-min);
     margin-left: auto;
-    padding: 8px 0 8px 12px;
+    padding: 0 0 0 12px;
     color: var(--text-primary);
     font-family: var(--font-body);
     font-size: 1rem;
@@ -141,6 +153,11 @@
     font-weight: 600;
   }
 
+}
+
+// Foco dorado con aire, también en el menú móvil (que es hermano de .navbar, no hijo).
+.navbar,
+.navbar__mobile {
   a:focus-visible,
   button:focus-visible {
     outline: 2px solid var(--gold-light);
@@ -158,7 +175,7 @@
     }
 
     &__menu {
-      display: block;
+      display: inline-flex;
     }
 
     &__logo-img {

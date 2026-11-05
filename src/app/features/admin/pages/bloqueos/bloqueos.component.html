@@ -2,9 +2,9 @@
   <div class="page-header">
     <div>
       <h1 class="page-title">Bloqueos de agenda</h1>
-      <p class="page-subtitle">Gestión de horarios bloqueados por empleado</p>
+      <p class="page-subtitle">Las horas en que un profesional no atiende y no se pueden reservar</p>
     </div>
-    <button class="btn btn--primary" (click)="abrirDialogo()">
+    <button type="button" class="btn btn--primary" (click)="abrirDialogo()">
       <mat-icon>add</mat-icon>
       Nuevo bloqueo
     </button>
@@ -13,18 +13,20 @@
   <div class="filters-bar">
     <select
       class="filter-select"
+      aria-label="Filtrar por profesional"
       [ngModel]="filtroEmpleado()"
       (ngModelChange)="filtroEmpleado.set($event)"
     >
-      <option value="">Todos los empleados</option>
+      <option value="">Todos los profesionales</option>
       @for (emp of empleados(); track emp.id) {
         <option [value]="emp.id">{{ emp.nombre }} {{ emp.apellido }}</option>
       }
     </select>
 
     <div class="filter-date">
-      <label class="filter-date-label">Desde</label>
+      <label class="filter-date-label" for="bloqueos-desde">Desde</label>
       <input
+        id="bloqueos-desde"
         type="date"
         class="filter-date-input"
         [ngModel]="filtroFechaDesde()"
@@ -33,8 +35,9 @@
     </div>
 
     <div class="filter-date">
-      <label class="filter-date-label">Hasta</label>
+      <label class="filter-date-label" for="bloqueos-hasta">Hasta</label>
       <input
+        id="bloqueos-hasta"
         type="date"
         class="filter-date-input"
         [ngModel]="filtroFechaHasta()"
@@ -43,7 +46,7 @@
     </div>
 
     @if (filtroEmpleado() || filtroFechaDesde() || filtroFechaHasta()) {
-      <button class="filter-clear" (click)="limpiarFiltros()">
+      <button type="button" class="filter-clear" (click)="limpiarFiltros()">
         <mat-icon>filter_alt_off</mat-icon>
         Limpiar
       </button>
@@ -51,30 +54,35 @@
   </div>
 
   @if (cargando()) {
-    <div class="loading-state">
+    <div class="loading-state" role="status">
       <mat-icon class="loading-icon">hourglass_empty</mat-icon>
       <span>Cargando bloqueos...</span>
     </div>
   } @else if (bloqueos().length === 0) {
     <div class="empty-state">
       <mat-icon class="empty-icon">event_busy</mat-icon>
-      <h3 class="empty-title">Sin bloqueos registrados</h3>
-      <p class="empty-text">
-        Crea un bloqueo para reservar horarios de empleados.
-      </p>
-      <button class="btn btn--primary" (click)="abrirDialogo()">
-        <mat-icon>add</mat-icon>
-        Nuevo bloqueo
-      </button>
+      <h2 class="empty-title">No hay horas bloqueadas</h2>
+      @if (empleados().length === 0) {
+        <p class="empty-text">
+          Los bloqueos son por profesional. Primero agrega a tu equipo en <strong>Empleados</strong>.
+        </p>
+      } @else {
+        <p class="empty-text">
+          Bloquea el almuerzo, unas vacaciones o un feriado y esas horas dejan de ofrecerse a tus
+          clientes.
+        </p>
+        <button type="button" class="btn btn--primary" (click)="abrirDialogo()">
+          <mat-icon>add</mat-icon>
+          Nuevo bloqueo
+        </button>
+      }
     </div>
   } @else if (bloqueosFiltrados().length === 0) {
     <div class="empty-state">
       <mat-icon class="empty-icon">search_off</mat-icon>
-      <h3 class="empty-title">Sin resultados</h3>
-      <p class="empty-text">
-        No se encontraron bloqueos con los filtros aplicados.
-      </p>
-      <button class="btn btn--outline" (click)="limpiarFiltros()">
+      <h2 class="empty-title">Sin resultados</h2>
+      <p class="empty-text">Ningún bloqueo coincide con estos filtros. Prueba con otras fechas.</p>
+      <button type="button" class="btn btn--outline" (click)="limpiarFiltros()">
         <mat-icon>filter_alt_off</mat-icon>
         Limpiar filtros
       </button>
@@ -83,7 +91,7 @@
     <div class="bloqueos-list">
       @for (bloqueo of bloqueosFiltrados(); track bloqueo.id) {
         <div class="bloqueo-card">
-          <div class="bloqueo-color"></div>
+          <div class="bloqueo-color" aria-hidden="true"></div>
           <div class="bloqueo-body">
             <div class="bloqueo-header">
               <div class="bloqueo-info">
@@ -91,13 +99,21 @@
                 <span class="bloqueo-motivo">{{ bloqueo.motivo || 'Sin motivo' }}</span>
               </div>
               <div class="bloqueo-actions">
-                <button class="action-btn" (click)="editarBloqueo(bloqueo)" matTooltip="Editar">
+                <button
+                  type="button"
+                  class="action-btn"
+                  (click)="editarBloqueo(bloqueo)"
+                  title="Editar"
+                  [attr.aria-label]="'Editar bloqueo de ' + bloqueo.empleadoNombre + ' del ' + formatearFecha(bloqueo.fecha)"
+                >
                   <mat-icon>edit</mat-icon>
                 </button>
                 <button
+                  type="button"
                   class="action-btn action-btn--danger"
                   (click)="eliminarBloqueo(bloqueo)"
-                  matTooltip="Eliminar"
+                  title="Eliminar"
+                  [attr.aria-label]="'Eliminar bloqueo de ' + bloqueo.empleadoNombre + ' del ' + formatearFecha(bloqueo.fecha)"
                 >
                   <mat-icon>delete</mat-icon>
                 </button>
@@ -110,7 +126,7 @@
               </div>
               <div class="meta-item">
                 <mat-icon>schedule</mat-icon>
-                <span>{{ bloqueo.horaInicio }} - {{ bloqueo.horaFin }}</span>
+                <span>{{ bloqueo.horaInicio }} a {{ bloqueo.horaFin }}</span>
               </div>
             </div>
           </div>
@@ -119,8 +135,12 @@
     </div>
 
     <div class="table-footer">
-      <span class="result-count">
-        {{ bloqueosFiltrados().length }} de {{ bloqueos().length }} bloqueos
+      <span class="result-count" aria-live="polite">
+        @if (bloqueosFiltrados().length === bloqueos().length) {
+          {{ bloqueos().length }} {{ bloqueos().length === 1 ? 'bloqueo' : 'bloqueos' }}
+        } @else {
+          {{ bloqueosFiltrados().length }} de {{ bloqueos().length }} bloqueos
+        }
       </span>
     </div>
   }

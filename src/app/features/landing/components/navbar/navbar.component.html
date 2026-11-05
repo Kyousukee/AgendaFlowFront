@@ -1,4 +1,4 @@
-<nav class="navbar" aria-label="Principal">
+<nav class="navbar" id="inicio" aria-label="Principal">
   <a routerLink="/" class="navbar__brand" aria-label="AgendaFlow, inicio">
     <img src="logo.png" alt="AgendaFlow" class="navbar__logo-img" width="96" height="48" />
   </a>
@@ -19,7 +19,7 @@
     class="navbar__menu"
     (click)="toggleMenu()"
     [attr.aria-expanded]="mobileMenuOpen()"
-    aria-controls="navbar-mobile"
+    [attr.aria-controls]="mobileMenuOpen() ? 'navbar-mobile' : null"
   >
     {{ mobileMenuOpen() ? 'Cerrar' : 'Menú' }}
   </button>

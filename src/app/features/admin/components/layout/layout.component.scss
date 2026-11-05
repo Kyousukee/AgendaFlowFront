@@ -152,13 +152,13 @@
   }
 
   &--prueba {
-    --chip-color: #f59e0b;
-    --chip-bg: rgba(245, 158, 11, 0.14);
+    --chip-color: var(--warning);
+    --chip-bg: var(--warning-surface);
   }
 
   &--gratis {
     --chip-color: var(--text-secondary);
-    --chip-bg: rgba(156, 163, 175, 0.14);
+    --chip-bg: var(--neutral-surface);
   }
 
   &--pro {
@@ -168,7 +168,7 @@
 
   // Va al final para que el rojo gane sobre el color del plan.
   &--por-vencer {
-    --chip-color: #f87171;
+    --chip-color: var(--error);
     --chip-bg: rgba(239, 68, 68, 0.16);
   }
 }
@@ -269,7 +269,7 @@
   min-width: 180px;
   height: 30px;
   padding: 0 8px;
-  border: 1px solid var(--border-light); // taste-skill-ignore: control de formulario
+  border: 1px solid var(--border-field);
   border-radius: 6px;
   background: var(--bg-surface);
   color: var(--text-primary);
@@ -445,19 +445,27 @@
       text-align: center;
     }
 
+    // "Configuración" no cabe en una columna de 375px: se corta con guion en vez de "Configura...".
     &__link-label {
-      overflow: hidden;
       max-width: 100%;
-      white-space: nowrap;
-      text-overflow: ellipsis;
+      line-height: 1.15;
+      hyphens: auto;
+      overflow-wrap: break-word;
     }
 
+    // El texto se oculta a la vista pero sigue siendo el nombre del botón (no "logout").
     &__logout {
       width: auto;
-      min-height: 40px;
+      min-width: var(--target-min);
+      min-height: var(--target-min);
 
       .sidebar__link-label {
-        display: none;
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
       }
     }
   }
@@ -478,5 +486,38 @@
 
   .admin-main {
     padding: 20px 16px 40px;
+  }
+}
+
+// Objetivos táctiles (SPEC 04). El chip y el enlace del aviso conservan su tamaño visual:
+// un área invisible alrededor los lleva a 44px sin cambiar el armazón.
+.plan-chip,
+.aviso-suscripcion__link {
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: -8px -4px;
+  }
+}
+
+.aviso-suscripcion__link::after {
+  inset: -10px -6px;
+}
+
+@media (max-width: 900px) {
+  .sidebar__logo {
+    min-width: var(--target-min);
+    min-height: var(--target-min);
+  }
+
+  .aviso-suscripcion__cerrar {
+    width: var(--target-min);
+    height: var(--target-min);
+  }
+
+  .sucursal-select {
+    height: var(--target-min);
   }
 }

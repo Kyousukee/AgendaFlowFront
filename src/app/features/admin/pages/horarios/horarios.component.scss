@@ -11,7 +11,7 @@
   gap: 6px;
   font-size: 0.9375rem;
   font-weight: 600;
-  color: #6ee7b7;
+  color: var(--success);
   animation: save-in 200ms var(--ease-out);
 
   mat-icon {
@@ -126,7 +126,7 @@
   min-width: 104px;
   height: 36px;
   padding: 0 10px;
-  border: 1px solid var(--border-light); // taste-skill-ignore: campo de formulario
+  border: 1px solid var(--border-field);
   border-radius: 6px;
   background: var(--bg-primary);
   color: var(--text-primary);
@@ -136,7 +136,7 @@
   cursor: pointer;
 
   &:hover {
-    border-color: #4a4a4a;
+    border-color: var(--border-field-hover);
   }
 
   &:focus-visible {
@@ -178,7 +178,7 @@
 .descanso-icon {
   width: 16px;
   height: 16px;
-  font-size: 16px;
+  font-size: 1rem;
 }
 
 .time-divider {
@@ -275,5 +275,35 @@
 
   .dia-config {
     padding-left: 0;
+  }
+}
+
+.resumen-nota {
+  margin-top: 12px;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+// Teléfono (SPEC 04): selects de 44px, y "Guardar cambios" fijo abajo, en la zona del pulgar,
+// con el "Guardado" a la vista aunque edites el sábado.
+@media (max-width: 900px) {
+  .time-select {
+    height: var(--target-min);
+  }
+
+  // Fija al borde inferior: dentro de la cabecera, un sticky no podría salir de ella.
+  .horarios-page {
+    padding-bottom: 80px;
+  }
+
+  .horarios-page .page-actions {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 20;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    background: var(--bg-primary);
+    border-top: 1px solid var(--border); // taste-skill-ignore: barra de acción fija
   }
 }

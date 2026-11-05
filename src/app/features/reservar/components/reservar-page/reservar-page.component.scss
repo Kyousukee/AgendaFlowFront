@@ -40,7 +40,7 @@
 }
 
 .reservar-error {
-  h2 {
+  h1 {
     font-family: var(--font-display);
     font-weight: 400;
     font-size: 2rem;
@@ -137,3 +137,12 @@
   margin: 0 auto;
   padding: 40px 0 80px;
 }
+
+// Teléfono: la cabecera deja de ser fija. Con ~126px tapaba el foco al navegar con el
+// teclado (WCAG 2.4.11) y se comía el 15% del alto útil.
+@media (max-width: 600px) {
+  .reservar-header {
+    position: static;
+  }
+}
+

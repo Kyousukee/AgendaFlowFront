@@ -12,12 +12,13 @@
       <input
         type="text"
         class="search-input"
-        placeholder="Buscar por cliente, servicio o código..."
+        placeholder="Buscar cliente, servicio o código"
+        aria-label="Buscar pagos por cliente, servicio o código"
         [ngModel]="busqueda()"
         (ngModelChange)="busqueda.set($event)"
       />
       @if (busqueda()) {
-        <button class="search-clear" (click)="busqueda.set('')" aria-label="Limpiar búsqueda">
+        <button type="button" class="search-clear" (click)="busqueda.set('')" aria-label="Limpiar búsqueda">
           <mat-icon>close</mat-icon>
         </button>
       }
@@ -26,6 +27,7 @@
     <div class="filter-group">
       <select
         class="filter-select"
+        aria-label="Filtrar por estado"
         [ngModel]="filtroEstado()"
         (ngModelChange)="filtroEstado.set($event)"
       >
@@ -36,27 +38,29 @@
       </select>
 
       <div class="filter-date">
-        <label class="filter-date-label">Desde</label>
+        <label class="filter-date-label" for="pagos-desde">Desde</label>
         <input
           type="date"
           class="filter-date-input"
           [ngModel]="filtroFechaDesde()"
           (ngModelChange)="filtroFechaDesde.set($event)"
+          id="pagos-desde"
         />
       </div>
 
       <div class="filter-date">
-        <label class="filter-date-label">Hasta</label>
+        <label class="filter-date-label" for="pagos-hasta">Hasta</label>
         <input
           type="date"
           class="filter-date-input"
           [ngModel]="filtroFechaHasta()"
           (ngModelChange)="filtroFechaHasta.set($event)"
+          id="pagos-hasta"
         />
       </div>
 
       @if (busqueda() || filtroEstado() || filtroFechaDesde() || filtroFechaHasta()) {
-        <button class="filter-clear" (click)="limpiarFiltros()">
+        <button type="button" class="filter-clear" (click)="limpiarFiltros()">
           <mat-icon>filter_alt_off</mat-icon>
           Limpiar
         </button>
@@ -65,26 +69,26 @@
   </div>
 
   @if (cargando()) {
-    <div class="loading-state">
+    <div class="loading-state" role="status">
       <mat-icon class="loading-icon">hourglass_empty</mat-icon>
       <span>Cargando pagos...</span>
     </div>
   } @else if (pagos().length === 0) {
     <div class="empty-state">
       <mat-icon class="empty-icon">payments</mat-icon>
-      <h3 class="empty-title">Sin pagos registrados</h3>
+      <h2 class="empty-title">Sin pagos registrados</h2>
       <p class="empty-text">
-        Aún no hay pagos registrados en el sistema.
+        Aquí verás cada pago que registres desde la agenda de Inicio, con su método y su estado.
       </p>
     </div>
   } @else if (pagosFiltrados().length === 0) {
     <div class="empty-state">
       <mat-icon class="empty-icon">search_off</mat-icon>
-      <h3 class="empty-title">Sin resultados</h3>
+      <h2 class="empty-title">Sin resultados</h2>
       <p class="empty-text">
-        No se encontraron pagos con los filtros aplicados.
+        Ningún pago coincide con estos filtros. Prueba con otras fechas o quita la búsqueda.
       </p>
-      <button class="btn btn--outline" (click)="limpiarFiltros()">
+      <button type="button" class="btn btn--outline" (click)="limpiarFiltros()">
         <mat-icon>filter_alt_off</mat-icon>
         Limpiar filtros
       </button>
@@ -92,6 +96,7 @@
   } @else {
     <div class="table-container">
       <table class="pagos-table">
+        <caption class="sr-only">Pagos registrados</caption>
         <thead>
           <tr>
             <th class="th-id">#</th>
@@ -140,7 +145,9 @@
               <td class="td-acciones">
                 <button
                   class="btn btn--outline btn--sm"
+                  type="button"
                   (click)="verReserva(pago)"
+                  [attr.aria-label]="'Ver reserva de ' + getNombreCliente(pago)"
                 >
                   <mat-icon>visibility</mat-icon>
                   Ver reserva
@@ -153,8 +160,12 @@
     </div>
 
     <div class="table-footer">
-      <span class="result-count">
-        {{ pagosFiltrados().length }} de {{ pagos().length }} pagos
+      <span class="result-count" aria-live="polite">
+        @if (pagosFiltrados().length === pagos().length) {
+          {{ pagos().length }} {{ pagos().length === 1 ? 'pago' : 'pagos' }}
+        } @else {
+          {{ pagosFiltrados().length }} de {{ pagos().length }} pagos
+        }
       </span>
     </div>
   }

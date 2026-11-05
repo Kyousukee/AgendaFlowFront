@@ -19,8 +19,8 @@ export interface BloqueoDialogData {
   template: `
     <div class="dialog">
       <div class="dialog__header">
-        <h2 class="dialog__title">{{ data.bloqueo ? 'Editar' : 'Nuevo' }} bloqueo</h2>
-        <button class="dialog__close" (click)="cerrar()" aria-label="Cerrar">
+        <h2 class="dialog__title" mat-dialog-title>{{ data.bloqueo ? 'Editar' : 'Nuevo' }} bloqueo</h2>
+        <button type="button" class="dialog__close" (click)="cerrar()" aria-label="Cerrar">
           <mat-icon>close</mat-icon>
         </button>
       </div>
@@ -33,6 +33,8 @@ export interface BloqueoDialogData {
             class="form-input"
             formControlName="empleadoId"
             [class.form-input--error]="fieldError('empleadoId')"
+            [attr.aria-invalid]="fieldError('empleadoId')"
+            [attr.aria-describedby]="fieldError('empleadoId') ? 'empleadoId-error' : null"
           >
             <option value="">Seleccionar empleado</option>
             @for (emp of data.empleados; track emp.id) {
@@ -40,7 +42,7 @@ export interface BloqueoDialogData {
             }
           </select>
           @if (fieldError('empleadoId')) {
-            <span class="form-error">Selecciona un empleado.</span>
+            <span class="form-error" id="empleadoId-error">Selecciona un empleado.</span>
           }
         </div>
 
@@ -52,9 +54,11 @@ export interface BloqueoDialogData {
             class="form-input"
             formControlName="fecha"
             [class.form-input--error]="fieldError('fecha')"
+            [attr.aria-invalid]="fieldError('fecha')"
+            [attr.aria-describedby]="fieldError('fecha') ? 'fecha-error' : null"
           />
           @if (fieldError('fecha')) {
-            <span class="form-error">La fecha es requerida.</span>
+            <span class="form-error" id="fecha-error">La fecha es requerida.</span>
           }
         </div>
 
@@ -66,6 +70,8 @@ export interface BloqueoDialogData {
               class="form-input"
               formControlName="horaInicio"
               [class.form-input--error]="fieldError('horaInicio')"
+            [attr.aria-invalid]="fieldError('horaInicio')"
+            [attr.aria-describedby]="fieldError('horaInicio') ? 'horaInicio-error' : null"
             >
               <option value="">Seleccionar</option>
               @for (hora of horas; track hora) {
@@ -73,7 +79,7 @@ export interface BloqueoDialogData {
               }
             </select>
             @if (fieldError('horaInicio')) {
-              <span class="form-error">Requerido.</span>
+              <span class="form-error" id="horaInicio-error">Requerido.</span>
             }
           </div>
           <div class="form-group">
@@ -83,6 +89,8 @@ export interface BloqueoDialogData {
               class="form-input"
               formControlName="horaFin"
               [class.form-input--error]="fieldError('horaFin')"
+            [attr.aria-invalid]="fieldError('horaFin')"
+            [attr.aria-describedby]="fieldError('horaFin') ? 'horaFin-error' : null"
             >
               <option value="">Seleccionar</option>
               @for (hora of horas; track hora) {
@@ -90,7 +98,7 @@ export interface BloqueoDialogData {
               }
             </select>
             @if (fieldError('horaFin')) {
-              <span class="form-error">Requerido.</span>
+              <span class="form-error" id="horaFin-error">Requerido.</span>
             }
           </div>
         </div>
@@ -110,7 +118,7 @@ export interface BloqueoDialogData {
         <div class="dialog__actions">
           <button type="button" class="btn btn--secondary" (click)="cerrar()">Cancelar</button>
           <button type="submit" class="btn btn--primary" [disabled]="form.invalid || guardando()">
-            {{ guardando() ? 'Guardando...' : data.bloqueo ? 'Actualizar' : 'Crear bloqueo' }}
+            {{ guardando() ? 'Guardando...' : data.bloqueo ? 'Guardar cambios' : 'Crear bloqueo' }}
           </button>
         </div>
       </form>

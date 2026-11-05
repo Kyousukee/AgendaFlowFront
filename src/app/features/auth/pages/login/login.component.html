@@ -1,39 +1,55 @@
 <div class="auth">
   <div class="auth__left">
     <div class="auth__brand">
-      <a routerLink="/" class="auth__logo">
-        <img src="logo.png" alt="AgendaFlow" class="auth__logo-img" />
+      <a routerLink="/" class="auth__logo" aria-label="AgendaFlow, ir al inicio">
+        <img src="logo.png" alt="" class="auth__logo-img" />
       </a>
     </div>
-    <img class="auth__photo" src="images/landing/barberia-sillon.webp" alt="Interior de una barbería con tres sillones" width="1600" height="1067" />
+    <img class="auth__photo" src="images/landing/barberia-sillon.webp" alt="" width="1600" height="1067" />
     <div class="auth__promo">
-      <h1 class="auth__promo-title">Bienvenido de vuelta.</h1>
-      <p class="auth__promo-text">Accede a tu panel y gestiona tu negocio desde cualquier lugar.</p>
+      <h1 class="auth__promo-title">Hola de nuevo.</h1>
+      <p class="auth__promo-text">Entra a tu panel y mira el día de tu negocio desde cualquier lugar.</p>
     </div>
   </div>
 
-  <div class="auth__right">
+  <main class="auth__right">
     <div class="auth__card">
       <h2 class="auth__title">Iniciar sesión</h2>
-      <p class="auth__subtitle">Ingresa tus credenciales para acceder a tu cuenta.</p>
+      <p class="auth__subtitle">Entra con el correo y la contraseña de tu cuenta.</p>
 
       @if (errorMessage()) {
-        <div class="form-error-banner">{{ errorMessage() }}</div>
+        <div class="form-error-banner" role="alert">{{ errorMessage() }}</div>
       }
 
-      <form class="auth__form" [formGroup]="form" (ngSubmit)="onSubmit()">
+      @let email = form.controls.email;
+      @let password = form.controls.password;
+      @let emailError = email.invalid && (email.dirty || email.touched);
+      @let passwordError = password.invalid && (password.dirty || password.touched);
+
+      <form class="auth__form" [formGroup]="form" (ngSubmit)="form.markAllAsTouched(); onSubmit()">
         <div class="form-group">
           <label class="form-label" for="email">Correo electrónico</label>
           <input
             id="email"
             type="email"
             class="form-input"
-            placeholder="tu&#64;email.com"
+            placeholder="nombre&#64;correo.cl"
             formControlName="email"
-            [class.form-input--error]="
-              form.get('email')?.invalid && (form.get('email')?.dirty || form.get('email')?.touched)
-            "
+            autocomplete="email"
+            inputmode="email"
+            [class.form-input--error]="emailError"
+            [attr.aria-invalid]="emailError"
+            [attr.aria-describedby]="emailError ? 'email-error' : null"
           />
+          @if (emailError) {
+            <span class="form-error" id="email-error">
+              {{
+                email.hasError('required')
+                  ? 'Escribe tu correo.'
+                  : 'Escribe un correo válido, como nombre@correo.cl.'
+              }}
+            </span>
+          }
         </div>
 
         <div class="form-group">
@@ -43,16 +59,23 @@
               id="password"
               [type]="showPassword() ? 'text' : 'password'"
               class="form-input form-input--password"
-              placeholder="Ingresa tu contraseña"
+              placeholder="Tu contraseña"
               formControlName="password"
-              [class.form-input--error]="
-                form.get('password')?.invalid &&
-                (form.get('password')?.dirty || form.get('password')?.touched)
-              "
+              autocomplete="current-password"
+              [class.form-input--error]="passwordError"
+              [attr.aria-invalid]="passwordError"
+              [attr.aria-describedby]="passwordError ? 'password-error' : null"
             />
-            <button type="button" class="form-input-toggle" (click)="togglePassword()">
+            <button
+              type="button"
+              class="form-input-toggle"
+              (click)="togglePassword()"
+              [attr.aria-label]="showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+              [attr.aria-pressed]="showPassword()"
+            >
               @if (showPassword()) {
                 <svg
+                  aria-hidden="true"
                   width="18"
                   height="18"
                   viewBox="0 0 24 24"
@@ -69,6 +92,7 @@
                 </svg>
               } @else {
                 <svg
+                  aria-hidden="true"
                   width="18"
                   height="18"
                   viewBox="0 0 24 24"
@@ -84,17 +108,17 @@
               }
             </button>
           </div>
+          @if (passwordError) {
+            <span class="form-error" id="password-error">Escribe tu contraseña.</span>
+          }
         </div>
 
-        <div class="form-row">
-          <label class="form-checkbox">
-            <input type="checkbox" />
-            <span>Recordarme</span>
-          </label>
-          <a href="#" class="form-link">¿Olvidaste tu contraseña?</a>
-        </div>
-
-        <button type="submit" class="btn btn--primary btn--full" [disabled]="isLoading()">
+        <button
+          type="submit"
+          class="btn btn--primary btn--full"
+          [disabled]="isLoading()"
+          [attr.aria-busy]="isLoading()"
+        >
           {{ isLoading() ? 'Ingresando...' : 'Iniciar sesión' }}
         </button>
       </form>
@@ -103,5 +127,5 @@
         ¿No tienes una cuenta? <a routerLink="/register" class="form-link">Regístrate aquí</a>
       </p>
     </div>
-  </div>
+  </main>
 </div>
