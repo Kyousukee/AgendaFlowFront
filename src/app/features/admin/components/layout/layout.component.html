@@ -48,6 +48,19 @@
 
   <div class="admin-body">
     <header class="topbar">
+      @if (auth.empresa(); as emp) {
+        <div class="empresa-brand">
+          @if (emp.logo) {
+            <img
+              class="empresa-brand__logo"
+              [src]="emp.logo"
+              [alt]="emp.nombreComercial || emp.nombre"
+            />
+          } @else {
+            <span class="empresa-brand__nombre">{{ emp.nombreComercial || emp.nombre }}</span>
+          }
+        </div>
+      }
       @if (auth.sucursales().length > 0) {
         <div class="sucursal-info">
           <mat-icon class="sucursal-icon">store</mat-icon>

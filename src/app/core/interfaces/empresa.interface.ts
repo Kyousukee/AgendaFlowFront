@@ -8,7 +8,7 @@ export interface Empresa {
   telefono?: string;
   whatsapp?: string;
   sitioWeb?: string;
-  logo?: string;
+  logo?: string | null;
   banner?: string;
   colorPrincipal?: string;
   colorSecundario?: string;

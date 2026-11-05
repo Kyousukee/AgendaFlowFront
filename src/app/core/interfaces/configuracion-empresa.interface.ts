@@ -11,3 +11,13 @@ export interface ConfiguracionEmpresa {
   enviarCorreo: boolean;
   enviarWhatsapp: boolean;
 }
+
+export interface EmpresaLogoResponse {
+  logo: string;
+}
+
+/** Cuerpo de error de NestJS: `message` puede venir como texto o como lista de validaciones. */
+export interface ApiErrorBody {
+  message?: string | string[];
+  statusCode?: number;
+}

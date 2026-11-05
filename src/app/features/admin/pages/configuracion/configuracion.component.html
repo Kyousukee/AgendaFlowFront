@@ -86,6 +86,143 @@
     </section>
   }
 
+  <section class="config-card logo-card" aria-labelledby="logo-titulo">
+    <div class="config-card__header">
+      <mat-icon class="config-card__icon">image</mat-icon>
+      <div>
+        <h2 class="config-card__title" id="logo-titulo">Logo</h2>
+        <p class="config-card__desc">
+          Se muestra en tu página de reservas y en el panel. PNG, JPG o WEBP, hasta 2 MB.
+        </p>
+      </div>
+    </div>
+
+    <div class="config-card__body">
+      <div class="logo-editor">
+        <div class="logo-preview" [class.logo-preview--local]="logoPreview()">
+          @if (logoMostrado(); as src) {
+            <img [src]="src" [alt]="'Logo de ' + nombreEmpresa()" class="logo-preview__img" />
+          } @else {
+            <span class="logo-preview__placeholder" aria-hidden="true">
+              {{ nombreEmpresa().charAt(0) }}
+            </span>
+          }
+          @if (logoSubiendo()) {
+            <div class="logo-preview__overlay">
+              <mat-spinner diameter="28" aria-label="Subiendo logo" />
+            </div>
+          }
+        </div>
+
+        <label
+          class="logo-dropzone"
+          [class.logo-dropzone--activa]="logoArrastrando()"
+          [class.logo-dropzone--deshabilitada]="logoOcupado()"
+          (dragover)="onLogoDragOver($event)"
+          (dragleave)="onLogoDragLeave($event)"
+          (drop)="onLogoDrop($event)"
+        >
+          <input
+            type="file"
+            class="logo-dropzone__input"
+            [accept]="logoAccept"
+            [disabled]="logoOcupado()"
+            (change)="onLogoSeleccionado($event)"
+          />
+          <mat-icon class="logo-dropzone__icon">upload</mat-icon>
+          <span class="logo-dropzone__titulo">
+            {{ logoArchivo() ? 'Elegir otra imagen' : 'Elegir imagen' }}
+          </span>
+          <span class="logo-dropzone__hint">o arrástrala aquí</span>
+        </label>
+      </div>
+
+      @if (logoError()) {
+        <p class="logo-mensaje logo-mensaje--error" role="alert">
+          <mat-icon>error_outline</mat-icon>
+          {{ logoError() }}
+        </p>
+      }
+
+      @if (logoArchivo(); as archivo) {
+        <div class="logo-acciones">
+          <span class="logo-archivo">{{ archivo.name }}</span>
+          <button
+            type="button"
+            class="btn btn--outline btn--sm"
+            (click)="cancelarLogo()"
+            [disabled]="logoSubiendo()"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            class="btn btn--primary btn--sm"
+            (click)="subirLogo()"
+            [disabled]="logoOcupado()"
+          >
+            @if (logoSubiendo()) {
+              <mat-icon class="spin">hourglass_empty</mat-icon>
+              Subiendo...
+            } @else {
+              <mat-icon>cloud_upload</mat-icon>
+              Subir logo
+            }
+          </button>
+        </div>
+      } @else if (empresa()?.logo) {
+        @if (logoConfirmarEliminar()) {
+          <div class="logo-acciones logo-acciones--confirmar" role="group" aria-label="Confirmar">
+            <span class="logo-archivo">¿Eliminar el logo actual?</span>
+            <button
+              type="button"
+              class="btn btn--outline btn--sm"
+              (click)="logoConfirmarEliminar.set(false)"
+              [disabled]="logoEliminando()"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              class="btn btn--danger btn--sm"
+              (click)="eliminarLogo()"
+              [disabled]="logoEliminando()"
+            >
+              @if (logoEliminando()) {
+                <mat-icon class="spin">hourglass_empty</mat-icon>
+                Eliminando...
+              } @else {
+                <mat-icon>delete</mat-icon>
+                Sí, eliminar
+              }
+            </button>
+          </div>
+        } @else {
+          <div class="logo-acciones">
+            <button
+              type="button"
+              class="btn btn--outline btn--sm"
+              (click)="logoConfirmarEliminar.set(true)"
+            >
+              <mat-icon>delete</mat-icon>
+              Eliminar logo
+            </button>
+          </div>
+        }
+      }
+
+      @if (logoUrlSubida(); as url) {
+        <p class="logo-mensaje">
+          <mat-icon>check_circle</mat-icon>
+          <span>
+            Logo publicado en
+            <a class="logo-url" [href]="url" target="_blank" rel="noopener">{{ url }}</a>
+          </span>
+        </p>
+      }
+    </div>
+  </section>
+
   @if (cargando()) {
     <div class="loading-state">
       <mat-icon class="loading-icon">hourglass_empty</mat-icon>
