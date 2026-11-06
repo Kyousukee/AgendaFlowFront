@@ -39,10 +39,11 @@ La CSP queda **en modo estricto, sin `Report-Only`**. Para lograrlo, en producci
 1. **Mapa roto (`L.map is not a function`):** `import('leaflet')` solo expone `default`, Leaflet se montaba en el host en lugar de en `#mapContainer`, y el icono del marcador no cargaba. Corregidos los tres.
 2. **IDs de estado de reserva equivocados:** las opciones del panel no coincidían con `schema.sql`. Ahora salen de `core/constants/estados-reserva.ts`, con los nombres reales del catálogo. "Confirmada" y "No asistió" desaparecen porque no existen en la base. Las tres opciones que liberan la hora piden confirmación.
 3. **Recargar `/admin/*` llevaba a `/login`:** las rutas se prerenderizaban con `authGuard` sin sesión. Ahora usan `RenderMode.Client` y el guard decide en el navegador.
+4. **Estados de pago:** el panel enviaba IDs de otros tipos de estado. Ahora el selector se carga desde `GET /pagos/estados` y un pago nuevo deja que la API asigne el estado. Los pagos ya guardados se corrigen con la migración 002 de la API (ver su informe).
 
 ## Verificación
 
-- **Chrome, build de desarrollo contra API local:** reserva completa, hora ocupada no ofrecida, login, listado en el panel, Cancelada guardada como tal y hora liberada.
+- **Chrome, build de desarrollo contra API local:** reserva completa, hora ocupada no ofrecida, login, listado en el panel, Cancelada guardada como tal y hora liberada, y flujo de pagos (registrar, cambiar a Reembolsado y verlo en el listado).
 - **Chrome, build de producción contra API local:** recarga y acceso directo a `/admin/*`, mapa con clic y dirección rellenada, Nominatim sin `Authorization`, y panel sin violaciones de CSP.
 - **Chrome, build de producción, páginas públicas:** `/`, `/login`, `/register`, `/terminos` y `/privacidad` sin violaciones de CSP y con estilos cargados.
 - **`ng test`:** 9 de 10. Falla `app.spec.ts`, que busca un "Hello" de la plantilla inicial; ni el test ni `app.html` cambian en esta rama.
@@ -57,6 +58,5 @@ La CSP queda **en modo estricto, sin `Report-Only`**. Para lograrlo, en producci
 
 ## Pendiente
 
-- **Estados de pago:** mismo problema que el de reservas, pero **sin corregir**, porque el catálogo no tiene estados de tipo `Pago`. El panel envía los IDs 6 a 9, que son Rechazado, Anulado, Usuario/Activo y Usuario/Inactivo, y cada pago nuevo se guarda con el ID 1 (Programada). Requiere añadir esos estados en la API y la base, y una decisión sobre los pagos ya guardados.
-- **Datos ya guardados:** las reservas que se marcaron con las opciones antiguas conservan el estado equivocado (por ejemplo, "Cancelada" quedó como Pagado). No se pueden distinguir automáticamente de los pagos reales, así que hay que revisarlas a mano.
+- **Reservas ya guardadas:** las reservas que se marcaron con las opciones antiguas conservan el estado equivocado (por ejemplo, "Cancelada" quedó como Pagado). No se pueden distinguir automáticamente de los pagos reales, así que hay que revisarlas a mano.
 - **JWT en `localStorage`:** sin sinks XSS y con la CSP el riesgo baja, pero un XSS futuro podría leerlo. Decidir las cookies HttpOnly junto con la rama `feat/supabase-auth`, que también modifica `session.interceptor.ts` y tendrá conflicto con esta rama.

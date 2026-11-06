@@ -241,10 +241,9 @@
                         <label class="modal__label" for="modal-estado-pago">Nuevo estado</label>
                         <select id="modal-estado-pago" class="modal__select" [ngModel]="nuevoEstadoPago()" (ngModelChange)="nuevoEstadoPago.set($event)">
                           <option value="">Seleccionar estado</option>
-                          <option value="6">Pendiente</option>
-                          <option value="7">Pagado</option>
-                          <option value="8">Rechazado</option>
-                          <option value="9">Reembolsado</option>
+                          @for (estado of estadosPago(); track estado.id) {
+                            <option [value]="estado.id.toString()">{{ estado.nombre }}</option>
+                          }
                         </select>
                       </div>
                     </div>

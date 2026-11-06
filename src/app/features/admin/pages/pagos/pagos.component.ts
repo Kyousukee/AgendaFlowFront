@@ -147,6 +147,7 @@ export class PagosComponent {
       Pendiente: 'pendiente',
       Rechazado: 'rechazado',
       Anulado: 'anulado',
+      Reembolsado: 'anulado',
     };
     return map[estado] || 'desconocido';
   }

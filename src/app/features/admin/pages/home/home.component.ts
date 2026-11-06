@@ -9,6 +9,7 @@ import { ServiciosService } from '../../services/servicios.service';
 import { HorariosService } from '../../services/horarios.service';
 import { ReservasService } from '../../services/reservas.service';
 import { PagosService } from '../../services/pagos.service';
+import { Estado } from '../../../../core/interfaces/estado.interface';
 import { Servicio } from '../../../../core/interfaces/servicio.interface';
 import { HorarioSucursal } from '../../interfaces/horario-sucursal.interface';
 import { Reserva, PagoReserva } from '../../../../core/interfaces/reserva.interface';
@@ -69,6 +70,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   pagoSeleccionado = signal<PagoReserva | null>(null);
   nuevoEstadoPago = signal('');
+  estadosPago = signal<Estado[]>([]);
   actualizandoEstado = signal(false);
   estadoActualizado = signal(false);
 
@@ -287,7 +289,17 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
   }
 
+  private cargarEstadosPago(): void {
+    if (this.estadosPago().length > 0) return;
+    this.pagosService.getEstados().subscribe({
+      next: (estados) => this.estadosPago.set(estados),
+      error: () =>
+        this.pagoError.set('No pudimos cargar los estados de pago. Cierra esta ventana e inténtalo de nuevo.'),
+    });
+  }
+
   abrirModalPago(reserva: Reserva): void {
+    this.cargarEstadosPago();
     this.reservaSeleccionada.set(reserva);
     this.montoPago.set(reserva.precio || 0);
     this.metodoPago.set('Efectivo');
@@ -383,7 +395,6 @@ export class HomeComponent implements OnInit, OnDestroy {
       metodoPago: this.metodoPago(),
       codigoTransaccion: this.codigoTransaccion(),
       fechaPago,
-      estadoId: 1,
     }).subscribe({
       next: () => {
         this.guardandoPago.set(false);
