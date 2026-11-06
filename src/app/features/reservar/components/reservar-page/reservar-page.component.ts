@@ -1,7 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { forkJoin } from 'rxjs';
-import { ReservarPublicService } from '../../services/reservar-public.service';
+import { OcupacionReserva, ReservarPublicService } from '../../services/reservar-public.service';
 import { Empresa } from '../../../../core/interfaces/empresa.interface';
 import { Sucursal } from '../../../../core/interfaces/sucursal.interface';
 import { Servicio } from '../../../../core/interfaces/servicio.interface';
@@ -10,7 +10,6 @@ import { HorarioSucursal } from '../../../admin/interfaces/horario-sucursal.inte
 import { BloqueoAgenda } from '../../../../core/interfaces/bloqueo-agenda.interface';
 import { ServicioEmpleado } from '../../../../core/interfaces/servicio-empleado.interface';
 import { ConfiguracionEmpresa } from '../../../../core/interfaces/configuracion-empresa.interface';
-import { Reserva } from '../../../../core/interfaces/reserva.interface';
 import { ReservarFormComponent } from '../reservar-form/reservar-form.component';
 import { ReservarConfirmacionComponent } from '../reservar-confirmacion/reservar-confirmacion.component';
 import { ReservaResumen } from '../../interfaces/reserva-resumen.interface';
@@ -32,7 +31,7 @@ export class ReservarPageComponent implements OnInit {
   empleados = signal<Empleado[]>([]);
   horarios = signal<HorarioSucursal[]>([]);
   bloqueos = signal<BloqueoAgenda[]>([]);
-  reservas = signal<Reserva[]>([]);
+  ocupacion = signal<OcupacionReserva[]>([]);
   serviciosEmpleados = signal<ServicioEmpleado[]>([]);
   configuracion = signal<ConfiguracionEmpresa | null>(null);
   cargando = signal(true);
@@ -52,7 +51,6 @@ export class ReservarPageComponent implements OnInit {
 
     this.reservarService.getEmpresaBySlug(slug).subscribe({
       next: (empresa) => {
-        console.log('Empresa por slug:', slug, empresa);
         if (!empresa) {
           this.cargando.set(false);
           this.error.set('Empresa no encontrada.');
@@ -61,8 +59,7 @@ export class ReservarPageComponent implements OnInit {
         this.empresa.set(empresa);
         this.cargarSucursal(sucursalId);
       },
-      error: (err) => {
-        console.error('Error al buscar empresa:', err);
+      error: () => {
         this.cargando.set(false);
         this.error.set('Error al cargar la empresa.');
       },
@@ -72,7 +69,6 @@ export class ReservarPageComponent implements OnInit {
   private cargarSucursal(sucursalId: number): void {
     this.reservarService.getSucursal(sucursalId).subscribe({
       next: (sucursal) => {
-        console.log('Sucursal:', sucursalId, sucursal);
         if (!sucursal) {
           this.cargando.set(false);
           this.error.set('Sucursal no encontrada.');
@@ -97,25 +93,18 @@ export class ReservarPageComponent implements OnInit {
       horarios: this.reservarService.getHorariosBySucursal(sucursalId),
       bloqueos: this.reservarService.getBloqueosBySucursal(sucursalId),
       serviciosEmpleados: this.reservarService.getServiciosEmpleados(sucursalId),
-      reservas: this.reservarService.getReservasBySucursal(sucursalId),
+      ocupacion: this.reservarService.getOcupacion(sucursalId),
     }).subscribe({
       next: (data) => {
-        console.log('Servicios:', data.servicios);
-        console.log('Empleados:', data.empleados);
-        console.log('Horarios:', data.horarios);
-        console.log('Bloqueos:', data.bloqueos);
-        console.log('ServiciosEmpleados:', data.serviciosEmpleados);
-        console.log('Reservas:', data.reservas);
         this.servicios.set(data.servicios);
         this.empleados.set(data.empleados);
         this.horarios.set(data.horarios);
         this.bloqueos.set(data.bloqueos);
         this.serviciosEmpleados.set(data.serviciosEmpleados);
-        this.reservas.set(data.reservas);
+        this.ocupacion.set(data.ocupacion);
         this.cargando.set(false);
       },
-      error: (err) => {
-        console.error('Error en forkJoin reservar:', err);
+      error: () => {
         this.cargando.set(false);
         this.error.set('Error al cargar los datos de la sucursal.');
       },

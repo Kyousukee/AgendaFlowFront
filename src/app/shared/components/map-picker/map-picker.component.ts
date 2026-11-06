@@ -7,6 +7,7 @@ import {
   input,
   output,
   NgZone,
+  viewChild,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { PLATFORM_ID } from '@angular/core';
@@ -73,7 +74,7 @@ import { PLATFORM_ID } from '@angular/core';
   `,
 })
 export class MapPickerComponent implements OnDestroy {
-  private mapContainer = inject<ElementRef<HTMLDivElement>>(ElementRef);
+  private mapContainer = viewChild.required<ElementRef<HTMLDivElement>>('mapContainer');
   private platformId = inject(PLATFORM_ID);
   private zone = inject(NgZone);
 
@@ -94,7 +95,9 @@ export class MapPickerComponent implements OnDestroy {
   }
 
   private async loadLeaflet(): Promise<void> {
-    this.L = await import('leaflet');
+    // Leaflet es CommonJS: al empaquetarlo, su API queda en `default`.
+    const leaflet = await import('leaflet');
+    this.L = (leaflet as unknown as { default?: typeof leaflet }).default ?? leaflet;
     this.zone.runOutsideAngular(() => {
       this.initMap();
     });
@@ -107,7 +110,7 @@ export class MapPickerComponent implements OnDestroy {
     const lng = this.lng();
     const L = this.L;
 
-    this.map = L.map(this.mapContainer.nativeElement, {
+    this.map = L.map(this.mapContainer().nativeElement, {
       center: [lat, lng],
       zoom: 14,
       zoomControl: false,
@@ -120,7 +123,16 @@ export class MapPickerComponent implements OnDestroy {
       maxZoom: 19,
     }).addTo(this.map);
 
-    this.marker = L.marker([lat, lng], { draggable: true }).addTo(this.map);
+    // Rutas explícitas: la detección automática de Leaflet falla con archivos empaquetados.
+    const icon = L.icon({
+      iconUrl: 'leaflet/marker-icon.png',
+      iconRetinaUrl: 'leaflet/marker-icon-2x.png',
+      shadowUrl: 'leaflet/marker-shadow.png',
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      shadowSize: [41, 41],
+    });
+    this.marker = L.marker([lat, lng], { draggable: true, icon }).addTo(this.map);
 
     this.marker.on('dragend', () => {
       const pos = this.marker.getLatLng();

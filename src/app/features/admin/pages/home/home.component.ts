@@ -7,11 +7,17 @@ import { A11yModule } from '@angular/cdk/a11y';
 import { AuthService, SUCURSAL_UPDATED } from '../../../../core/services/auth.service';
 import { ServiciosService } from '../../services/servicios.service';
 import { HorariosService } from '../../services/horarios.service';
-import { ReservarPublicService } from '../../../reservar/services/reservar-public.service';
+import { ReservasService } from '../../services/reservas.service';
 import { PagosService } from '../../services/pagos.service';
+import { Estado } from '../../../../core/interfaces/estado.interface';
 import { Servicio } from '../../../../core/interfaces/servicio.interface';
 import { HorarioSucursal } from '../../interfaces/horario-sucursal.interface';
 import { Reserva, PagoReserva } from '../../../../core/interfaces/reserva.interface';
+import {
+  ESTADOS_RESERVA,
+  liberaHora,
+  nombreEstadoReserva,
+} from '../../../../core/constants/estados-reserva';
 
 interface TimelineItem {
   type: 'reserva' | 'disponible';
@@ -41,7 +47,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private serviciosService = inject(ServiciosService);
   private horariosService = inject(HorariosService);
-  private reservarService = inject(ReservarPublicService);
+  private reservasService = inject(ReservasService);
   private pagosService = inject(PagosService);
 
   selectedDate = signal(new Date());
@@ -64,10 +70,12 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   pagoSeleccionado = signal<PagoReserva | null>(null);
   nuevoEstadoPago = signal('');
+  estadosPago = signal<Estado[]>([]);
   actualizandoEstado = signal(false);
   estadoActualizado = signal(false);
 
   nuevoEstadoReserva = signal('');
+  readonly estadosReserva = ESTADOS_RESERVA;
   actualizandoEstadoReserva = signal(false);
   estadoReservaActualizado = signal(false);
 
@@ -235,7 +243,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     const sucursal = this.authService.sucursalActual();
     if (!sucursal) return;
 
-    this.reservarService.getReservasBySucursal(sucursal.id).subscribe({
+    this.reservasService.getBySucursal(sucursal.id).subscribe({
       next: (reservas) => {
         this.reservas.set(reservas);
         this.cargando.set(false);
@@ -281,7 +289,17 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
   }
 
+  private cargarEstadosPago(): void {
+    if (this.estadosPago().length > 0) return;
+    this.pagosService.getEstados().subscribe({
+      next: (estados) => this.estadosPago.set(estados),
+      error: () =>
+        this.pagoError.set('No pudimos cargar los estados de pago. Cierra esta ventana e inténtalo de nuevo.'),
+    });
+  }
+
   abrirModalPago(reserva: Reserva): void {
+    this.cargarEstadosPago();
     this.reservaSeleccionada.set(reserva);
     this.montoPago.set(reserva.precio || 0);
     this.metodoPago.set('Efectivo');
@@ -308,10 +326,10 @@ export class HomeComponent implements OnInit, OnDestroy {
     if (!reserva || !estadoId || this.actualizandoEstadoReserva()) return;
     // SPEC 04: cancelar una cita no se hace con un solo clic.
     const cliente = [reserva.cliente?.nombre, reserva.cliente?.apellido].filter(Boolean).join(' ');
-    if (estadoId === 3 && !confirm(`¿Cancelar la reserva de ${cliente || "este cliente"} de las ${reserva.horaInicio}? La hora vuelve a quedar libre.`)) return;
+    if (liberaHora(estadoId) && !confirm(`¿Marcar como ${nombreEstadoReserva(estadoId)} la reserva de ${cliente || "este cliente"} de las ${reserva.horaInicio}? La hora vuelve a quedar libre.`)) return;
 
     this.actualizandoEstadoReserva.set(true);
-    this.reservarService.actualizarEstadoReserva(reserva.id, estadoId).subscribe({
+    this.reservasService.actualizarEstado(reserva.id, estadoId).subscribe({
       next: () => {
         this.actualizandoEstadoReserva.set(false);
         this.estadoReservaActualizado.set(true);
@@ -377,7 +395,6 @@ export class HomeComponent implements OnInit, OnDestroy {
       metodoPago: this.metodoPago(),
       codigoTransaccion: this.codigoTransaccion(),
       fechaPago,
-      estadoId: 1,
     }).subscribe({
       next: () => {
         this.guardandoPago.set(false);

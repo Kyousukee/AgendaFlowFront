@@ -14,7 +14,6 @@ export class ServiciosService {
   }
 
   crear(servicio: Omit<Servicio, 'id' | 'fechaCreacion'>): Observable<Servicio> {
-    console.log('Creando servicio:', servicio);
     return this.http.post<Servicio>(this.apiUrl, servicio);
   }
 

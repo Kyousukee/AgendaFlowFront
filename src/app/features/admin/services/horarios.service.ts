@@ -30,8 +30,6 @@ export class HorariosService {
   }
 
   saveAll(sucursalId: number, horarios: Omit<HorarioSucursal, 'id' | 'sucursalId'>[]): Observable<HorarioSucursal[]> {
-    console.log(`${this.apiUrl}/sucursales/${sucursalId}/horarios`);
-    console.log(horarios);
     return this.http
       .post<HorarioSucursal[]>(`${this.apiUrl}/sucursales/${sucursalId}/horarios`, { horarios })
       .pipe(catchError(() => of([])));

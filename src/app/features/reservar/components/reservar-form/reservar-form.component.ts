@@ -15,8 +15,7 @@ import { Empleado } from '../../../../core/interfaces/empleado.interface';
 import { HorarioSucursal } from '../../../admin/interfaces/horario-sucursal.interface';
 import { BloqueoAgenda } from '../../../../core/interfaces/bloqueo-agenda.interface';
 import { ServicioEmpleado } from '../../../../core/interfaces/servicio-empleado.interface';
-import { Reserva } from '../../../../core/interfaces/reserva.interface';
-import { ReservarPublicService } from '../../services/reservar-public.service';
+import { OcupacionReserva, ReservarPublicService } from '../../services/reservar-public.service';
 import { ReservaResumen } from '../../interfaces/reserva-resumen.interface';
 
 @Component({
@@ -34,7 +33,7 @@ export class ReservarFormComponent implements OnChanges {
   @Input({ required: true }) horarios: HorarioSucursal[] = [];
   @Input({ required: true }) bloqueos: BloqueoAgenda[] = [];
   @Input({ required: true }) serviciosEmpleados: ServicioEmpleado[] = [];
-  @Input({ required: true }) reservas: Reserva[] = [];
+  @Input({ required: true }) ocupacion: OcupacionReserva[] = [];
   // SPEC 04 (TS mínimo autorizado): emite el resumen, no solo el código, para la confirmación.
   @Output() reservaCreada = new EventEmitter<ReservaResumen>();
 
@@ -178,8 +177,6 @@ export class ReservarFormComponent implements OnChanges {
       empleadoId: empleado.id,
       fecha: this.fechaSeleccionada(),
       horaInicio: this.horaSeleccionada(),
-      horaFin: this.calcularHoraFin(),
-      precio: servicio.precio,
       clienteNombre: [formValue.nombre, formValue.apellido].filter(Boolean).join(' '),
       clienteEmail: formValue.email,
       clienteTelefono: formValue.telefono,
@@ -253,7 +250,7 @@ export class ReservarFormComponent implements OnChanges {
         this.servicios,
         this.horarios,
         this.bloqueos,
-        this.reservas,
+        this.ocupacion,
       )
       .subscribe((horas) => {
         this.horasDisponibles.set(horas);
