@@ -8,7 +8,7 @@ Modo `strix-standard`, white-box, con pruebas en Chrome solo en local. Este repo
 
 Esta rama y la de la API **deben desplegarse juntas**: el front actual deja de funcionar contra la API nueva, y al revés.
 
-- **`allowedHosts`:** se configuró `agendaflow.cl` y `www.agendaflow.cl`, deducidos de `api.agendaflow.cl`. **Hay que confirmar el dominio real.** Para probar el SSR en local: `NG_ALLOWED_HOSTS=localhost`.
+- **`allowedHosts`:** `agendaflow.cl` y `www.agendaflow.cl`. Dominio confirmado. Para probar el SSR en local: `NG_ALLOWED_HOSTS=localhost`.
 - **Cabeceras de seguridad:** las envía `server.ts` solo cuando corre como servidor propio. Un despliegue que importe `reqHandler` (por ejemplo, Cloud Functions) debe enviarlas por su cuenta.
 
 ## Hallazgos de seguridad (corregidos)
