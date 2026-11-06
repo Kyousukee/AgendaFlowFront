@@ -6,6 +6,7 @@ export interface LoginApiResponse {
     apellido: string;
     email: string;
     rolId: number;
+    emailVerificado: boolean;
     empleado: {
       id: number;
       nombre: string;
@@ -35,6 +36,8 @@ export interface UserData {
   empresaId: number;
   rolId: number;
   telefono?: string;
+  /** Opcional: una sesión guardada antes de la verificación de email no lo trae. */
+  emailVerificado?: boolean;
 }
 
 export interface AuthResponse {

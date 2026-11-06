@@ -95,6 +95,24 @@
     </header>
 
     <main class="admin-main">
+      @if (mostrarAvisoVerificacion()) {
+        <div class="aviso-verificacion">
+          <mat-icon class="aviso-verificacion__icon">mark_email_unread</mat-icon>
+          <div class="aviso-verificacion__texto">
+            <p>Confirma tu correo con el enlace que te enviamos.</p>
+            <p class="aviso-verificacion__resultado" role="status">{{ mensajeReenvio() }}</p>
+          </div>
+          <button
+            type="button"
+            class="aviso-verificacion__boton"
+            [disabled]="reenviando()"
+            [attr.aria-busy]="reenviando()"
+            (click)="reenviarVerificacion()"
+          >
+            Reenviar correo
+          </button>
+        </div>
+      }
       @if (suscripcion.mostrarAviso()) {
         <div class="aviso-suscripcion" role="status">
           <mat-icon class="aviso-suscripcion__icon">info</mat-icon>

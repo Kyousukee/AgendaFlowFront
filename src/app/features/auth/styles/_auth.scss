@@ -228,6 +228,15 @@
   }
 }
 
+// Confirmación de una acción que ya ocurrió (p. ej. "tu contraseña cambió").
+.form-success-banner {
+  margin-bottom: 20px;
+  padding: 12px 14px;
+  background: var(--success-surface);
+  color: var(--success);
+  font-size: 0.9375rem;
+}
+
 // Ayuda permanente bajo un campo (el requisito no vive en el placeholder).
 .form-hint {
   font-size: 0.8125rem;
@@ -302,6 +311,13 @@
   display: inline-block;
   padding-block: 11px;
   margin-block: -11px;
+}
+
+// Enlace bajo un campo: no se estira con el form-group y mide 44px de alto sin mover el resto.
+.form-link--campo {
+  align-self: flex-start;
+  padding-block: 11px;
+  margin-block: -7px -11px;
 }
 
 .form-nav {

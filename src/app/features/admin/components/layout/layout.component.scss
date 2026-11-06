@@ -375,6 +375,69 @@
   }
 }
 
+// Aviso de correo sin verificar: la misma franja, con una acción secundaria porque no bloquea nada.
+.aviso-verificacion {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  min-height: 48px;
+  margin-bottom: 24px;
+  padding: 6px 8px 6px 16px;
+  border-radius: 8px;
+  background: rgba(201, 168, 76, 0.12);
+  color: var(--text-primary);
+  font-size: 0.9375rem;
+  animation: aviso-in 240ms var(--ease-out);
+
+  &__icon {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+    color: var(--gold);
+  }
+
+  &__texto {
+    flex: 1 1 240px;
+    min-width: 0;
+  }
+
+  &__resultado {
+    color: var(--text-secondary);
+
+    &:empty {
+      display: none;
+    }
+  }
+
+  &__boton {
+    flex-shrink: 0;
+    height: 36px;
+    padding: 0 14px;
+    border: 1px solid var(--border-light); // taste-skill-ignore: botón secundario app
+    border-radius: 6px;
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    transition:
+      background-color var(--duration-fast) var(--ease-out),
+      border-color var(--duration-fast) var(--ease-out);
+
+    &:hover:not(:disabled) {
+      border-color: var(--text-secondary);
+      background: var(--bg-surface-elevated);
+    }
+
+    &:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+  }
+}
+
 @keyframes aviso-in {
   from {
     opacity: 0;
@@ -514,6 +577,10 @@
 
   .aviso-suscripcion__cerrar {
     width: var(--target-min);
+    height: var(--target-min);
+  }
+
+  .aviso-verificacion__boton {
     height: var(--target-min);
   }
 
