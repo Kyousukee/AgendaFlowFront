@@ -1,0 +1,73 @@
+<div class="auth">
+  <div class="auth__left">
+    <div class="auth__brand">
+      <a routerLink="/" class="auth__logo" aria-label="AgendaFlow, ir al inicio">
+        <img src="logo.png" alt="" class="auth__logo-img" />
+      </a>
+    </div>
+    <img class="auth__photo" src="images/landing/barberia-sillon.webp" alt="" width="1600" height="1067" />
+    <div class="auth__promo">
+      <h1 class="auth__promo-title">Le pasa a cualquiera.</h1>
+      <p class="auth__promo-text">Te mandamos un enlace al correo para que elijas una contraseña nueva.</p>
+    </div>
+  </div>
+
+  <main class="auth__right">
+    <div class="auth__card">
+      <h2 class="auth__title">Recupera tu contraseña</h2>
+
+      @if (mensajeEnviado()) {
+        <p class="form-success-banner" role="status">{{ mensajeEnviado() }}</p>
+      } @else {
+        <p class="auth__subtitle">Escribe el correo de tu cuenta y te enviaremos un enlace.</p>
+
+        @if (errorMessage()) {
+          <div class="form-error-banner" role="alert">{{ errorMessage() }}</div>
+        }
+
+        @let email = form.controls.email;
+        @let emailError = email.invalid && (email.dirty || email.touched);
+
+        <form class="auth__form" [formGroup]="form" (ngSubmit)="onSubmit()">
+          <div class="form-group">
+            <label class="form-label" for="email">Correo electrónico</label>
+            <input
+              id="email"
+              type="email"
+              class="form-input"
+              placeholder="nombre&#64;correo.cl"
+              formControlName="email"
+              autocomplete="email"
+              inputmode="email"
+              [class.form-input--error]="emailError"
+              [attr.aria-invalid]="emailError"
+              [attr.aria-describedby]="emailError ? 'email-error' : null"
+            />
+            @if (emailError) {
+              <span class="form-error" id="email-error">
+                {{
+                  email.hasError('required')
+                    ? 'Escribe tu correo.'
+                    : 'Escribe un correo válido, como nombre@correo.cl.'
+                }}
+              </span>
+            }
+          </div>
+
+          <button
+            type="submit"
+            class="btn btn--primary btn--full"
+            [disabled]="isLoading()"
+            [attr.aria-busy]="isLoading()"
+          >
+            {{ isLoading() ? 'Enviando...' : 'Enviar enlace' }}
+          </button>
+        </form>
+      }
+
+      <p class="auth__footer-text">
+        <a routerLink="/login" class="form-link">Volver a iniciar sesión</a>
+      </p>
+    </div>
+  </main>
+</div>

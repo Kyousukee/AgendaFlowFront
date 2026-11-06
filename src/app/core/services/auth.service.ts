@@ -1,5 +1,5 @@
 import { Injectable, signal, inject, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { Location, isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap, catchError, throwError } from 'rxjs';
@@ -12,6 +12,12 @@ import { environment } from '../../../environments/environment';
 import { SuscripcionService } from './suscripcion.service';
 
 export const SUCURSAL_UPDATED = 'agendaflow_sucursal_updated';
+
+/**
+ * Páginas que se abren sin sesión, a veces desde un correo. Si había una sesión vencida guardada,
+ * el 401 de sus cargas de fondo la cierra, pero no debe sacar al usuario de la página.
+ */
+const PAGINAS_DE_CUENTA = ['/olvide-contrasena', '/verificar-email', '/restablecer-contrasena'];
 
 interface ApiEmpresa {
   id: number;
@@ -41,6 +47,7 @@ interface ApiUser {
   apellido: string;
   email: string;
   rolId: number;
+  emailVerificado: boolean;
   empleado: ApiEmpleado;
 }
 
@@ -55,6 +62,7 @@ export class AuthService {
 
   private platformId = inject(PLATFORM_ID);
   private router = inject(Router);
+  private location = inject(Location);
   private http = inject(HttpClient);
   private suscripcionService = inject(SuscripcionService);
 
@@ -130,6 +138,7 @@ export class AuthService {
       empresaId: apiEmpresa.id,
       rolId: apiUser.rolId,
       telefono: apiUser.empleado.telefono ?? undefined,
+      emailVerificado: apiUser.emailVerificado,
     };
 
     const empresaData: Empresa = {
@@ -236,6 +245,17 @@ export class AuthService {
     }
   }
 
+  /** Actualiza el estado de verificación en memoria y en localStorage. Sin sesión no hace nada. */
+  actualizarEmailVerificado(emailVerificado: boolean): void {
+    const actual = this.currentUser();
+    if (!actual) return;
+    const usuario: UserData = { ...actual, emailVerificado };
+    this.currentUser.set(usuario);
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem(this.USER_KEY, JSON.stringify(usuario));
+    }
+  }
+
   cambiarSucursal(sucursalId: number): void {
     const suc = this.sucursales().find((s) => s.id === sucursalId);
     if (suc) {
@@ -277,7 +297,8 @@ export class AuthService {
       );
   }
 
-  logout(): void {
+  /** @param navegar `false` si quien llama hace su propia navegación después de cerrar la sesión. */
+  logout(navegar = true): void {
     if (isPlatformBrowser(this.platformId)) {
       localStorage.removeItem(this.TOKEN_KEY);
       localStorage.removeItem(this.USER_KEY);
@@ -294,6 +315,8 @@ export class AuthService {
     this.sucursalActual.set(null);
     this.empleado.set(null);
     this.suscripcionService.limpiar();
-    this.router.navigate(['/login']);
+    if (navegar && !PAGINAS_DE_CUENTA.includes(this.location.path().split(/[?#]/)[0])) {
+      this.router.navigate(['/login']);
+    }
   }
 }

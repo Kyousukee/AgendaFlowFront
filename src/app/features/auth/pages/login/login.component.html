@@ -17,6 +17,12 @@
       <h2 class="auth__title">Iniciar sesión</h2>
       <p class="auth__subtitle">Entra con el correo y la contraseña de tu cuenta.</p>
 
+      @if (contrasenaRestablecida()) {
+        <div class="form-success-banner" role="status">
+          Tu contraseña cambió. Inicia sesión con la nueva.
+        </div>
+      }
+
       @if (errorMessage()) {
         <div class="form-error-banner" role="alert">{{ errorMessage() }}</div>
       }
@@ -111,6 +117,9 @@
           @if (passwordError) {
             <span class="form-error" id="password-error">Escribe tu contraseña.</span>
           }
+          <a routerLink="/olvide-contrasena" class="form-link form-link--campo">
+            ¿Olvidaste tu contraseña?
+          </a>
         </div>
 
         <button

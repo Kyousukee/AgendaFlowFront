@@ -1,10 +1,12 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { AuthService } from '../../../../core/services/auth.service';
+import { CuentaService, mensajeErrorCuenta } from '../../../../core/services/cuenta.service';
 import { SuscripcionService } from '../../../../core/services/suscripcion.service';
 
 @Component({
@@ -25,6 +27,12 @@ import { SuscripcionService } from '../../../../core/services/suscripcion.servic
 export class LayoutComponent {
   auth = inject(AuthService);
   suscripcion = inject(SuscripcionService);
+  private cuenta = inject(CuentaService);
+
+  // Con `undefined` (sesión guardada antes de la verificación de email) no se muestra.
+  mostrarAvisoVerificacion = computed(() => this.auth.currentUser()?.emailVerificado === false);
+  reenviando = signal(false);
+  mensajeReenvio = signal('');
 
   navItems = [
     { label: 'Inicio', icon: 'dashboard', route: '/admin/home' },
@@ -39,6 +47,30 @@ export class LayoutComponent {
     { label: 'Sucursales', icon: 'store', route: '/admin/sucursales' },
     { label: 'Configuración', icon: 'settings', route: '/admin/configuracion' },
   ];
+
+  reenviarVerificacion(): void {
+    if (this.reenviando()) return;
+    this.reenviando.set(true);
+    this.mensajeReenvio.set('');
+
+    this.cuenta.reenviarVerificacion().subscribe({
+      next: ({ emailVerificado }) => {
+        this.reenviando.set(false);
+        if (emailVerificado) {
+          // Pudo verificarse en otro dispositivo.
+          this.auth.actualizarEmailVerificado(true);
+        } else {
+          this.mensajeReenvio.set(
+            'Si pasó al menos un minuto desde el último envío, te enviamos otro correo. Revisa también el spam.',
+          );
+        }
+      },
+      error: (error: HttpErrorResponse) => {
+        this.reenviando.set(false);
+        this.mensajeReenvio.set(mensajeErrorCuenta(error));
+      },
+    });
+  }
 
   cambiarSucursal(event: Event): void {
     const select = event.target as HTMLSelectElement;

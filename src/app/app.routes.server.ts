@@ -15,6 +15,16 @@ export const serverRoutes: ServerRoute[] = [
     path: 'reservar/**',
     renderMode: RenderMode.Client,
   },
+  // El token llega en la URL: al prerenderizar no existiría y la llamada a la API correría en el
+  // servidor. Estas páginas solo se renderizan en el navegador.
+  {
+    path: 'verificar-email',
+    renderMode: RenderMode.Client,
+  },
+  {
+    path: 'restablecer-contrasena',
+    renderMode: RenderMode.Client,
+  },
   {
     path: '**',
     renderMode: RenderMode.Prerender

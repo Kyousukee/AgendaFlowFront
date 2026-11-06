@@ -1,0 +1,50 @@
+<div class="auth">
+  <div class="auth__left">
+    <div class="auth__brand">
+      <a routerLink="/" class="auth__logo" aria-label="AgendaFlow, ir al inicio">
+        <img src="logo.png" alt="" class="auth__logo-img" />
+      </a>
+    </div>
+    <img class="auth__photo" src="images/landing/barberia-sillon.webp" alt="" width="1600" height="1067" />
+    <div class="auth__promo">
+      <h1 class="auth__promo-title">Confirma tu correo.</h1>
+      <p class="auth__promo-text">Así sabemos que es tuyo y puedes recuperar tu cuenta cuando lo necesites.</p>
+    </div>
+  </div>
+
+  <main class="auth__right">
+    <div class="auth__card" role="status">
+      @switch (estado()) {
+        @case ('verificando') {
+          <h2 class="auth__title">Verificando tu correo...</h2>
+          <p class="auth__subtitle">Esto toma solo un momento.</p>
+        }
+        @case ('exito') {
+          <h2 class="auth__title">Listo, correo verificado</h2>
+          <p class="auth__subtitle">Gracias por confirmar tu correo.</p>
+          @if (auth.isLoggedIn()) {
+            <a routerLink="/admin/home" class="btn btn--primary btn--full">Ir al panel</a>
+          } @else {
+            <a routerLink="/login" class="btn btn--primary btn--full">Iniciar sesión</a>
+          }
+        }
+        @case ('invalido') {
+          <h2 class="auth__title">El enlace no es válido o venció</h2>
+          <p class="auth__subtitle">
+            Puede que ya se haya usado, y entonces tu correo ya está verificado. Si no, puedes pedir
+            otro desde el panel.
+          </p>
+          @if (auth.isLoggedIn()) {
+            <a routerLink="/admin/home" class="btn btn--primary btn--full">Ir al panel</a>
+          } @else {
+            <a routerLink="/login" class="btn btn--primary btn--full">Iniciar sesión</a>
+          }
+        }
+        @case ('error') {
+          <h2 class="auth__title">No pudimos verificar tu correo</h2>
+          <p class="auth__subtitle">{{ mensajeError() }} Para reintentar, abre otra vez el enlace de tu correo.</p>
+        }
+      }
+    </div>
+  </main>
+</div>
