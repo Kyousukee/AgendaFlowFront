@@ -319,11 +319,9 @@
                     <label class="modal__label" for="modal-estado-reserva">Cambiar estado</label>
                     <select id="modal-estado-reserva" class="modal__select" [ngModel]="nuevoEstadoReserva()" (ngModelChange)="nuevoEstadoReserva.set($event)">
                       <option value="">Sin cambios</option>
-                      <option value="1">Pendiente</option>
-                      <option value="2">Confirmada</option>
-                      <option value="3">Cancelada</option>
-                      <option value="4">Completada</option>
-                      <option value="5">No asistió</option>
+                      @for (estado of estadosReserva; track estado.id) {
+                        <option [value]="estado.id.toString()">{{ estado.nombre }}</option>
+                      }
                     </select>
                   </div>
                 }

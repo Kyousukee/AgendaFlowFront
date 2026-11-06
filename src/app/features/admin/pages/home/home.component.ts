@@ -12,6 +12,11 @@ import { PagosService } from '../../services/pagos.service';
 import { Servicio } from '../../../../core/interfaces/servicio.interface';
 import { HorarioSucursal } from '../../interfaces/horario-sucursal.interface';
 import { Reserva, PagoReserva } from '../../../../core/interfaces/reserva.interface';
+import {
+  ESTADOS_RESERVA,
+  liberaHora,
+  nombreEstadoReserva,
+} from '../../../../core/constants/estados-reserva';
 
 interface TimelineItem {
   type: 'reserva' | 'disponible';
@@ -68,6 +73,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   estadoActualizado = signal(false);
 
   nuevoEstadoReserva = signal('');
+  readonly estadosReserva = ESTADOS_RESERVA;
   actualizandoEstadoReserva = signal(false);
   estadoReservaActualizado = signal(false);
 
@@ -308,7 +314,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     if (!reserva || !estadoId || this.actualizandoEstadoReserva()) return;
     // SPEC 04: cancelar una cita no se hace con un solo clic.
     const cliente = [reserva.cliente?.nombre, reserva.cliente?.apellido].filter(Boolean).join(' ');
-    if (estadoId === 3 && !confirm(`¿Cancelar la reserva de ${cliente || "este cliente"} de las ${reserva.horaInicio}? La hora vuelve a quedar libre.`)) return;
+    if (liberaHora(estadoId) && !confirm(`¿Marcar como ${nombreEstadoReserva(estadoId)} la reserva de ${cliente || "este cliente"} de las ${reserva.horaInicio}? La hora vuelve a quedar libre.`)) return;
 
     this.actualizandoEstadoReserva.set(true);
     this.reservasService.actualizarEstado(reserva.id, estadoId).subscribe({
