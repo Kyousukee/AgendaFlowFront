@@ -69,7 +69,6 @@ export class EmpleadosComponent {
 
     this.empleadosService.getBySucursal(sucursalId).subscribe({
       next: (empleados) => {
-        console.log('Empleados cargados:', empleados);
         this.empleados.set(empleados);
         const map: Record<number, number[]> = {};
         for (const e of empleados) {

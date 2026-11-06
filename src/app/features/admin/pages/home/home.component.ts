@@ -7,7 +7,7 @@ import { A11yModule } from '@angular/cdk/a11y';
 import { AuthService, SUCURSAL_UPDATED } from '../../../../core/services/auth.service';
 import { ServiciosService } from '../../services/servicios.service';
 import { HorariosService } from '../../services/horarios.service';
-import { ReservarPublicService } from '../../../reservar/services/reservar-public.service';
+import { ReservasService } from '../../services/reservas.service';
 import { PagosService } from '../../services/pagos.service';
 import { Servicio } from '../../../../core/interfaces/servicio.interface';
 import { HorarioSucursal } from '../../interfaces/horario-sucursal.interface';
@@ -41,7 +41,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private serviciosService = inject(ServiciosService);
   private horariosService = inject(HorariosService);
-  private reservarService = inject(ReservarPublicService);
+  private reservasService = inject(ReservasService);
   private pagosService = inject(PagosService);
 
   selectedDate = signal(new Date());
@@ -235,7 +235,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     const sucursal = this.authService.sucursalActual();
     if (!sucursal) return;
 
-    this.reservarService.getReservasBySucursal(sucursal.id).subscribe({
+    this.reservasService.getBySucursal(sucursal.id).subscribe({
       next: (reservas) => {
         this.reservas.set(reservas);
         this.cargando.set(false);
@@ -311,7 +311,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     if (estadoId === 3 && !confirm(`¿Cancelar la reserva de ${cliente || "este cliente"} de las ${reserva.horaInicio}? La hora vuelve a quedar libre.`)) return;
 
     this.actualizandoEstadoReserva.set(true);
-    this.reservarService.actualizarEstadoReserva(reserva.id, estadoId).subscribe({
+    this.reservasService.actualizarEstado(reserva.id, estadoId).subscribe({
       next: () => {
         this.actualizandoEstadoReserva.set(false);
         this.estadoReservaActualizado.set(true);

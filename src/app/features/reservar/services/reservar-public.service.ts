@@ -9,17 +9,30 @@ import { Empleado } from '../../../core/interfaces/empleado.interface';
 import { HorarioSucursal } from '../../admin/interfaces/horario-sucursal.interface';
 import { BloqueoAgenda } from '../../../core/interfaces/bloqueo-agenda.interface';
 import { ServicioEmpleado } from '../../../core/interfaces/servicio-empleado.interface';
-import { Reserva } from '../../../core/interfaces/reserva.interface';
 import { environment } from '../../../../environments/environment';
 
 interface BloqueoBackend {
   id: number;
   empleadoId?: number;
-  empleado?: { id: number; nombre: string; apellido?: string };
   fecha: string;
   horaInicio: string;
   horaFin: string;
-  motivo?: string;
+}
+
+export interface OcupacionReserva {
+  empleadoId?: number;
+  fecha: string;
+  horaInicio: string;
+  horaFin: string;
+}
+
+export interface ReservaCreada {
+  id: number;
+  codigo: string;
+  fecha: string;
+  horaInicio: string;
+  horaFin: string;
+  precio: number;
 }
 
 export interface CrearReservaDto {
@@ -29,8 +42,6 @@ export interface CrearReservaDto {
   empleadoId: number;
   fecha: string;
   horaInicio: string;
-  horaFin: string;
-  precio: number;
   observacion?: string;
   clienteNombre: string;
   clienteEmail: string;
@@ -78,14 +89,10 @@ export class ReservarPublicService {
       map((bloqueos) =>
         bloqueos.map((b) => ({
           id: b.id,
-          empleadoId: b.empleadoId ?? b.empleado?.id ?? 0,
-          empleadoNombre: b.empleado
-            ? [b.empleado.nombre, b.empleado.apellido].filter(Boolean).join(' ')
-            : '',
+          empleadoId: b.empleadoId ?? 0,
           fecha: b.fecha,
           horaInicio: b.horaInicio.substring(0, 5),
           horaFin: b.horaFin.substring(0, 5),
-          motivo: b.motivo,
         })),
       ),
     );
@@ -111,7 +118,7 @@ export class ReservarPublicService {
     servicios: Servicio[],
     horarios: HorarioSucursal[],
     bloqueos: BloqueoAgenda[],
-    reservas: Reserva[] = [],
+    ocupacion: OcupacionReserva[] = [],
   ): Observable<string[]> {
     const servicio = servicios.find((s) => s.id === servicioId);
     if (!servicio) return of([]);
@@ -128,8 +135,8 @@ export class ReservarPublicService {
       (b) => b.empleadoId === empleadoId && b.fecha === fecha,
     );
 
-    const reservasDelDia = reservas.filter(
-      (r) => r.empleado?.id === empleadoId && r.fecha === fecha,
+    const reservasDelDia = ocupacion.filter(
+      (r) => r.empleadoId === empleadoId && r.fecha === fecha,
     );
 
     const horas: string[] = [];
@@ -173,36 +180,21 @@ export class ReservarPublicService {
     return of(horas);
   }
 
-  getReservasBySucursal(sucursalId: number): Observable<Reserva[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/reservas/${sucursalId}`).pipe(
+  /** Horas tomadas de la sucursal. No incluye datos de clientes. */
+  getOcupacion(sucursalId: number): Observable<OcupacionReserva[]> {
+    return this.http.get<OcupacionReserva[]>(`${this.apiUrl}/ocupacion/${sucursalId}`).pipe(
       map((items) =>
         items.map((item) => ({
-          id: item.id,
-          codigo: item.codigo,
-          empresa: item.empresa,
-          sucursal: item.sucursal,
-          cliente: item.cliente,
-          empleado: item.empleado,
-          servicio: item.servicio,
-          fecha: item.fecha,
+          ...item,
           horaInicio: (item.horaInicio ?? '').substring(0, 5),
           horaFin: (item.horaFin ?? '').substring(0, 5),
-          precio: item.precio,
-          observacion: item.observacion,
-          fechaCreacion: item.fechaCreacion,
-          estado: item.estado,
-          pagos: item.pagos ?? [],
         })),
       ),
     );
   }
 
-  crearReserva(data: CrearReservaDto): Observable<Reserva> {
-    return this.http.post<Reserva>(this.apiUrl, data);
-  }
-
-  actualizarEstadoReserva(reservaId: number, estadoId: number): Observable<Reserva> {
-    return this.http.patch<Reserva>(`${this.apiUrl}/reservas/${reservaId}/estado`, { estadoId });
+  crearReserva(data: CrearReservaDto): Observable<ReservaCreada> {
+    return this.http.post<ReservaCreada>(this.apiUrl, data);
   }
 
   private timeToMinutes(time: string): number {

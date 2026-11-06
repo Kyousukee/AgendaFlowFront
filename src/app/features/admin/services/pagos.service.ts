@@ -33,8 +33,6 @@ export class PagosService {
   }
 
   actualizarEstado(pagoId: number, estadoId: number): Observable<Pago> {
-    console.log(`Actualizando estado del pago con ID ${pagoId} a estado ID ${estadoId}`);
-    console.log(`URL de la API: ${this.apiUrl}/${pagoId}/estado`);
     return this.http.patch<Pago>(`${this.apiUrl}/${pagoId}/estado`, { estadoId });
   }
 }
