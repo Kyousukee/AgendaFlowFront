@@ -1,0 +1,19 @@
+@if (google.disponible()) {
+  <div class="acceso-google">
+    @if (validando()) {
+      <p class="acceso-google__estado" role="status">Validando tu cuenta de Google...</p>
+    } @else {
+      <app-google-button
+        texto="continue_with"
+        (credential)="onCredential($event)"
+        (noDisponible)="google.deshabilitar()"
+      />
+    }
+  </div>
+
+  @if (separador(); as texto) {
+    <p class="acceso-google__separador">
+      <span>{{ texto }}</span>
+    </p>
+  }
+}

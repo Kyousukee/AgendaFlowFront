@@ -175,6 +175,15 @@
     padding-right: 48px;
   }
 
+  // Dato que no se edita (p. ej. el correo de la cuenta de Google).
+  &[readonly],
+  &[readonly]:hover,
+  &[readonly]:focus {
+    border-color: var(--border-field);
+    background: transparent;
+    color: var(--text-secondary);
+  }
+
   &--error,
   &--error:focus {
     border-color: var(--error);
@@ -220,6 +229,12 @@
   background: var(--error-surface);
   color: var(--error-text);
   font-size: 0.9375rem;
+
+  // Explicación extra bajo el error (p. ej. "esa cuenta se creó con Google").
+  &__nota {
+    flex-basis: 100%;
+    color: var(--text-primary);
+  }
 
   // Lleva de vuelta al paso donde se corrige el dato (p. ej. "el correo ya está registrado").
   &__action {

@@ -1,0 +1,7 @@
+// Estilos compartidos con registro/login: ver src/app/features/auth/styles/_auth.scss
+@use '../../styles/auth';
+
+// Los campos participan del flex del formulario de la página, como si estuvieran escritos ahí.
+:host {
+  display: contents;
+}

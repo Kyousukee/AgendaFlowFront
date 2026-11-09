@@ -19,14 +19,18 @@ app.disable('x-powered-by');
 /**
  * `style-src 'unsafe-inline'` es necesario porque Angular y Leaflet aplican estilos en línea.
  * `script-src` no lo permite: es la directiva que frena un XSS.
+ * "Continuar con Google" (Google Identity Services) necesita su script, su hoja de estilos, el
+ * iframe del botón y sus llamadas, todos bajo `https://accounts.google.com/gsi/`.
  */
+const GOOGLE_GSI = 'https://accounts.google.com/gsi/';
 const CONTENT_SECURITY_POLICY = [
   `default-src 'self'`,
-  `script-src 'self'`,
-  `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com`,
+  `script-src 'self' ${GOOGLE_GSI}client`,
+  `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com ${GOOGLE_GSI}style`,
   `font-src 'self' https://fonts.gstatic.com`,
   `img-src 'self' data: blob: https://res.cloudinary.com https://*.tile.openstreetmap.org`,
-  `connect-src 'self' ${new URL(environment.apiUrl).origin} https://nominatim.openstreetmap.org`,
+  `connect-src 'self' ${new URL(environment.apiUrl).origin} https://nominatim.openstreetmap.org ${GOOGLE_GSI}`,
+  `frame-src ${GOOGLE_GSI}`,
   `object-src 'none'`,
   `base-uri 'self'`,
   `form-action 'self'`,
@@ -80,9 +84,7 @@ app.use(
 app.use((req, res, next) => {
   angularApp
     .handle(req)
-    .then((response) =>
-      response ? writeResponseToNodeResponse(response, res) : next(),
-    )
+    .then((response) => (response ? writeResponseToNodeResponse(response, res) : next()))
     .catch(next);
 });
 

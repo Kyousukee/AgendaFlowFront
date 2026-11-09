@@ -1,0 +1,11 @@
+:host {
+  display: block;
+}
+
+// Alto reservado: el iframe de Google llega después y no debe mover el formulario.
+.google-button {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  min-height: 44px;
+}

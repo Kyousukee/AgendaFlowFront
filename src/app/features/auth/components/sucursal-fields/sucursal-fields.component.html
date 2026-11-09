@@ -1,0 +1,91 @@
+<p class="form-note">
+  Todo este paso es opcional. Puedes dejarlo en blanco y completar la sucursal después, desde el
+  panel.
+</p>
+
+<ng-container [formGroup]="form()">
+  <div class="form-group">
+    <label class="form-label" for="sucursalNombre">Nombre de la sucursal</label>
+    <input
+      id="sucursalNombre"
+      type="text"
+      class="form-input"
+      placeholder="Ej: Sucursal Centro"
+      formControlName="sucursalNombre"
+    />
+  </div>
+
+  <div class="form-group">
+    <label class="form-label" for="direccion">Dirección</label>
+    <input
+      id="direccion"
+      type="text"
+      class="form-input"
+      placeholder="Av. Principal 1234"
+      formControlName="direccion"
+      autocomplete="street-address"
+    />
+  </div>
+
+  <div class="form-row-2">
+    <div class="form-group">
+      <label class="form-label" for="comuna">Comuna</label>
+      <input
+        id="comuna"
+        type="text"
+        class="form-input"
+        placeholder="Providencia"
+        formControlName="comuna"
+        autocomplete="address-level3"
+      />
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="ciudad">Ciudad</label>
+      <input
+        id="ciudad"
+        type="text"
+        class="form-input"
+        placeholder="Santiago"
+        formControlName="ciudad"
+        autocomplete="address-level2"
+      />
+    </div>
+  </div>
+
+  <div class="form-row-2">
+    <div class="form-group">
+      <label class="form-label" for="region">Región</label>
+      <input
+        id="region"
+        type="text"
+        class="form-input"
+        placeholder="Metropolitana"
+        formControlName="region"
+        autocomplete="address-level1"
+      />
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="pais">País</label>
+      <input
+        id="pais"
+        type="text"
+        class="form-input"
+        placeholder="Chile"
+        formControlName="pais"
+        autocomplete="country-name"
+      />
+    </div>
+  </div>
+</ng-container>
+
+<div class="form-group" role="group" aria-labelledby="map-label" aria-describedby="map-hint">
+  <span class="form-label" id="map-label">Ubicación en el mapa</span>
+  <span class="form-hint" id="map-hint">
+    Al mover el pin, la dirección de arriba se completa sola.
+  </span>
+  <app-map-picker
+    [lat]="mapLat()"
+    [lng]="mapLng()"
+    (locationChange)="onMapLocationChange($event)"
+  />
+</div>

@@ -25,8 +25,13 @@ export const serverRoutes: ServerRoute[] = [
     path: 'restablecer-contrasena',
     renderMode: RenderMode.Client,
   },
+  // Depende del registro con Google pendiente, que solo existe en la memoria del navegador.
+  {
+    path: 'registro-google',
+    renderMode: RenderMode.Client,
+  },
   {
     path: '**',
-    renderMode: RenderMode.Prerender
-  }
+    renderMode: RenderMode.Prerender,
+  },
 ];

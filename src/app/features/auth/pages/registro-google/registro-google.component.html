@@ -1,0 +1,247 @@
+<div class="auth">
+  <div class="auth__left">
+    <div class="auth__brand">
+      <a routerLink="/" class="auth__logo" aria-label="AgendaFlow, ir al inicio">
+        <img src="logo.png" alt="" class="auth__logo-img" />
+      </a>
+    </div>
+    <img
+      class="auth__photo"
+      src="images/landing/peluqueria-brushing.webp"
+      alt=""
+      width="1600"
+      height="1067"
+    />
+    <div class="auth__promo">
+      <h1 class="auth__promo-title">Ya casi.</h1>
+      <p class="auth__promo-text">
+        Tu cuenta de Google ya está lista. Cuéntanos de tu negocio y empieza tu prueba gratis.
+      </p>
+    </div>
+  </div>
+
+  <main class="auth__right">
+    <div class="auth__card">
+      <h2 class="auth__title">Completa los datos de tu negocio</h2>
+      <p class="auth__subtitle">
+        Entrarás siempre con «Continuar con Google»: no necesitas contraseña.
+      </p>
+
+      <ol class="steps" aria-label="Pasos del registro">
+        <li
+          class="steps__item"
+          [class.steps__item--active]="currentStep() === 1"
+          [class.steps__item--done]="currentStep() > 1"
+          [attr.aria-current]="currentStep() === 1 ? 'step' : null"
+        >
+          <span class="steps__number" aria-hidden="true">{{
+            currentStep() > 1 ? '&#10003;' : '1'
+          }}</span>
+          <span class="steps__label">Tus datos</span>
+          @if (currentStep() > 1) {
+            <span class="sr-only">, completado</span>
+          }
+        </li>
+        <li
+          class="steps__line"
+          aria-hidden="true"
+          [class.steps__line--done]="currentStep() > 1"
+        ></li>
+        <li
+          class="steps__item"
+          [class.steps__item--active]="currentStep() === 2"
+          [class.steps__item--done]="currentStep() > 2"
+          [attr.aria-current]="currentStep() === 2 ? 'step' : null"
+        >
+          <span class="steps__number" aria-hidden="true">{{
+            currentStep() > 2 ? '&#10003;' : '2'
+          }}</span>
+          <span class="steps__label">Negocio</span>
+          @if (currentStep() > 2) {
+            <span class="sr-only">, completado</span>
+          }
+        </li>
+        <li
+          class="steps__line"
+          aria-hidden="true"
+          [class.steps__line--done]="currentStep() > 2"
+        ></li>
+        <li
+          class="steps__item"
+          [class.steps__item--active]="currentStep() === 3"
+          [attr.aria-current]="currentStep() === 3 ? 'step' : null"
+        >
+          <span class="steps__number" aria-hidden="true">3</span>
+          <span class="steps__label">Sucursal</span>
+        </li>
+      </ol>
+
+      <p class="sr-only" aria-live="polite">
+        Paso {{ currentStep() }} de {{ totalSteps }}:
+        {{
+          currentStep() === 1 ? 'tus datos' : currentStep() === 2 ? 'tu negocio' : 'tu sucursal'
+        }}.
+      </p>
+
+      <form
+        class="auth__form"
+        [formGroup]="
+          currentStep() === 1 ? datosForm : currentStep() === 2 ? businessForm : branchForm
+        "
+        (ngSubmit)="onSubmit()"
+      >
+        @if (currentStep() === 1) {
+          @let nombreError = fieldError(datosForm, 'nombre');
+          @let termsError = fieldError(datosForm, 'terms');
+
+          <div class="form-group">
+            <label class="form-label" for="email">Correo electrónico</label>
+            <input
+              id="email"
+              type="email"
+              class="form-input"
+              [value]="email()"
+              readonly
+              aria-describedby="email-hint"
+            />
+            <span class="form-hint" id="email-hint">Es el correo de tu cuenta de Google.</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="nombre">Nombre</label>
+            <input
+              id="nombre"
+              type="text"
+              class="form-input"
+              placeholder="Tu nombre"
+              formControlName="nombre"
+              autocomplete="given-name"
+              [class.form-input--error]="nombreError"
+              [attr.aria-invalid]="nombreError"
+              [attr.aria-describedby]="nombreError ? 'nombre-error' : null"
+            />
+            @if (nombreError) {
+              <span class="form-error" id="nombre-error"
+                >Escribe tu nombre (al menos 2 letras).</span
+              >
+            }
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="apellido">Apellido (opcional)</label>
+            <input
+              id="apellido"
+              type="text"
+              class="form-input"
+              placeholder="Tu apellido"
+              formControlName="apellido"
+              autocomplete="family-name"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-checkbox" [class.form-checkbox--error]="termsError">
+              <input
+                type="checkbox"
+                formControlName="terms"
+                [attr.aria-invalid]="termsError"
+                [attr.aria-describedby]="termsError ? 'terms-error' : null"
+              />
+              <span
+                >Acepto los
+                <a routerLink="/terminos" target="_blank" class="form-link"
+                  >términos y condiciones<span class="sr-only"> (se abre en otra pestaña)</span></a
+                >
+                y la
+                <a routerLink="/privacidad" target="_blank" class="form-link"
+                  >política de privacidad<span class="sr-only"> (se abre en otra pestaña)</span></a
+                ></span
+              >
+            </label>
+            @if (termsError) {
+              <span class="form-error" id="terms-error">
+                Para crear la cuenta tienes que aceptar los términos y la política de privacidad.
+              </span>
+            }
+          </div>
+
+          <button
+            type="button"
+            class="btn btn--primary btn--full"
+            (click)="datosForm.valid ? nextStep() : datosForm.markAllAsTouched()"
+          >
+            Continuar
+          </button>
+        }
+
+        @if (currentStep() === 2) {
+          <app-negocio-fields [form]="businessForm" />
+
+          <div class="form-nav">
+            <button type="button" class="btn btn--secondary" (click)="prevStep()">Atrás</button>
+            <button
+              type="button"
+              class="btn btn--primary"
+              (click)="businessForm.valid ? nextStep() : businessForm.markAllAsTouched()"
+            >
+              Continuar
+            </button>
+          </div>
+        }
+
+        @if (currentStep() === 3) {
+          <app-sucursal-fields [form]="branchForm" />
+
+          @if (errorMessage()) {
+            <div class="form-error-banner" role="alert">
+              <p>{{ errorMessage() }}</p>
+              @if (revisarDatos()) {
+                <button
+                  type="button"
+                  class="form-link form-error-banner__action"
+                  (click)="irADatos()"
+                >
+                  Revisar mis datos
+                </button>
+              }
+              @if (!google.disponible()) {
+                <a routerLink="/register" class="form-link form-error-banner__action">
+                  Crear la cuenta con correo y contraseña
+                </a>
+              }
+            </div>
+          }
+
+          @if (reautenticar()) {
+            <app-acceso-google
+              [separador]="null"
+              (inicio)="limpiarAvisos()"
+              (listo)="onGoogleListo()"
+              (error)="onGoogleError($event)"
+            />
+          }
+
+          <div class="form-nav">
+            <button type="button" class="btn btn--secondary" (click)="prevStep()">Atrás</button>
+            <button
+              type="submit"
+              class="btn btn--primary"
+              [disabled]="isLoading() || reautenticar()"
+              [attr.aria-busy]="isLoading()"
+            >
+              @if (isLoading()) {
+                Creando cuenta...
+              } @else {
+                Crear cuenta gratis
+              }
+            </button>
+          </div>
+        }
+      </form>
+
+      <p class="auth__footer-text">
+        ¿Ya tienes una cuenta? <a routerLink="/login" class="form-link">Inicia sesión aquí</a>
+      </p>
+    </div>
+  </main>
+</div>

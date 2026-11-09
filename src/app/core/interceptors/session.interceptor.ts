@@ -4,7 +4,8 @@ import { catchError, throwError } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 import { esApiPropia } from './auth.interceptor';
 
-const EXCLUDE_URLS = ['/auth/login', '/auth/register'];
+// Un 401 de estas rutas es un dato mal ingresado o un credential de Google vencido, no una sesión vencida.
+const EXCLUDE_URLS = ['/auth/login', '/auth/register', '/auth/google'];
 
 export const sessionInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
