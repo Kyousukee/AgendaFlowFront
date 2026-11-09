@@ -1,0 +1,73 @@
+@let empresaError = fieldError('empresaNombre');
+@let empresaEmailError = fieldError('empresaEmail');
+
+<ng-container [formGroup]="form()">
+  <div class="form-group">
+    <label class="form-label" for="empresaNombre">Nombre del negocio</label>
+    <input
+      id="empresaNombre"
+      type="text"
+      class="form-input"
+      placeholder="Ej: Barbería Los Barones"
+      formControlName="empresaNombre"
+      autocomplete="organization"
+      [class.form-input--error]="empresaError"
+      [attr.aria-invalid]="empresaError"
+      [attr.aria-describedby]="empresaError ? 'empresa-error' : 'empresa-hint'"
+    />
+    @if (empresaError) {
+      <span class="form-error" id="empresa-error">Escribe el nombre de tu negocio.</span>
+    } @else {
+      <span class="form-hint" id="empresa-hint">Lo puedes cambiar después en Configuración.</span>
+    }
+  </div>
+
+  <div class="form-group">
+    <label class="form-label" for="nombreComercial">Nombre comercial (opcional)</label>
+    <input
+      id="nombreComercial"
+      type="text"
+      class="form-input"
+      placeholder="Nombre que ven tus clientes"
+      formControlName="nombreComercial"
+      aria-describedby="comercial-hint"
+    />
+    <span class="form-hint" id="comercial-hint">
+      Si lo dejas vacío, tus clientes ven el nombre del negocio.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <label class="form-label" for="empresaEmail">Correo del negocio (opcional)</label>
+    <input
+      id="empresaEmail"
+      type="email"
+      class="form-input"
+      placeholder="contacto&#64;negocio.cl"
+      formControlName="empresaEmail"
+      autocomplete="email"
+      inputmode="email"
+      [class.form-input--error]="empresaEmailError"
+      [attr.aria-invalid]="empresaEmailError"
+      [attr.aria-describedby]="empresaEmailError ? 'empresa-email-error' : null"
+    />
+    @if (empresaEmailError) {
+      <span class="form-error" id="empresa-email-error">
+        Escribe un correo válido, como contacto&#64;negocio.cl.
+      </span>
+    }
+  </div>
+
+  <div class="form-group">
+    <label class="form-label" for="telefono">Teléfono (opcional)</label>
+    <input
+      id="telefono"
+      type="tel"
+      class="form-input"
+      placeholder="+56 9 1234 5678"
+      formControlName="telefono"
+      autocomplete="tel"
+      inputmode="tel"
+    />
+  </div>
+</ng-container>

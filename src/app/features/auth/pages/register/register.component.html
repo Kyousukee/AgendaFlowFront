@@ -5,7 +5,13 @@
         <img src="logo.png" alt="" class="auth__logo-img" />
       </a>
     </div>
-    <img class="auth__photo" src="images/landing/peluqueria-brushing.webp" alt="" width="1600" height="1067" />
+    <img
+      class="auth__photo"
+      src="images/landing/peluqueria-brushing.webp"
+      alt=""
+      width="1600"
+      height="1067"
+    />
     <div class="auth__promo">
       <h1 class="auth__promo-title">Únete a AgendaFlow.</h1>
       <p class="auth__promo-text">
@@ -26,26 +32,38 @@
           [class.steps__item--done]="currentStep() > 1"
           [attr.aria-current]="currentStep() === 1 ? 'step' : null"
         >
-          <span class="steps__number" aria-hidden="true">{{ currentStep() > 1 ? '&#10003;' : '1' }}</span>
+          <span class="steps__number" aria-hidden="true">{{
+            currentStep() > 1 ? '&#10003;' : '1'
+          }}</span>
           <span class="steps__label">Cuenta</span>
           @if (currentStep() > 1) {
             <span class="sr-only">, completado</span>
           }
         </li>
-        <li class="steps__line" aria-hidden="true" [class.steps__line--done]="currentStep() > 1"></li>
+        <li
+          class="steps__line"
+          aria-hidden="true"
+          [class.steps__line--done]="currentStep() > 1"
+        ></li>
         <li
           class="steps__item"
           [class.steps__item--active]="currentStep() === 2"
           [class.steps__item--done]="currentStep() > 2"
           [attr.aria-current]="currentStep() === 2 ? 'step' : null"
         >
-          <span class="steps__number" aria-hidden="true">{{ currentStep() > 2 ? '&#10003;' : '2' }}</span>
+          <span class="steps__number" aria-hidden="true">{{
+            currentStep() > 2 ? '&#10003;' : '2'
+          }}</span>
           <span class="steps__label">Negocio</span>
           @if (currentStep() > 2) {
             <span class="sr-only">, completado</span>
           }
         </li>
-        <li class="steps__line" aria-hidden="true" [class.steps__line--done]="currentStep() > 2"></li>
+        <li
+          class="steps__line"
+          aria-hidden="true"
+          [class.steps__line--done]="currentStep() > 2"
+        ></li>
         <li
           class="steps__item"
           [class.steps__item--active]="currentStep() === 3"
@@ -58,11 +76,21 @@
 
       <p class="sr-only" aria-live="polite">
         Paso {{ currentStep() }} de {{ totalSteps }}:
-        {{ currentStep() === 1 ? 'tu cuenta' : currentStep() === 2 ? 'tu negocio' : 'tu sucursal' }}.
+        {{
+          currentStep() === 1 ? 'tu cuenta' : currentStep() === 2 ? 'tu negocio' : 'tu sucursal'
+        }}.
       </p>
 
       @if (errorMessage() && currentStep() !== 3) {
         <div class="form-error-banner" role="alert">{{ errorMessage() }}</div>
+      }
+
+      @if (currentStep() === 1) {
+        <app-acceso-google
+          separador="o crea tu cuenta con tu correo"
+          (inicio)="errorMessage.set('')"
+          (error)="errorMessage.set($event.message)"
+        />
       }
 
       <form
@@ -93,7 +121,9 @@
               [attr.aria-describedby]="nombreError ? 'nombre-error' : null"
             />
             @if (nombreError) {
-              <span class="form-error" id="nombre-error">Escribe tu nombre (al menos 2 letras).</span>
+              <span class="form-error" id="nombre-error"
+                >Escribe tu nombre (al menos 2 letras).</span
+              >
             }
           </div>
 
@@ -142,7 +172,9 @@
                 autocomplete="new-password"
                 [class.form-input--error]="passwordError"
                 [attr.aria-invalid]="passwordError"
-                [attr.aria-describedby]="passwordError ? 'password-hint password-error' : 'password-hint'"
+                [attr.aria-describedby]="
+                  passwordError ? 'password-hint password-error' : 'password-hint'
+                "
               />
               <button
                 type="button"
@@ -297,77 +329,7 @@
         }
 
         @if (currentStep() === 2) {
-          @let empresaError = fieldError(businessForm, 'empresaNombre');
-          @let empresaEmailError = fieldError(businessForm, 'empresaEmail');
-
-          <div class="form-group">
-            <label class="form-label" for="empresaNombre">Nombre del negocio</label>
-            <input
-              id="empresaNombre"
-              type="text"
-              class="form-input"
-              placeholder="Ej: Barbería Los Barones"
-              formControlName="empresaNombre"
-              autocomplete="organization"
-              [class.form-input--error]="empresaError"
-              [attr.aria-invalid]="empresaError"
-              [attr.aria-describedby]="empresaError ? 'empresa-error' : 'empresa-hint'"
-            />
-            @if (empresaError) {
-              <span class="form-error" id="empresa-error">Escribe el nombre de tu negocio.</span>
-            } @else {
-              <span class="form-hint" id="empresa-hint">Lo puedes cambiar después en Configuración.</span>
-            }
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="nombreComercial">Nombre comercial (opcional)</label>
-            <input
-              id="nombreComercial"
-              type="text"
-              class="form-input"
-              placeholder="Nombre que ven tus clientes"
-              formControlName="nombreComercial"
-              aria-describedby="comercial-hint"
-            />
-            <span class="form-hint" id="comercial-hint">
-              Si lo dejas vacío, tus clientes ven el nombre del negocio.
-            </span>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="empresaEmail">Correo del negocio (opcional)</label>
-            <input
-              id="empresaEmail"
-              type="email"
-              class="form-input"
-              placeholder="contacto&#64;negocio.cl"
-              formControlName="empresaEmail"
-              autocomplete="email"
-              inputmode="email"
-              [class.form-input--error]="empresaEmailError"
-              [attr.aria-invalid]="empresaEmailError"
-              [attr.aria-describedby]="empresaEmailError ? 'empresa-email-error' : null"
-            />
-            @if (empresaEmailError) {
-              <span class="form-error" id="empresa-email-error">
-                Escribe un correo válido, como contacto&#64;negocio.cl.
-              </span>
-            }
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="telefono">Teléfono (opcional)</label>
-            <input
-              id="telefono"
-              type="tel"
-              class="form-input"
-              placeholder="+56 9 1234 5678"
-              formControlName="telefono"
-              autocomplete="tel"
-              inputmode="tel"
-            />
-          </div>
+          <app-negocio-fields [form]="businessForm" />
 
           <div class="form-nav">
             <button type="button" class="btn btn--secondary" (click)="prevStep()">Atrás</button>
@@ -382,100 +344,16 @@
         }
 
         @if (currentStep() === 3) {
-          <p class="form-note">
-            Todo este paso es opcional. Puedes dejarlo en blanco y completar la sucursal después,
-            desde el panel.
-          </p>
-
-          <div class="form-group">
-            <label class="form-label" for="sucursalNombre">Nombre de la sucursal</label>
-            <input
-              id="sucursalNombre"
-              type="text"
-              class="form-input"
-              placeholder="Ej: Sucursal Centro"
-              formControlName="sucursalNombre"
-            />
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="direccion">Dirección</label>
-            <input
-              id="direccion"
-              type="text"
-              class="form-input"
-              placeholder="Av. Principal 1234"
-              formControlName="direccion"
-              autocomplete="street-address"
-            />
-          </div>
-
-          <div class="form-row-2">
-            <div class="form-group">
-              <label class="form-label" for="comuna">Comuna</label>
-              <input
-                id="comuna"
-                type="text"
-                class="form-input"
-                placeholder="Providencia"
-                formControlName="comuna"
-                autocomplete="address-level3"
-              />
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="ciudad">Ciudad</label>
-              <input
-                id="ciudad"
-                type="text"
-                class="form-input"
-                placeholder="Santiago"
-                formControlName="ciudad"
-                autocomplete="address-level2"
-              />
-            </div>
-          </div>
-
-          <div class="form-row-2">
-            <div class="form-group">
-              <label class="form-label" for="region">Región</label>
-              <input
-                id="region"
-                type="text"
-                class="form-input"
-                placeholder="Metropolitana"
-                formControlName="region"
-                autocomplete="address-level1"
-              />
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="pais">País</label>
-              <input
-                id="pais"
-                type="text"
-                class="form-input"
-                placeholder="Chile"
-                formControlName="pais"
-                autocomplete="country-name"
-              />
-            </div>
-          </div>
-
-          <div class="form-group" role="group" aria-labelledby="map-label" aria-describedby="map-hint">
-            <span class="form-label" id="map-label">Ubicación en el mapa</span>
-            <span class="form-hint" id="map-hint">
-              Al mover el pin, la dirección de arriba se completa sola.
-            </span>
-            <app-map-picker
-              [lat]="mapLat()"
-              [lng]="mapLng()"
-              (locationChange)="onMapLocationChange($event)"
-            />
-          </div>
+          <app-sucursal-fields [form]="branchForm" />
 
           @if (errorMessage()) {
             <div class="form-error-banner" role="alert">
               <p>{{ errorMessage() }}</p>
-              <button type="button" class="form-link form-error-banner__action" (click)="currentStep.set(1)">
+              <button
+                type="button"
+                class="form-link form-error-banner__action"
+                (click)="currentStep.set(1)"
+              >
                 Revisar mis datos
               </button>
             </div>

@@ -1,0 +1,35 @@
+:host {
+  display: block;
+}
+
+.acceso-google {
+  // Mismo alto que el botón de Google: al validar, el formulario no salta.
+  min-height: 44px;
+
+  &__estado {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    border: 1px solid var(--border-field);
+    color: var(--text-secondary);
+    font-size: 0.9375rem;
+  }
+
+  &__separador {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-block: 24px;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+
+    &::before,
+    &::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border-field);
+    }
+  }
+}

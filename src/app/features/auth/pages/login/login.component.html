@@ -5,17 +5,31 @@
         <img src="logo.png" alt="" class="auth__logo-img" />
       </a>
     </div>
-    <img class="auth__photo" src="images/landing/barberia-sillon.webp" alt="" width="1600" height="1067" />
+    <img
+      class="auth__photo"
+      src="images/landing/barberia-sillon.webp"
+      alt=""
+      width="1600"
+      height="1067"
+    />
     <div class="auth__promo">
       <h1 class="auth__promo-title">Hola de nuevo.</h1>
-      <p class="auth__promo-text">Entra a tu panel y mira el día de tu negocio desde cualquier lugar.</p>
+      <p class="auth__promo-text">
+        Entra a tu panel y mira el día de tu negocio desde cualquier lugar.
+      </p>
     </div>
   </div>
 
   <main class="auth__right">
     <div class="auth__card">
       <h2 class="auth__title">Iniciar sesión</h2>
-      <p class="auth__subtitle">Entra con el correo y la contraseña de tu cuenta.</p>
+      <p class="auth__subtitle">
+        @if (google.disponible()) {
+          Entra con tu cuenta de Google o con tu correo y contraseña.
+        } @else {
+          Entra con el correo y la contraseña de tu cuenta.
+        }
+      </p>
 
       @if (contrasenaRestablecida()) {
         <div class="form-success-banner" role="status">
@@ -24,8 +38,23 @@
       }
 
       @if (errorMessage()) {
-        <div class="form-error-banner" role="alert">{{ errorMessage() }}</div>
+        <div class="form-error-banner" role="alert">
+          <p>{{ errorMessage() }}</p>
+          @if (sugerirAlternativas()) {
+            <p class="form-error-banner__nota">
+              ¿Creaste tu cuenta con Google? Esa cuenta no tiene contraseña:
+              @if (google.disponible()) {
+                usa «Continuar con Google» o
+              }
+              <a routerLink="/olvide-contrasena" class="form-link"
+                >crea una con «Olvidé mi contraseña»</a
+              >.
+            </p>
+          }
+        </div>
       }
+
+      <app-acceso-google (inicio)="limpiarAvisos()" (error)="onGoogleError($event)" />
 
       @let email = form.controls.email;
       @let password = form.controls.password;

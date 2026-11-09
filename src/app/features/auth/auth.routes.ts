@@ -4,6 +4,7 @@ import { RegisterComponent } from './pages/register/register.component';
 import { OlvideContrasenaComponent } from './pages/olvide-contrasena/olvide-contrasena.component';
 import { VerificarEmailComponent } from './pages/verificar-email/verificar-email.component';
 import { RestablecerContrasenaComponent } from './pages/restablecer-contrasena/restablecer-contrasena.component';
+import { RegistroGoogleComponent } from './pages/registro-google/registro-google.component';
 
 export const routes: Routes = [
   {
@@ -13,6 +14,10 @@ export const routes: Routes = [
   {
     path: 'register',
     component: RegisterComponent,
+  },
+  {
+    path: 'registro-google',
+    component: RegistroGoogleComponent,
   },
   {
     path: 'olvide-contrasena',

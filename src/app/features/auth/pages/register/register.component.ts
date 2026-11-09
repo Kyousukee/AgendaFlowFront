@@ -10,28 +10,33 @@ import {
 } from '@angular/forms';
 import { AuthService } from '../../../../core/services/auth.service';
 import { RegisterRequest } from '../../interfaces/register-request.interface';
-import { MapPickerComponent } from '../../../../shared/components/map-picker/map-picker.component';
-import { GeocodingService } from '../../../../shared/services/geocoding.service';
+import { AccesoGoogleComponent } from '../../components/acceso-google/acceso-google.component';
+import { NegocioFieldsComponent } from '../../components/negocio-fields/negocio-fields.component';
+import { SucursalFieldsComponent } from '../../components/sucursal-fields/sucursal-fields.component';
+import { crearFormNegocio, crearFormSucursal, datosNegocio } from '../../forms/datos-negocio.form';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [RouterLink, ReactiveFormsModule, MapPickerComponent],
+  imports: [
+    RouterLink,
+    ReactiveFormsModule,
+    AccesoGoogleComponent,
+    NegocioFieldsComponent,
+    SucursalFieldsComponent,
+  ],
   templateUrl: './register.component.html',
   styleUrl: './register.component.scss',
 })
 export class RegisterComponent {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
-  private geocodingService = inject(GeocodingService);
 
   currentStep = signal(1);
   showPassword = signal(false);
   showConfirmPassword = signal(false);
   isLoading = signal(false);
   errorMessage = signal('');
-  mapLat = signal(-33.4489);
-  mapLng = signal(-70.6693);
 
   totalSteps = 3;
 
@@ -48,23 +53,8 @@ export class RegisterComponent {
     { validators: this.passwordMatchValidator },
   );
 
-  businessForm = this.fb.nonNullable.group({
-    empresaNombre: ['', [Validators.required, Validators.minLength(2)]],
-    nombreComercial: [''],
-    empresaEmail: ['', [Validators.email]],
-    telefono: [''],
-  });
-
-  branchForm = this.fb.nonNullable.group({
-    sucursalNombre: [''],
-    direccion: [''],
-    comuna: [''],
-    ciudad: [''],
-    region: [''],
-    pais: ['Chile'],
-    latitud: [null as number | null],
-    longitud: [null as number | null],
-  });
+  businessForm = crearFormNegocio(this.fb.nonNullable);
+  branchForm = crearFormSucursal(this.fb.nonNullable);
 
   get step1Valid(): boolean {
     return this.accountForm.valid;
@@ -104,25 +94,6 @@ export class RegisterComponent {
     }
   }
 
-  onMapLocationChange(event: { lat: number; lng: number }): void {
-    this.mapLat.set(event.lat);
-    this.mapLng.set(event.lng);
-    this.branchForm.patchValue({
-      latitud: event.lat,
-      longitud: event.lng,
-    });
-
-    this.geocodingService.reverse(event.lat, event.lng).subscribe((addr) => {
-      this.branchForm.patchValue({
-        direccion: addr.direccion,
-        comuna: addr.comuna,
-        ciudad: addr.ciudad,
-        region: addr.region,
-        pais: addr.pais,
-      });
-    });
-  }
-
   fieldError(form: FormGroup, field: string): boolean {
     const control = form.get(field);
     return !!(control && control.invalid && (control.dirty || control.touched));
@@ -134,8 +105,6 @@ export class RegisterComponent {
     this.errorMessage.set('');
 
     const account = this.accountForm.getRawValue();
-    const business = this.businessForm.getRawValue();
-    const branch = this.branchForm.getRawValue();
 
     this.isLoading.set(true);
 
@@ -144,18 +113,7 @@ export class RegisterComponent {
       apellido: account.apellido || '',
       email: account.email,
       password: account.password,
-      empresaNombre: business.empresaNombre,
-      nombreComercial: business.nombreComercial || undefined,
-      empresaEmail: business.empresaEmail || undefined,
-      telefono: business.telefono || undefined,
-      sucursalNombre: branch.sucursalNombre || undefined,
-      direccion: branch.direccion || undefined,
-      comuna: branch.comuna || undefined,
-      ciudad: branch.ciudad || undefined,
-      region: branch.region || undefined,
-      pais: branch.pais || undefined,
-      latitud: branch.latitud,
-      longitud: branch.longitud,
+      ...datosNegocio(this.businessForm, this.branchForm),
     };
 
     this.authService.register(payload).subscribe({
