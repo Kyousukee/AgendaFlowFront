@@ -23,6 +23,9 @@ import { ReservaResumen } from '../../interfaces/reserva-resumen.interface';
         @if (direccion) {
           <div><dt>Dónde</dt><dd>{{ sucursalNombre }}, {{ direccion }}</dd></div>
         }
+        @if (montoPagado !== null) {
+          <div><dt>Pagado con Flow</dt><dd>{{ formatearPrecio(montoPagado) }}</dd></div>
+        }
       </dl>
 
       <div class="confirmacion__info">
@@ -154,4 +157,14 @@ export class ReservarConfirmacionComponent {
   @Input() direccion = '';
   @Input({ required: true }) empresaNombre = '';
   @Input({ required: true }) sucursalNombre = '';
+  /** SPEC 06: abono pagado online, para la confirmación que llega desde Flow. */
+  @Input() montoPagado: number | null = null;
+
+  formatearPrecio(monto: number): string {
+    return new Intl.NumberFormat('es-CL', {
+      style: 'currency',
+      currency: 'CLP',
+      maximumFractionDigits: 0,
+    }).format(monto);
+  }
 }

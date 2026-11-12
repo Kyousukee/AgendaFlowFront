@@ -55,7 +55,10 @@
           [bloqueos]="bloqueos()"
           [serviciosEmpleados]="serviciosEmpleados()"
           [ocupacion]="ocupacion()"
+          [pagoOnline]="empresa()?.pagoOnline ?? null"
           (reservaCreada)="onReservaConfirmada($event)"
+          (pagoIniciado)="onPagoIniciado($event)"
+          (horaTomada)="recargarOcupacion()"
         />
       }
     </main>

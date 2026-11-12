@@ -1,0 +1,102 @@
+<div class="reservar-page">
+  @if (contexto(); as c) {
+    <header class="reservar-header">
+      <div class="reservar-header__content">
+        <div class="reservar-header__empresa">
+          <div class="reservar-header__info">
+            <p class="reservar-header__nombre">{{ c.empresaNombre }}</p>
+            <span class="reservar-header__sucursal">{{ c.sucursalNombre }}</span>
+          </div>
+        </div>
+      </div>
+    </header>
+  }
+
+  <main class="reservar-main">
+    @switch (vista()) {
+      @case ('cargando') {
+        <div class="pago-estado" role="status">
+          <div class="loading-spinner" aria-hidden="true"></div>
+          <p class="pago-estado__texto">Revisando tu pago...</p>
+        </div>
+      }
+      @case ('pendiente') {
+        <div class="pago-estado" role="status">
+          <div class="loading-spinner" aria-hidden="true"></div>
+          <h1 class="pago-estado__titulo">Confirmando tu pago…</h1>
+          <p class="pago-estado__texto">Flow nos está avisando. No cierres esta página.</p>
+        </div>
+      }
+      @case ('pagado') {
+        @if (contexto(); as c) {
+          <app-reservar-confirmacion
+            [resumen]="c.resumen"
+            [direccion]="c.direccion"
+            [empresaNombre]="c.empresaNombre"
+            [sucursalNombre]="c.sucursalNombre"
+            [montoPagado]="monto()"
+          />
+        } @else {
+          <!-- Sin el detalle (otra pestaña u otro dispositivo): el código y el monto bastan. -->
+          <div class="pago-estado" role="status">
+            <span class="pago-estado__icono material-icons" aria-hidden="true">check</span>
+            <h1 class="pago-estado__titulo">Reserva confirmada</h1>
+            @if (monto(); as pagado) {
+              <p class="pago-estado__texto">Pagaste {{ formatearPrecio(pagado) }} con Flow.</p>
+            }
+            <div class="pago-estado__codigo">
+              <span class="pago-estado__codigo-label">Código de reserva</span>
+              <span class="pago-estado__codigo-valor">{{ codigo() }}</span>
+            </div>
+            <p class="pago-estado__texto">
+              Guarda esta pantalla. Te pueden pedir el código al llegar.
+            </p>
+          </div>
+        }
+      }
+      @case ('rechazado') {
+        <div class="pago-estado" role="alert">
+          <span
+            class="pago-estado__icono pago-estado__icono--error material-icons"
+            aria-hidden="true"
+            >close</span
+          >
+          <h1 class="pago-estado__titulo">El pago no se completó y la hora se liberó</h1>
+          <p class="pago-estado__texto">No se hizo ningún cobro. Puedes volver a reservar.</p>
+          <a class="btn btn--primary" [routerLink]="linkReservar()">Volver a reservar</a>
+        </div>
+      }
+      @case ('sin-confirmar') {
+        <div class="pago-estado" role="status">
+          <span
+            class="pago-estado__icono pago-estado__icono--espera material-icons"
+            aria-hidden="true"
+            >schedule</span
+          >
+          <h1 class="pago-estado__titulo">Tu pago sigue en confirmación</h1>
+          <p class="pago-estado__texto">Te avisaremos por correo cuando se confirme.</p>
+          <div class="pago-estado__codigo">
+            <span class="pago-estado__codigo-label">Código de reserva</span>
+            <span class="pago-estado__codigo-valor">{{ codigo() }}</span>
+          </div>
+        </div>
+      }
+      @case ('error') {
+        <div class="pago-estado" role="alert">
+          <h1 class="pago-estado__titulo">No pudimos revisar tu pago</h1>
+          <p class="pago-estado__texto">Revisa tu conexión e inténtalo de nuevo.</p>
+          <button type="button" class="btn btn--primary" (click)="reintentar()">Reintentar</button>
+        </div>
+      }
+      @default {
+        <div class="pago-estado" role="alert">
+          <h1 class="pago-estado__titulo">No encontramos esta reserva</h1>
+          <p class="pago-estado__texto">
+            Revisa que el enlace esté completo. Si pagaste, te llegará la confirmación por correo.
+          </p>
+          <a class="btn btn--secondary" routerLink="/">Volver al inicio</a>
+        </div>
+      }
+    }
+  </main>
+</div>

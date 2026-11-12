@@ -529,3 +529,156 @@
     height: var(--target-min);
   }
 }
+
+// SPEC 06: pago de la mensualidad Pro dentro de "Tu plan".
+.plan-cta {
+  flex-wrap: wrap;
+
+  &__texto {
+    flex: 1 1 220px;
+    min-width: 0;
+  }
+
+  &--neutro {
+    background: var(--neutral-surface);
+    color: var(--text-secondary);
+    font-weight: 400;
+
+    mat-icon {
+      color: var(--text-secondary);
+    }
+  }
+}
+
+.plan-pagos {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border); // taste-skill-ignore: separa el historial del uso
+
+  &__titulo {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  &__vacio {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+  }
+
+  &__lista {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__fila {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 16px;
+    padding: 10px 0;
+    font-size: 0.9375rem;
+
+    & + & {
+      border-top: 1px solid var(--border); // taste-skill-ignore: filas del historial
+    }
+  }
+
+  &__fecha,
+  &__monto {
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__fecha {
+    min-width: 88px;
+    color: var(--text-secondary);
+  }
+
+  &__monto {
+    min-width: 72px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  &__fin {
+    margin-left: auto;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+  }
+}
+
+// SPEC 06: General / Pagos (cuentas Flow).
+.config-tabs {
+  display: flex;
+  gap: 4px;
+  margin-top: 24px;
+  border-bottom: 1px solid var(--border); // taste-skill-ignore: base de las pestañas
+
+  &__link {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--target-min);
+    margin-bottom: -1px;
+    padding: 0 14px;
+    border-bottom: 2px solid transparent; // taste-skill-ignore: indicador de la pestaña activa
+    color: var(--text-secondary);
+    font-weight: 600;
+    transition: color var(--duration-fast) var(--ease-out);
+
+    &:hover {
+      color: var(--text-primary);
+    }
+
+    &--activo {
+      border-bottom-color: var(--gold);
+      color: var(--text-primary);
+    }
+  }
+}
+
+.config-input--suffixed-corto {
+  padding-right: 36px;
+}
+
+.config-hint--error {
+  color: var(--error-text);
+}
+
+.anticipo-error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: var(--error-surface);
+  font-size: 0.9375rem;
+  color: var(--text-primary);
+
+  mat-icon {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+    color: var(--error);
+  }
+
+  &__texto {
+    flex: 1 1 220px;
+    min-width: 0;
+  }
+
+  &__link {
+    color: var(--gold-light);
+    font-weight: 600;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}

@@ -119,6 +119,12 @@
                             <div class="slot__item-main">
                               <span class="slot__servicio">{{ item.servicio.nombre }}</span>
                               <span class="slot__cliente">{{ item.cliente }}</span>
+                              @if (item.reserva && esperandoPago(item.reserva)) {
+                                <span class="slot__esperando-pago">
+                                  <mat-icon aria-hidden="true">hourglass_top</mat-icon>
+                                  Esperando pago
+                                </span>
+                              }
                             </div>
                             @if (item.empleado) {
                               <span class="slot__empleado">
@@ -226,7 +232,7 @@
                       <div class="modal__pago-info">
                         <div class="modal__resumen-row">
                           <span class="modal__resumen-label">Método</span>
-                          <span class="modal__resumen-value">{{ pago.metodoPago }}</span>
+                          <app-metodo-pago class="modal__resumen-value" [metodo]="pago.metodoPago" />
                         </div>
                         <div class="modal__resumen-row">
                           <span class="modal__resumen-label">Monto</span>
@@ -237,15 +243,24 @@
                           <span class="modal__resumen-value">{{ pago.codigoTransaccion || '-' }}</span>
                         </div>
                       </div>
-                      <div class="modal__field">
-                        <label class="modal__label" for="modal-estado-pago">Nuevo estado</label>
-                        <select id="modal-estado-pago" class="modal__select" [ngModel]="nuevoEstadoPago()" (ngModelChange)="nuevoEstadoPago.set($event)">
-                          <option value="">Seleccionar estado</option>
-                          @for (estado of estadosPago(); track estado.id) {
-                            <option [value]="estado.id.toString()">{{ estado.nombre }}</option>
-                          }
-                        </select>
-                      </div>
+                      @let estadosEditables = estadosPagoEditables(pago);
+                      @if (esPagoFlow(pago.metodoPago)) {
+                        <p class="modal__nota">
+                          Flow actualiza este pago solo. Si lo devolviste desde tu panel de Flow,
+                          márcalo como Reembolsado.
+                        </p>
+                      }
+                      @if (estadosEditables.length > 0) {
+                        <div class="modal__field">
+                          <label class="modal__label" for="modal-estado-pago">Nuevo estado</label>
+                          <select id="modal-estado-pago" class="modal__select" [ngModel]="nuevoEstadoPago()" (ngModelChange)="nuevoEstadoPago.set($event)">
+                            <option value="">Seleccionar estado</option>
+                            @for (estado of estadosEditables; track estado.id) {
+                              <option [value]="estado.id.toString()">{{ estado.nombre }}</option>
+                            }
+                          </select>
+                        </div>
+                      }
                     </div>
                   }
                 } @else {
@@ -261,7 +276,7 @@
                         tabindex="0"
                       >
                         <div class="modal__pago-item-info">
-                          <span class="modal__pago-item-metodo">{{ pago.metodoPago }}</span>
+                          <app-metodo-pago class="modal__pago-item-metodo" [metodo]="pago.metodoPago" />
                           <span class="modal__pago-item-monto">{{ formatearPrecio(pago.monto) }}</span>
                         </div>
                         <div class="modal__pago-item-detalles">
@@ -330,7 +345,7 @@
           <div class="modal__footer">
             <button type="button" class="btn btn--outline" (click)="cerrarModalPago()">Cerrar</button>
             @if (pagoSeleccionado(); as pago) {
-              @if (!estadoActualizado()) {
+              @if (!estadoActualizado() && estadosPagoEditables(pago).length > 0) {
                 <button class="btn btn--primary" (click)="actualizarEstadoPago()" [disabled]="!nuevoEstadoPago() || actualizandoEstado()">
                   @if (actualizandoEstado()) {
                     <span>Actualizando...</span>

@@ -18,6 +18,12 @@ import {
   liberaHora,
   nombreEstadoReserva,
 } from '../../../../core/constants/estados-reserva';
+import {
+  MetodoPagoComponent,
+  esPagoFlow,
+} from '../../../../shared/components/metodo-pago/metodo-pago.component';
+
+const ESTADO_PAGO_REEMBOLSADO = 'Reembolsado';
 
 interface TimelineItem {
   type: 'reserva' | 'disponible';
@@ -39,7 +45,14 @@ interface TimelineRow {
   selector: 'app-home',
   standalone: true,
   // A11yModule (SPEC 04, TS mínimo autorizado): cdkTrapFocus en el modal de pago.
-  imports: [MatCardModule, MatIconModule, MatButtonModule, FormsModule, A11yModule],
+  imports: [
+    MatCardModule,
+    MatIconModule,
+    MatButtonModule,
+    FormsModule,
+    A11yModule,
+    MetodoPagoComponent,
+  ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
 })
@@ -340,6 +353,23 @@ export class HomeComponent implements OnInit, OnDestroy {
         this.pagoError.set('No pudimos cambiar el estado de la reserva. Revisa tu conexión e inténtalo de nuevo.');
       },
     });
+  }
+
+  /** SPEC 06: reserva retenida mientras el cliente paga el abono en Flow. */
+  esperandoPago(reserva: Reserva): boolean {
+    return reserva.estado?.nombre === 'Pendiente';
+  }
+
+  readonly esPagoFlow = esPagoFlow;
+
+  /**
+   * SPEC 06: los pagos de Flow los actualiza Flow; a mano solo se marcan Reembolsado
+   * (el local devuelve el dinero desde su panel de Flow).
+   */
+  estadosPagoEditables(pago: PagoReserva): Estado[] {
+    if (!esPagoFlow(pago.metodoPago)) return this.estadosPago();
+    if (pago.estado?.nombre === ESTADO_PAGO_REEMBOLSADO) return [];
+    return this.estadosPago().filter((e) => e.nombre === ESTADO_PAGO_REEMBOLSADO);
   }
 
   tienePago(reserva: Reserva): boolean {

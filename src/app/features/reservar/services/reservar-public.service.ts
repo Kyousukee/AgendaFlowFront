@@ -26,6 +26,13 @@ export interface OcupacionReserva {
   horaFin: string;
 }
 
+/** SPEC 06: cobro creado en Flow. La hora queda retenida hasta `expiraEn` (15 minutos). */
+export interface PagoIniciado {
+  monto: number;
+  urlPago: string;
+  expiraEn: string;
+}
+
 export interface ReservaCreada {
   id: number;
   codigo: string;
@@ -33,6 +40,19 @@ export interface ReservaCreada {
   horaInicio: string;
   horaFin: string;
   precio: number;
+  /** SPEC 06: Pendiente mientras se paga en Flow; Programada sin cobro. */
+  estado?: 'Pendiente' | 'Programada';
+  /** SPEC 06: fuente de verdad. null = sin cobro (confirmación de siempre). */
+  pago?: PagoIniciado | null;
+}
+
+/** SPEC 06: GET /reservar/reservas/:codigo/pago. */
+export interface EstadoPagoReserva {
+  estadoReserva: string | null;
+  /** Pendiente, Pagado o Rechazado. */
+  estadoPago: string | null;
+  monto: number;
+  expiraEn: string | null;
 }
 
 export interface CrearReservaDto {
@@ -46,6 +66,8 @@ export interface CrearReservaDto {
   clienteNombre: string;
   clienteEmail: string;
   clienteTelefono: string;
+  /** SPEC 06: solo se envía si el negocio deja elegir pagar en el local. */
+  pagarAhora?: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -195,6 +217,13 @@ export class ReservarPublicService {
 
   crearReserva(data: CrearReservaDto): Observable<ReservaCreada> {
     return this.http.post<ReservaCreada>(this.apiUrl, data);
+  }
+
+  /** SPEC 06: resultado del pago online de una reserva. 404 si no existe o no tiene pago Flow. */
+  getEstadoPago(codigo: string): Observable<EstadoPagoReserva> {
+    return this.http.get<EstadoPagoReserva>(
+      `${this.apiUrl}/reservas/${encodeURIComponent(codigo)}/pago`,
+    );
   }
 
   private timeToMinutes(time: string): number {

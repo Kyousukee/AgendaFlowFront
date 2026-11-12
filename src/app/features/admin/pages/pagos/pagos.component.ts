@@ -6,6 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { AuthService } from '../../../../core/services/auth.service';
 import { PagosService } from '../../services/pagos.service';
 import { Pago } from '../../../../core/interfaces/pago.interface';
+import { MetodoPagoComponent } from '../../../../shared/components/metodo-pago/metodo-pago.component';
 import {
   ReservaDetailDialogComponent,
 } from '../../components/reserva-detail-dialog/reserva-detail-dialog.component';
@@ -13,7 +14,7 @@ import {
 @Component({
   selector: 'app-pagos',
   standalone: true,
-  imports: [FormsModule, MatIconModule, MatButtonModule],
+  imports: [FormsModule, MatIconModule, MatButtonModule, MetodoPagoComponent],
   templateUrl: './pagos.component.html',
   styleUrl: './pagos.component.scss',
 })

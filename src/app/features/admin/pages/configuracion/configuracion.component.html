@@ -78,15 +78,76 @@
           }
         </div>
 
-        @if (plan.plan === 'Gratis' || plan.plan === 'Prueba') {
-          <p class="plan-cta" role="note">
+        <!-- SPEC 06: la mensualidad Pro se paga con Flow y suma 30 días. -->
+        @if (suscripcion.puedePagarPro() && pagoSuscripcion.pagosDisponibles()) {
+          <div class="plan-cta">
             <mat-icon>rocket_launch</mat-icon>
-            Contáctanos para activar el plan Pro
+            <span class="plan-cta__texto">
+              @if (plan.plan === 'Pro') {
+                Renueva tu plan Pro: se suman {{ diasPorPago }} días a tu fecha de fin.
+              } @else {
+                Activa el plan Pro: sin límites de sucursales, empleados ni servicios.
+              }
+            </span>
+            <button
+              type="button"
+              class="btn btn--primary btn--sm"
+              [disabled]="pagoSuscripcion.pagando()"
+              [attr.aria-busy]="pagoSuscripcion.pagando()"
+              (click)="pagoSuscripcion.pagar()"
+            >
+              @if (pagoSuscripcion.pagando()) {
+                <mat-icon class="spin">hourglass_empty</mat-icon>
+                Abriendo Flow...
+              } @else {
+                Pagar Pro – {{ precioPro }} / {{ diasPorPago }} días
+              }
+            </button>
+          </div>
+        } @else if (!pagoSuscripcion.pagosDisponibles()) {
+          <p class="plan-cta plan-cta--neutro" role="note">
+            <mat-icon>info</mat-icon>
+            Pagos no disponibles por ahora
           </p>
         }
+
+        <div class="plan-pagos">
+          <h3 class="plan-pagos__titulo">Pagos del plan</h3>
+          @if (cargandoPagosMensualidad()) {
+            <p class="plan-pagos__vacio" role="status">Cargando pagos...</p>
+          } @else if (pagosMensualidad().length === 0) {
+            <p class="plan-pagos__vacio">Todavía no has pagado el plan Pro con Flow.</p>
+          } @else {
+            <ul class="plan-pagos__lista">
+              @for (pago of pagosMensualidad(); track pago.id) {
+                <li class="plan-pagos__fila">
+                  <span class="plan-pagos__fecha">
+                    {{ pago.fechaPago ?? pago.fechaCreacion | date: 'dd-MM-yyyy' }}
+                  </span>
+                  <span class="plan-pagos__monto">{{ formatearPrecio(pago.monto) }}</span>
+                  <span class="estado-badge" [attr.data-estado]="claseEstadoPago(pago)">
+                    {{ pago.estado?.nombre ?? 'Sin estado' }}
+                  </span>
+                  <span class="plan-pagos__fin">
+                    @if (pago.finNuevo) {
+                      Pro hasta {{ pago.finNuevo | date: 'dd-MM-yyyy' }}
+                    }
+                  </span>
+                </li>
+              }
+            </ul>
+          }
+        </div>
       </div>
     </section>
   }
+
+  <nav class="config-tabs" aria-label="Secciones de configuración">
+    <a class="config-tabs__link config-tabs__link--activo" routerLink="/admin/configuracion" aria-current="page">
+      General
+    </a>
+    <a class="config-tabs__link" routerLink="/admin/configuracion/pagos">Pagos</a>
+  </nav>
 
   <section class="config-card logo-card" aria-labelledby="logo-titulo">
     <div class="config-card__header">
@@ -237,8 +298,11 @@
           <div class="config-card__header">
             <mat-icon class="config-card__icon">payments</mat-icon>
             <div>
-              <h2 class="config-card__title">Pagos anticipados</h2>
-              <p class="config-card__desc">Configura el cobro anticipado de reservas</p>
+              <h2 class="config-card__title">Cobro al reservar</h2>
+              <p class="config-card__desc">
+                El cliente paga un abono con Flow al reservar. El dinero llega a la cuenta Flow
+                de tu negocio o de cada sucursal.
+              </p>
             </div>
           </div>
 
@@ -246,8 +310,8 @@
             <div class="config-toggle">
               <label class="toggle-label">
                 <span class="toggle-text">
-                  <span class="toggle-title">Permitir pago anticipado</span>
-                  <span class="toggle-desc">Cobrar un porcentaje o monto fijo al agendar</span>
+                  <span class="toggle-title">Cobrar al reservar</span>
+                  <span class="toggle-desc">Pide un abono o el pago completo al agendar</span>
                 </span>
                 <input
                   type="checkbox"
@@ -258,33 +322,103 @@
               </label>
             </div>
 
-            @if (form.get('permitePagoAnticipado')?.value) {
+            @if (form.controls.permitePagoAnticipado.value) {
+              @let tipo = form.controls.tipoAnticipo.value;
+              @let montoControl = form.controls.montoAnticipo;
+              @let montoError = montoControl.invalid && (montoControl.dirty || montoControl.touched);
               <div class="config-row">
                 <div class="config-field">
-                  <label class="config-label" for="cfg-tipo-anticipo">Tipo de anticipo</label>
+                  <label class="config-label" for="cfg-tipo-anticipo">Cuánto cobrar</label>
                   <select id="cfg-tipo-anticipo" class="config-select" formControlName="tipoAnticipo">
-                    <option value="Porcentaje">Porcentaje (%)</option>
-                    <option value="Monto fijo">Monto fijo ($)</option>
+                    @for (opcion of tiposAnticipo; track opcion.valor) {
+                      <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
+                    }
                   </select>
                 </div>
-                <div class="config-field">
-                  <label class="config-label" for="cfg-monto-anticipo">
-                    {{ form.get('tipoAnticipo')?.value === 'Porcentaje' ? 'Porcentaje' : 'Monto' }}
-                  </label>
-                  <div class="config-input-with-prefix">
-                    <span class="config-prefix">
-                      {{ form.get('tipoAnticipo')?.value === 'Porcentaje' ? '%' : '$' }}
+                @if (muestraMontoAnticipo) {
+                  <div class="config-field">
+                    <label class="config-label" for="cfg-monto-anticipo">
+                      {{ tipo === 'Porcentaje' ? 'Porcentaje' : 'Monto (CLP)' }}
+                    </label>
+                    @if (tipo === 'Porcentaje') {
+                      <div class="config-input-with-suffix">
+                        <input
+                          id="cfg-monto-anticipo"
+                          type="number"
+                          inputmode="numeric"
+                          class="config-input config-input--suffixed-corto"
+                          formControlName="montoAnticipo"
+                          min="1"
+                          max="100"
+                          step="1"
+                          [attr.aria-invalid]="montoError"
+                          aria-describedby="cfg-monto-anticipo-hint"
+                        />
+                        <span class="config-suffix">%</span>
+                      </div>
+                    } @else {
+                      <div class="config-input-with-prefix">
+                        <span class="config-prefix">$</span>
+                        <input
+                          id="cfg-monto-anticipo"
+                          type="number"
+                          inputmode="numeric"
+                          class="config-input config-input--prefixed"
+                          formControlName="montoAnticipo"
+                          min="1"
+                          step="1"
+                          [attr.aria-invalid]="montoError"
+                          aria-describedby="cfg-monto-anticipo-hint"
+                        />
+                      </div>
+                    }
+                    <span
+                      class="config-hint"
+                      [class.config-hint--error]="montoError"
+                      id="cfg-monto-anticipo-hint"
+                    >
+                      @if (tipo === 'Porcentaje') {
+                        Un número entero entre 1 y 100.
+                      } @else {
+                        Pesos enteros. Si el servicio cuesta menos, se cobra su precio.
+                      }
                     </span>
-                    <input
-                      id="cfg-monto-anticipo"
-                      type="number"
-                      inputmode="numeric"
-                      class="config-input config-input--prefixed"
-                      formControlName="montoAnticipo"
-                      min="0"
-                    />
                   </div>
-                </div>
+                }
+              </div>
+
+              <div class="config-toggle">
+                <label class="toggle-label">
+                  <span class="toggle-text">
+                    <span class="toggle-title">El cliente debe pagar para reservar</span>
+                    <span class="toggle-desc">
+                      Si lo apagas, el cliente puede elegir pagar en el local
+                    </span>
+                  </span>
+                  <input type="checkbox" class="toggle-input" formControlName="pagoObligatorio" />
+                  <span class="toggle-switch"></span>
+                </label>
+              </div>
+            }
+
+            @if (errorAnticipo(); as error) {
+              <div class="anticipo-error" role="alert">
+                <mat-icon>error_outline</mat-icon>
+                <span class="anticipo-error__texto">{{ error.mensaje }}</span>
+                @if (error.tipo === 'plan' && pagoSuscripcion.pagosDisponibles()) {
+                  <button
+                    type="button"
+                    class="btn btn--primary btn--sm"
+                    [disabled]="pagoSuscripcion.pagando()"
+                    (click)="pagoSuscripcion.pagar()"
+                  >
+                    Pagar Pro
+                  </button>
+                } @else if (error.tipo === 'cuentas') {
+                  <a class="anticipo-error__link" routerLink="/admin/configuracion/pagos">
+                    Ir a Configuración → Pagos
+                  </a>
+                }
               </div>
             }
           </div>

@@ -17,6 +17,14 @@ export const routes: Routes = [
     loadChildren: () =>
       import('./features/reservar/reservar.routes').then((m) => m.routes),
   },
+  // SPEC 06: el back redirige aquí al volver de Flow con el pago de una reserva (pública).
+  {
+    path: 'reserva/pago',
+    loadComponent: () =>
+      import('./features/reservar/pages/reserva-pago/reserva-pago.component').then(
+        (m) => m.ReservaPagoComponent,
+      ),
+  },
   {
     path: '',
     canActivate: [authGuard],

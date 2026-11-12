@@ -214,6 +214,8 @@
               <span class="form-error" id="email-error">
                 Escribe un correo válido, como nombre&#64;correo.cl.
               </span>
+            } @else if (aplicaPago()) {
+              <span class="form-hint">Es obligatorio para pagar: ahí te llega el comprobante.</span>
             }
           </div>
           <div class="form-group">
@@ -279,15 +281,65 @@
           <span class="resumen-item__label">Total</span>
           <span class="resumen-item__price">{{ formatearPrecio(servicioSeleccionado()!.precio) }}</span>
         </div>
+
+        <!-- SPEC 06: abono con Flow. El back confirma si se cobra en la respuesta. -->
+        @if (abono(); as montoAbono) {
+          @if (pagoOpcional()) {
+            <fieldset class="pago-opciones" [disabled]="guardando()">
+              <legend class="pago-opciones__titulo">¿Cómo quieres pagar?</legend>
+              <label class="pago-opcion" [class.pago-opcion--selected]="pagarAhora()">
+                <input
+                  type="radio"
+                  name="pagar-ahora"
+                  class="pago-opcion__input"
+                  [checked]="pagarAhora()"
+                  (change)="pagarAhora.set(true)"
+                />
+                <span>Pagar ahora {{ formatearPrecio(montoAbono) }}</span>
+              </label>
+              <label class="pago-opcion" [class.pago-opcion--selected]="!pagarAhora()">
+                <input
+                  type="radio"
+                  name="pagar-ahora"
+                  class="pago-opcion__input"
+                  [checked]="!pagarAhora()"
+                  (change)="pagarAhora.set(false)"
+                />
+                <span>Pagar en el local</span>
+              </label>
+            </fieldset>
+          }
+
+          @if (aplicaPago()) {
+            <div class="resumen-item resumen-item--abono">
+              <span class="resumen-item__label">
+                {{ esPagoCompleto() ? 'Pago total' : 'Abono a pagar ahora' }}
+              </span>
+              <span class="resumen-item__value resumen-item__value--gold">
+                {{ formatearPrecio(montoAbono) }}
+              </span>
+            </div>
+            @if (saldoEnLocal() > 0) {
+              <div class="resumen-item">
+                <span class="resumen-item__label">Saldo a pagar en el local</span>
+                <span class="resumen-item__value">{{ formatearPrecio(saldoEnLocal()) }}</span>
+              </div>
+            }
+            <p class="resumen-card__nota">
+              Pagas con Flow al confirmar. Tu hora queda reservada 15 minutos mientras pagas.
+            </p>
+          }
+        }
       </div>
     </div>
   }
 
-  @if (errorReserva()) {
-    <div class="form-error-banner" role="alert">
-      No pudimos confirmar tu reserva. Revisa tu conexión e inténtalo de nuevo. Si el problema
-      sigue, puede que esa hora se haya tomado: vuelve atrás y elige otra.
+  @if (redirigiendoAFlow()) {
+    <div class="form-info-banner" role="status">
+      Te llevamos a Flow para pagar. Tu hora queda reservada 15 minutos.
     </div>
+  } @else if (errorReserva(); as mensaje) {
+    <div class="form-error-banner" role="alert">{{ mensaje }}</div>
   }
 
   <div class="form-actions">
@@ -319,8 +371,12 @@
         [disabled]="guardando() || !servicioSeleccionado() || !empleadoSeleccionado() || !fechaSeleccionada() || !horaSeleccionada()"
         [attr.aria-busy]="guardando()"
       >
-        @if (guardando()) {
+        @if (redirigiendoAFlow()) {
+          Abriendo Flow...
+        } @else if (guardando()) {
           Confirmando...
+        } @else if (aplicaPago()) {
+          Reservar y pagar {{ formatearPrecio(abono()!) }}
         } @else {
           Confirmar reserva
         }

@@ -116,7 +116,18 @@
       @if (suscripcion.mostrarAviso()) {
         <div class="aviso-suscripcion" role="status">
           <mat-icon class="aviso-suscripcion__icon">info</mat-icon>
-          <span class="aviso-suscripcion__texto">{{ suscripcion.suscripcion()?.aviso }}</span>
+          <span class="aviso-suscripcion__texto">{{ suscripcion.avisoTexto() }}</span>
+          @if (auth.esAdmin() && suscripcion.puedePagarPro() && pagoSuscripcion.pagosDisponibles()) {
+            <button
+              type="button"
+              class="aviso-suscripcion__pagar"
+              [disabled]="pagoSuscripcion.pagando()"
+              [attr.aria-busy]="pagoSuscripcion.pagando()"
+              (click)="pagoSuscripcion.pagar()"
+            >
+              {{ pagoSuscripcion.pagando() ? 'Abriendo Flow...' : 'Pagar Pro' }}
+            </button>
+          }
           <a class="aviso-suscripcion__link" routerLink="/admin/configuracion">Ver plan</a>
           <button
             type="button"

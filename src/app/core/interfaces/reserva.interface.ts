@@ -12,6 +12,7 @@ export interface PagoReserva {
   metodoPago: string;
   codigoTransaccion: string;
   fechaPago: string;
+  estado?: Estado;
 }
 
 export interface Reserva {

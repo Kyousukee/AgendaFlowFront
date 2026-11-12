@@ -543,3 +543,81 @@
     text-underline-offset: 3px;
   }
 }
+
+// SPEC 06: abono con Flow.
+.form-hint {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.pago-opciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 4px 0 0;
+  padding: 16px 0 4px;
+  border: 0;
+  border-top: 1px solid var(--border); // taste-skill-ignore: fila de resumen tipo tabla
+
+  &__titulo {
+    width: 100%;
+    margin-bottom: 4px;
+    padding: 0;
+    font-size: 1rem;
+    color: var(--text-secondary);
+    // El legend se sale del flujo flex sin esto.
+    float: left;
+  }
+}
+
+.pago-opcion {
+  display: inline-flex;
+  flex: 1 1 200px;
+  align-items: center;
+  gap: 10px;
+  min-height: var(--target-min);
+  padding: 0 14px;
+  border: 1px solid var(--border-light); // taste-skill-ignore: opción seleccionable
+  color: var(--text-primary);
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--ease-out);
+
+  &:hover {
+    border-color: var(--text-secondary);
+  }
+
+  &:focus-within {
+    outline: 2px solid var(--gold-light);
+    outline-offset: 2px;
+  }
+
+  &--selected,
+  &--selected:hover {
+    border-color: var(--gold);
+  }
+
+  &__input {
+    accent-color: var(--gold);
+  }
+}
+
+.resumen-item--abono {
+  padding-top: 16px;
+}
+
+.resumen-card__nota {
+  padding-top: 12px;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.form-info-banner {
+  margin-top: 24px;
+  padding: 12px 14px;
+  background: rgba(201, 168, 76, 0.12);
+  color: var(--text-primary);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}

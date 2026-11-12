@@ -1,0 +1,313 @@
+<div class="config-page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Configuración de la empresa</h1>
+      <p class="page-subtitle">Las cuentas Flow que reciben los abonos de tus reservas</p>
+    </div>
+  </div>
+
+  <nav class="config-tabs" aria-label="Secciones de configuración">
+    <a class="config-tabs__link" routerLink="/admin/configuracion">General</a>
+    <a
+      class="config-tabs__link config-tabs__link--activo"
+      routerLink="/admin/configuracion/pagos"
+      aria-current="page"
+    >
+      Pagos
+    </a>
+  </nav>
+
+  <p class="flow-ayuda">
+    <mat-icon>help_outline</mat-icon>
+    <span>
+      Encuentra tus llaves en
+      <a [href]="ayudaUrl" target="_blank" rel="noopener"
+        >Flow<span class="sr-only"> (se abre en otra pestaña)</span></a
+      >
+      → Mis datos → Integración.
+    </span>
+  </p>
+
+  @if (cargando() && !cuentas()) {
+    <div class="loading-state" role="status">
+      <mat-icon class="loading-icon">hourglass_empty</mat-icon>
+      <span>Cargando cuentas Flow...</span>
+    </div>
+  } @else if (errorCarga() && !cuentas()) {
+    <div class="flow-alerta" role="alert">
+      <mat-icon>error_outline</mat-icon>
+      <span class="flow-alerta__texto">No pudimos cargar las cuentas Flow.</span>
+      <button type="button" class="btn btn--outline btn--sm" (click)="cargar()">Reintentar</button>
+    </div>
+  } @else if (cuentas(); as datos) {
+    <!-- Cuenta del negocio -->
+    <section class="config-card" aria-labelledby="flow-empresa-titulo">
+      <div class="config-card__header">
+        <mat-icon class="config-card__icon">account_balance</mat-icon>
+        <div>
+          <h2 class="config-card__title" id="flow-empresa-titulo">Cuenta Flow del negocio</h2>
+          <p class="config-card__desc">
+            La usan todas las sucursales que no tienen una cuenta propia.
+          </p>
+        </div>
+      </div>
+
+      <div class="config-card__body">
+        <div class="flow-estado">
+          @if (datos.empresa.configurada) {
+            <span class="estado-badge" data-estado="pagado">Configurada</span>
+            <span class="flow-llave">API Key ••••{{ datos.empresa.apiKeyFinal }}</span>
+          } @else {
+            <span class="estado-badge">No configurada</span>
+          }
+        </div>
+
+        @if (editandoEmpresa() || !datos.empresa.configurada) {
+          <form class="flow-form" [formGroup]="formEmpresa" (ngSubmit)="guardarEmpresa()">
+            @let apiKeyError = campoInvalido(formEmpresa, 'apiKey');
+            @let secretKeyError = campoInvalido(formEmpresa, 'secretKey');
+            <div class="config-field">
+              <label class="config-label" for="flow-empresa-apikey">API Key</label>
+              <input
+                id="flow-empresa-apikey"
+                type="text"
+                class="config-input"
+                formControlName="apiKey"
+                autocomplete="off"
+                spellcheck="false"
+                [attr.aria-invalid]="apiKeyError"
+              />
+              @if (apiKeyError) {
+                <span class="config-hint config-hint--error">Pega la API Key de Flow.</span>
+              }
+            </div>
+            <div class="config-field">
+              <label class="config-label" for="flow-empresa-secret">Secret Key</label>
+              <input
+                id="flow-empresa-secret"
+                type="password"
+                class="config-input"
+                formControlName="secretKey"
+                autocomplete="new-password"
+                spellcheck="false"
+                [attr.aria-invalid]="secretKeyError"
+                aria-describedby="flow-empresa-secret-hint"
+              />
+              <span
+                class="config-hint"
+                [class.config-hint--error]="secretKeyError"
+                id="flow-empresa-secret-hint"
+              >
+                Se guarda cifrada. No la volverás a ver aquí.
+              </span>
+            </div>
+            <div class="flow-acciones">
+              @if (datos.empresa.configurada) {
+                <button
+                  type="button"
+                  class="btn btn--outline btn--sm"
+                  (click)="cancelarFormEmpresa()"
+                  [disabled]="ocupado() === 'empresa'"
+                >
+                  Cancelar
+                </button>
+              }
+              <button
+                type="submit"
+                class="btn btn--primary btn--sm"
+                [disabled]="ocupado() !== null"
+                [attr.aria-busy]="ocupado() === 'empresa'"
+              >
+                {{ ocupado() === 'empresa' ? 'Guardando...' : 'Guardar cuenta' }}
+              </button>
+            </div>
+          </form>
+        } @else if (confirmarQuitarEmpresa()) {
+          <div class="flow-acciones flow-acciones--confirmar" role="group" aria-label="Confirmar">
+            <span class="flow-acciones__pregunta">
+              ¿Quitar la cuenta del negocio? Las sucursales sin cuenta propia dejarán de cobrar al
+              reservar.
+            </span>
+            <button
+              type="button"
+              class="btn btn--outline btn--sm"
+              (click)="confirmarQuitarEmpresa.set(false)"
+              [disabled]="ocupado() === 'empresa'"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              class="btn btn--danger btn--sm"
+              (click)="quitarEmpresa()"
+              [disabled]="ocupado() !== null"
+            >
+              {{ ocupado() === 'empresa' ? 'Quitando...' : 'Sí, quitar' }}
+            </button>
+          </div>
+        } @else {
+          <div class="flow-acciones">
+            <button
+              type="button"
+              class="btn btn--outline btn--sm"
+              (click)="confirmarQuitarEmpresa.set(true)"
+            >
+              <mat-icon>delete</mat-icon>
+              Quitar
+            </button>
+            <button type="button" class="btn btn--outline btn--sm" (click)="abrirFormEmpresa()">
+              <mat-icon>key</mat-icon>
+              Cambiar llaves
+            </button>
+          </div>
+        }
+      </div>
+    </section>
+
+    <!-- Sucursales -->
+    <section class="config-card" aria-labelledby="flow-sucursales-titulo">
+      <div class="config-card__header">
+        <mat-icon class="config-card__icon">store</mat-icon>
+        <div>
+          <h2 class="config-card__title" id="flow-sucursales-titulo">Sucursales</h2>
+          <p class="config-card__desc">
+            Una sucursal puede cobrar en su propia cuenta Flow en vez de la del negocio.
+          </p>
+        </div>
+      </div>
+
+      <div class="config-card__body">
+        @if (datos.sucursales.length === 0) {
+          <p class="config-hint">Todavía no tienes sucursales.</p>
+        } @else {
+          <ul class="flow-sucursales">
+            @for (sucursal of datos.sucursales; track sucursal.sucursalId) {
+              @let sinCuentaFlow = sinCuenta(sucursal);
+              <li class="flow-sucursal" [class.flow-sucursal--sin-cuenta]="sinCuentaFlow">
+                <div class="flow-sucursal__fila">
+                  <div class="flow-sucursal__info">
+                    <span class="flow-sucursal__nombre">
+                      {{ nombreSucursal(sucursal) }}
+                      @if (!sucursal.activa) {
+                        <span class="estado-badge">Inactiva</span>
+                      }
+                    </span>
+                    <span class="flow-sucursal__estado">
+                      @if (sucursal.cuentaPropia) {
+                        Cuenta propia ••••{{ sucursal.apiKeyFinal }}
+                      } @else if (sucursal.usaCuentaEmpresa) {
+                        Usa la cuenta del negocio
+                      } @else {
+                        <mat-icon class="flow-sucursal__alerta">error_outline</mat-icon>
+                        Sin cuenta Flow: sus reservas no se pueden cobrar
+                      }
+                    </span>
+                  </div>
+                  @if (editandoSucursal() !== sucursal.sucursalId) {
+                    <div class="flow-acciones">
+                      @if (sucursal.cuentaPropia) {
+                        <button
+                          type="button"
+                          class="btn btn--outline btn--sm"
+                          (click)="abrirFormSucursal(sucursal.sucursalId)"
+                          [disabled]="ocupado() !== null"
+                        >
+                          Cambiar llaves
+                        </button>
+                        <button
+                          type="button"
+                          class="btn btn--outline btn--sm"
+                          (click)="volverACuentaEmpresa(sucursal)"
+                          [disabled]="ocupado() !== null"
+                          [attr.aria-busy]="ocupado() === sucursal.sucursalId"
+                        >
+                          {{
+                            ocupado() === sucursal.sucursalId
+                              ? 'Guardando...'
+                              : 'Volver a la cuenta del negocio'
+                          }}
+                        </button>
+                      } @else {
+                        <button
+                          type="button"
+                          class="btn btn--outline btn--sm"
+                          (click)="abrirFormSucursal(sucursal.sucursalId)"
+                          [disabled]="ocupado() !== null"
+                        >
+                          Usar cuenta propia
+                        </button>
+                      }
+                    </div>
+                  }
+                </div>
+
+                @if (editandoSucursal() === sucursal.sucursalId) {
+                  @let apiKeyError = campoInvalido(formSucursal, 'apiKey');
+                  @let secretKeyError = campoInvalido(formSucursal, 'secretKey');
+                  <form
+                    class="flow-form"
+                    [formGroup]="formSucursal"
+                    (ngSubmit)="guardarSucursal(sucursal)"
+                  >
+                    <div class="config-field">
+                      <label class="config-label" [for]="'flow-suc-apikey-' + sucursal.sucursalId">
+                        API Key
+                      </label>
+                      <input
+                        [id]="'flow-suc-apikey-' + sucursal.sucursalId"
+                        type="text"
+                        class="config-input"
+                        formControlName="apiKey"
+                        autocomplete="off"
+                        spellcheck="false"
+                        [attr.aria-invalid]="apiKeyError"
+                      />
+                      @if (apiKeyError) {
+                        <span class="config-hint config-hint--error">Pega la API Key de Flow.</span>
+                      }
+                    </div>
+                    <div class="config-field">
+                      <label class="config-label" [for]="'flow-suc-secret-' + sucursal.sucursalId">
+                        Secret Key
+                      </label>
+                      <input
+                        [id]="'flow-suc-secret-' + sucursal.sucursalId"
+                        type="password"
+                        class="config-input"
+                        formControlName="secretKey"
+                        autocomplete="new-password"
+                        spellcheck="false"
+                        [attr.aria-invalid]="secretKeyError"
+                      />
+                      <span class="config-hint" [class.config-hint--error]="secretKeyError">
+                        Se guarda cifrada. No la volverás a ver aquí.
+                      </span>
+                    </div>
+                    <div class="flow-acciones">
+                      <button
+                        type="button"
+                        class="btn btn--outline btn--sm"
+                        (click)="cancelarFormSucursal()"
+                        [disabled]="ocupado() === sucursal.sucursalId"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="submit"
+                        class="btn btn--primary btn--sm"
+                        [disabled]="ocupado() !== null"
+                        [attr.aria-busy]="ocupado() === sucursal.sucursalId"
+                      >
+                        {{ ocupado() === sucursal.sucursalId ? 'Guardando...' : 'Guardar cuenta' }}
+                      </button>
+                    </div>
+                  </form>
+                }
+              </li>
+            }
+          </ul>
+        }
+      </div>
+    </section>
+  }
+</div>
