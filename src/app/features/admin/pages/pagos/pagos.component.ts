@@ -7,9 +7,14 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { PagosService } from '../../services/pagos.service';
 import { Pago } from '../../../../core/interfaces/pago.interface';
 import { MetodoPagoComponent } from '../../../../shared/components/metodo-pago/metodo-pago.component';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { ReembolsoSolicitado } from '../../../../core/interfaces/reembolso.interface';
 import {
   ReservaDetailDialogComponent,
 } from '../../components/reserva-detail-dialog/reserva-detail-dialog.component';
+import { ReembolsoDialogComponent } from '../../components/reembolso-dialog/reembolso-dialog.component';
+import { ReembolsosHistorialDialogComponent } from '../../components/reembolsos-historial-dialog/reembolsos-historial-dialog.component';
+import { esPagoConFlow, puedeReembolsar } from '../../utils/reembolsos.util';
 
 @Component({
   selector: 'app-pagos',
@@ -22,6 +27,7 @@ export class PagosComponent {
   private authService = inject(AuthService);
   private pagosService = inject(PagosService);
   private dialog = inject(MatDialog);
+  private snackBar = inject(MatSnackBar);
 
   pagos = signal<Pago[]>([]);
   cargando = signal(true);
@@ -158,6 +164,34 @@ export class PagosComponent {
       data: pago,
       panelClass: 'dialog-panel',
       width: '560px',
+    });
+  }
+
+  readonly puedeReembolsar = puedeReembolsar;
+  readonly esPagoConFlow = esPagoConFlow;
+
+  /** SPEC 07: abre el diálogo de reembolso; si Flow lo acepta, avisa y recarga la lista. */
+  reembolsar(pago: Pago): void {
+    this.dialog
+      .open<ReembolsoDialogComponent, Pago, ReembolsoSolicitado>(ReembolsoDialogComponent, {
+        data: pago,
+        panelClass: 'dialog-panel',
+        width: '480px',
+      })
+      .afterClosed()
+      .subscribe((resultado) => {
+        if (!resultado) return;
+        this.snackBar.open('Reembolso solicitado', 'Cerrar', { duration: 5000 });
+        this.cargarPagos();
+      });
+  }
+
+  /** SPEC 07: historial de reembolsos del pago. */
+  verReembolsos(pago: Pago): void {
+    this.dialog.open(ReembolsosHistorialDialogComponent, {
+      data: pago,
+      panelClass: 'dialog-panel',
+      width: '520px',
     });
   }
 

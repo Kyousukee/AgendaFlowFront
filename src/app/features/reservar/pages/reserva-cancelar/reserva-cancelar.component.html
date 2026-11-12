@@ -1,0 +1,157 @@
+<div class="reservar-page">
+  @if (detalle(); as d) {
+    <header class="reservar-header">
+      <div class="reservar-header__content">
+        <div class="reservar-header__empresa">
+          <div class="reservar-header__info">
+            <p class="reservar-header__nombre">{{ d.reserva.empresa }}</p>
+            <span class="reservar-header__sucursal">{{ d.reserva.sucursal }}</span>
+          </div>
+        </div>
+      </div>
+    </header>
+  }
+
+  <main class="reservar-main">
+    @switch (vista()) {
+      @case ('cargando') {
+        <div class="pago-estado" role="status">
+          <div class="loading-spinner" aria-hidden="true"></div>
+          <p class="pago-estado__texto">Buscando tu reserva...</p>
+        </div>
+      }
+
+      @case ('detalle') {
+        @if (detalle(); as d) {
+          <div class="pago-estado">
+            <h1 class="pago-estado__titulo">Tu reserva</h1>
+
+            <dl class="cancelar-resumen">
+              @if (d.reserva.empresa) {
+                <div class="cancelar-resumen__fila">
+                  <dt>Local</dt>
+                  <dd>{{ d.reserva.empresa }}</dd>
+                </div>
+              }
+              @if (d.reserva.sucursal) {
+                <div class="cancelar-resumen__fila">
+                  <dt>Sucursal</dt>
+                  <dd>{{ d.reserva.sucursal }}</dd>
+                </div>
+              }
+              @if (d.reserva.servicio) {
+                <div class="cancelar-resumen__fila">
+                  <dt>Servicio</dt>
+                  <dd>{{ d.reserva.servicio }}</dd>
+                </div>
+              }
+              <div class="cancelar-resumen__fila">
+                <dt>Fecha</dt>
+                <dd class="cancelar-resumen__fecha">{{ formatearFecha(d.reserva.fecha) }}</dd>
+              </div>
+              <div class="cancelar-resumen__fila">
+                <dt>Hora</dt>
+                <dd>{{ d.reserva.horaInicio }}</dd>
+              </div>
+            </dl>
+
+            @if (d.motivo !== 'YA_CANCELADA') {
+              <p class="pago-estado__texto">
+                Puedes cancelar online hasta el {{ formatearLimite(d.limite) }}.
+              </p>
+            }
+
+            @if (d.puedeCancelar) {
+              @if (d.reembolso; as r) {
+                <div class="cancelar-reembolso">
+                  <p class="cancelar-reembolso__monto">
+                    Te devolveremos {{ formatearPrecio(r.monto) }}
+                  </p>
+                  <p class="cancelar-reembolso__nota">
+                    Es el monto que recibió el local, descontada la comisión de Flow.
+                  </p>
+                </div>
+              }
+
+              @if (errorCancelar()) {
+                <p class="cancelar-error" role="alert">{{ errorCancelar() }}</p>
+              }
+
+              @if (confirmando()) {
+                <div class="cancelar-confirmar" role="group" aria-labelledby="cancelar-pregunta">
+                  <p class="cancelar-confirmar__pregunta" id="cancelar-pregunta">
+                    ¿Seguro que quieres cancelar? La hora quedará libre para otra persona.
+                  </p>
+                  <div class="cancelar-confirmar__acciones">
+                    <button
+                      type="button"
+                      class="btn btn--peligro"
+                      (click)="cancelar()"
+                      [disabled]="cancelando()"
+                    >
+                      {{ cancelando() ? 'Cancelando...' : 'Sí, cancelar mi reserva' }}
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn--secondary"
+                      (click)="volver()"
+                      [disabled]="cancelando()"
+                    >
+                      No, mantenerla
+                    </button>
+                  </div>
+                </div>
+              } @else {
+                <button type="button" class="btn btn--secondary" (click)="pedirConfirmacion()">
+                  Cancelar mi reserva
+                </button>
+              }
+            } @else if (d.motivo) {
+              <p class="cancelar-aviso" role="status">{{ mensajeMotivo(d.motivo) }}</p>
+            }
+          </div>
+        }
+      }
+
+      @case ('cancelada') {
+        <div class="pago-estado" role="status">
+          <span class="pago-estado__icono material-icons" aria-hidden="true">check</span>
+          <h1 class="pago-estado__titulo">Tu reserva fue cancelada</h1>
+          @if (resultado()?.reembolso; as r) {
+            <p class="pago-estado__texto">
+              Flow procesará la devolución de {{ formatearPrecio(r.monto) }}; puede tardar algunos
+              días hábiles.
+            </p>
+          }
+          <p class="pago-estado__texto">Te enviamos la confirmación por correo.</p>
+        </div>
+      }
+
+      @case ('enlace-invalido') {
+        <div class="pago-estado" role="alert">
+          <h1 class="pago-estado__titulo">El enlace no es válido</h1>
+          <p class="pago-estado__texto">
+            Revisa que esté completo o usa el del último correo de confirmación que recibiste.
+          </p>
+          <a class="btn btn--secondary" routerLink="/">Volver al inicio</a>
+        </div>
+      }
+
+      @case ('demasiados') {
+        <div class="pago-estado" role="alert">
+          <h1 class="pago-estado__titulo">Demasiados intentos</h1>
+          <p class="pago-estado__texto">Espera un minuto y vuelve a intentarlo.</p>
+          <button type="button" class="btn btn--primary" (click)="cargar()">Reintentar</button>
+        </div>
+      }
+
+      @default {
+        <div class="pago-estado" role="alert">
+          <h1 class="pago-estado__titulo">No pudimos cargar tu reserva</h1>
+          <p class="pago-estado__texto">Revisa tu conexión e inténtalo de nuevo.</p>
+          <button type="button" class="btn btn--primary" (click)="cargar()">Reintentar</button>
+        </div>
+      }
+    }
+  </main>
+</div>

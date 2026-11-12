@@ -1,0 +1,48 @@
+<div class="dialog">
+  <div class="dialog__header">
+    <h2 class="dialog__title" mat-dialog-title>Reembolsos del pago #{{ pago.id }}</h2>
+    <button type="button" class="dialog__close" mat-dialog-close aria-label="Cerrar">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="historial">
+    @if (cargando()) {
+      <p class="historial__estado" role="status">Cargando reembolsos...</p>
+    } @else if (error()) {
+      <div class="historial__estado" role="alert">
+        <p>No pudimos cargar los reembolsos.</p>
+        <button type="button" class="btn btn--outline btn--sm" (click)="cargar()">
+          Reintentar
+        </button>
+      </div>
+    } @else if (reembolsos().length === 0) {
+      <p class="historial__estado">Este pago aún no tiene reembolsos.</p>
+    } @else {
+      <ul class="historial__lista">
+        @for (r of reembolsos(); track r.id) {
+          <li class="historial__item">
+            <div class="historial__fila">
+              <span class="historial__monto">{{ formatearPesos(r.monto) }}</span>
+              <span class="estado-badge" [attr.data-estado]="claseEstado(r)">
+                {{ r.estado?.nombre ?? 'Sin estado' }}
+              </span>
+            </div>
+            <div class="historial__meta">
+              <span>{{ formatearFecha(r.fechaCreacion) }}</span>
+              <span aria-hidden="true">·</span>
+              <span>Origen: {{ r.origen }}</span>
+              @if (r.comisionFlow) {
+                <span aria-hidden="true">·</span>
+                <span>Comisión Flow {{ formatearPesos(r.comisionFlow) }}</span>
+              }
+            </div>
+            @if (r.estado?.nombre === 'Rechazado' && r.error) {
+              <p class="historial__error">{{ r.error }}</p>
+            }
+          </li>
+        }
+      </ul>
+    }
+  </div>
+</div>

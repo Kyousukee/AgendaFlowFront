@@ -1,0 +1,121 @@
+// Cancelación pública (SPEC 07). Cabecera y columna: reservar-page; bloque y botones: reserva-pago.
+
+.cancelar-resumen {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  margin: 8px 0 4px;
+  padding: 20px 24px;
+  background: var(--bg-surface);
+
+  &__fila {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    font-size: 1rem;
+  }
+
+  dt {
+    flex-shrink: 0;
+    color: var(--text-secondary);
+  }
+
+  dd {
+    margin: 0;
+    min-width: 0;
+    font-weight: 600;
+    text-align: right;
+    color: var(--text-primary);
+    overflow-wrap: anywhere;
+  }
+
+  &__fecha::first-letter {
+    text-transform: uppercase;
+  }
+}
+
+.cancelar-reembolso {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  padding: 16px 20px;
+  border-left: 3px solid var(--gold); // taste-skill-ignore: acento del monto a devolver
+
+  &__monto {
+    font-size: 1.125rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-primary);
+  }
+
+  &__nota {
+    font-size: 0.9375rem;
+    line-height: 1.45;
+    color: var(--text-secondary);
+  }
+}
+
+.cancelar-confirmar {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+
+  &__pregunta {
+    max-width: 48ch;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.45;
+    color: var(--text-primary);
+  }
+
+  &__acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 12px;
+  }
+}
+
+.cancelar-aviso,
+.cancelar-error {
+  width: 100%;
+  padding: 14px 18px;
+  font-size: 1rem;
+  line-height: 1.45;
+}
+
+.cancelar-aviso {
+  background: var(--warning-surface);
+  color: var(--text-primary);
+}
+
+.cancelar-error {
+  background: var(--error-surface);
+  color: var(--error-text);
+}
+
+.btn--peligro {
+  background: var(--error-solid);
+  color: #fff;
+
+  &:hover:not(:disabled) {
+    background: var(--error-solid-hover);
+  }
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+  .cancelar-resumen {
+    padding: 16px;
+  }
+
+  .cancelar-confirmar__acciones .btn {
+    flex: 1 1 100%;
+  }
+}

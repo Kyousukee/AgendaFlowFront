@@ -1,0 +1,83 @@
+// Reembolso de un abono Flow (SPEC 07). Armazón y campos: features/admin/styles/_admin.scss.
+
+.reembolso-resumen {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 6px;
+  background: var(--bg-surface);
+
+  &__fila {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 0.9375rem;
+  }
+
+  dt {
+    color: var(--text-secondary);
+  }
+
+  dd {
+    margin: 0;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-primary);
+  }
+}
+
+.reembolso-ayuda {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+.reembolso-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 36px;
+  font-size: 0.9375rem;
+  color: var(--text-primary);
+  cursor: pointer;
+
+  input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--gold);
+    cursor: pointer;
+  }
+}
+
+.reembolso-nota {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--text-secondary);
+
+  mat-icon {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+    color: var(--gold);
+  }
+}
+
+.reembolso-error {
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: var(--error-surface);
+  color: var(--error-text);
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+@media (max-width: 900px) {
+  .reembolso-check {
+    min-height: var(--target-min);
+  }
+}

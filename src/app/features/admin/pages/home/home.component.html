@@ -246,8 +246,8 @@
                       @let estadosEditables = estadosPagoEditables(pago);
                       @if (esPagoFlow(pago.metodoPago)) {
                         <p class="modal__nota">
-                          Flow actualiza este pago solo. Si lo devolviste desde tu panel de Flow,
-                          márcalo como Reembolsado.
+                          Flow actualiza este pago solo. Para devolverlo, usa "Reembolsar" en
+                          Pagos.
                         </p>
                       }
                       @if (estadosEditables.length > 0) {

@@ -10,6 +10,7 @@ import { HorarioSucursal } from '../../admin/interfaces/horario-sucursal.interfa
 import { BloqueoAgenda } from '../../../core/interfaces/bloqueo-agenda.interface';
 import { ServicioEmpleado } from '../../../core/interfaces/servicio-empleado.interface';
 import { environment } from '../../../../environments/environment';
+import { CancelacionRealizada, CancelacionVista } from '../interfaces/cancelacion.interface';
 
 interface BloqueoBackend {
   id: number;
@@ -223,6 +224,21 @@ export class ReservarPublicService {
   getEstadoPago(codigo: string): Observable<EstadoPagoReserva> {
     return this.http.get<EstadoPagoReserva>(
       `${this.apiUrl}/reservas/${encodeURIComponent(codigo)}/pago`,
+    );
+  }
+
+  /** SPEC 07: reserva y plazo del enlace de cancelación del correo. 404 si el token no existe. */
+  getCancelacion(token: string): Observable<CancelacionVista> {
+    return this.http.get<CancelacionVista>(
+      `${this.apiUrl}/cancelacion/${encodeURIComponent(token)}`,
+    );
+  }
+
+  /** SPEC 07: cancela la reserva y reembolsa el abono Flow, si lo hay. 409 con `motivo`, 502. */
+  cancelarReserva(token: string): Observable<CancelacionRealizada> {
+    return this.http.post<CancelacionRealizada>(
+      `${this.apiUrl}/cancelacion/${encodeURIComponent(token)}`,
+      {},
     );
   }
 
