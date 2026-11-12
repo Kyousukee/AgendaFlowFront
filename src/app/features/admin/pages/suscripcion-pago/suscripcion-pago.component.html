@@ -1,0 +1,69 @@
+<div class="resultado-pago">
+  @switch (vista()) {
+    @case ('pagado') {
+      <div class="resultado" role="status">
+        <span class="resultado__icono resultado__icono--exito" aria-hidden="true">
+          <mat-icon>check</mat-icon>
+        </span>
+        <h1 class="resultado__titulo">¡Listo! Tu plan Pro se extendió 30 días</h1>
+        @if (suscripcion.suscripcion()?.fechaFin; as fechaFin) {
+          <p class="resultado__texto">Tu plan Pro vence el {{ fechaFin | date: 'dd-MM-yyyy' }}.</p>
+        }
+        <p class="resultado__texto">Te llevamos de vuelta al panel...</p>
+        <a class="btn btn--primary" routerLink="/admin/configuracion">Volver al panel</a>
+      </div>
+    }
+    @case ('rechazado') {
+      <div class="resultado" role="alert">
+        <span class="resultado__icono resultado__icono--error" aria-hidden="true">
+          <mat-icon>close</mat-icon>
+        </span>
+        <h1 class="resultado__titulo">El pago no se completó</h1>
+        <p class="resultado__texto">No se hizo ningún cobro. Puedes intentarlo de nuevo.</p>
+        <div class="resultado__acciones">
+          <a class="btn btn--outline" routerLink="/admin/configuracion">Volver al panel</a>
+          @if (pagoSuscripcion.pagosDisponibles()) {
+            <button
+              type="button"
+              class="btn btn--primary"
+              [disabled]="pagoSuscripcion.pagando()"
+              [attr.aria-busy]="pagoSuscripcion.pagando()"
+              (click)="reintentar()"
+            >
+              {{ pagoSuscripcion.pagando() ? 'Abriendo Flow...' : 'Reintentar el pago' }}
+            </button>
+          }
+        </div>
+      </div>
+    }
+    @case ('pendiente') {
+      <div class="resultado" role="status">
+        <span class="resultado__icono resultado__icono--espera" aria-hidden="true">
+          <mat-icon class="resultado__girando">autorenew</mat-icon>
+        </span>
+        <h1 class="resultado__titulo">Estamos confirmando tu pago</h1>
+        <p class="resultado__texto">Flow nos está avisando. Esto toma unos segundos.</p>
+      </div>
+    }
+    @case ('sin-confirmar') {
+      <div class="resultado" role="status">
+        <span class="resultado__icono resultado__icono--espera" aria-hidden="true">
+          <mat-icon>schedule</mat-icon>
+        </span>
+        <h1 class="resultado__titulo">Tu pago sigue en confirmación</h1>
+        <p class="resultado__texto">
+          Cuando Flow lo confirme, tu plan se actualiza solo. Puedes revisarlo en el historial de
+          pagos de Configuración.
+        </p>
+        <a class="btn btn--primary" routerLink="/admin/configuracion">Volver al panel</a>
+      </div>
+    }
+    @default {
+      <div class="resultado">
+        <h1 class="resultado__titulo">No sabemos cómo terminó el pago</h1>
+        <p class="resultado__texto">Revisa el historial de pagos en Configuración.</p>
+        <a class="btn btn--primary" routerLink="/admin/configuracion">Volver al panel</a>
+      </div>
+    }
+  }
+</div>

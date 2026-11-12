@@ -351,6 +351,30 @@
     }
   }
 
+  // SPEC 06: reemplaza el "Contáctanos" del aviso por el pago de la mensualidad.
+  &__pagar {
+    flex-shrink: 0;
+    min-height: 32px;
+    padding: 0 12px;
+    border-radius: 6px;
+    background: var(--gold);
+    color: var(--on-gold);
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color var(--duration-fast) var(--ease-out);
+
+    &:hover:not(:disabled) {
+      background: var(--gold-light);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: progress;
+    }
+  }
+
   &__cerrar {
     display: flex;
     flex-shrink: 0;

@@ -15,6 +15,15 @@ export const serverRoutes: ServerRoute[] = [
     path: 'reservar/**',
     renderMode: RenderMode.Client,
   },
+  // SPEC 06: retorno de Flow. Leen la query (?estado= / ?codigo=) y consultan la API.
+  {
+    path: 'suscripcion/**',
+    renderMode: RenderMode.Client,
+  },
+  {
+    path: 'reserva/**',
+    renderMode: RenderMode.Client,
+  },
   // El token llega en la URL: al prerenderizar no existiría y la llamada a la API correría en el
   // servidor. Estas páginas solo se renderizan en el navegador.
   {

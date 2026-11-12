@@ -1,4 +1,5 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, PLATFORM_ID, inject, signal, OnInit } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { OcupacionReserva, ReservarPublicService } from '../../services/reservar-public.service';
@@ -10,7 +11,8 @@ import { HorarioSucursal } from '../../../admin/interfaces/horario-sucursal.inte
 import { BloqueoAgenda } from '../../../../core/interfaces/bloqueo-agenda.interface';
 import { ServicioEmpleado } from '../../../../core/interfaces/servicio-empleado.interface';
 import { ConfiguracionEmpresa } from '../../../../core/interfaces/configuracion-empresa.interface';
-import { ReservarFormComponent } from '../reservar-form/reservar-form.component';
+import { ReservaConPago, ReservarFormComponent } from '../reservar-form/reservar-form.component';
+import { ReservaPagoContextoService } from '../../services/reserva-pago-contexto.service';
 import { ReservarConfirmacionComponent } from '../reservar-confirmacion/reservar-confirmacion.component';
 import { ReservaResumen } from '../../interfaces/reserva-resumen.interface';
 
@@ -24,6 +26,8 @@ import { ReservaResumen } from '../../interfaces/reserva-resumen.interface';
 export class ReservarPageComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private reservarService = inject(ReservarPublicService);
+  private pagoContexto = inject(ReservaPagoContextoService);
+  private platformId = inject(PLATFORM_ID);
 
   empresa = signal<Empresa | null>(null);
   sucursal = signal<Sucursal | null>(null);
@@ -114,6 +118,40 @@ export class ReservarPageComponent implements OnInit {
   onReservaConfirmada(resumen: ReservaResumen): void {
     this.reservaResumen.set(resumen);
     this.reservaConfirmada.set(true);
+  }
+
+  /**
+   * SPEC 06: la reserva quedó Pendiente con un cobro en Flow. Se guarda lo necesario para la
+   * página de resultado (/reserva/pago) y el navegador se va a Flow.
+   */
+  onPagoIniciado({ resumen, pago }: ReservaConPago): void {
+    const empresa = this.empresa();
+    const sucursal = this.sucursal();
+    if (empresa && sucursal) {
+      this.pagoContexto.guardar({
+        resumen,
+        empresaSlug: empresa.slug,
+        sucursalId: sucursal.id,
+        empresaNombre: empresa.nombreComercial || empresa.nombre,
+        sucursalNombre: sucursal.nombre || '',
+        direccion: this.formatearDireccion(),
+      });
+    }
+    if (isPlatformBrowser(this.platformId)) {
+      window.location.href = pago.urlPago;
+    }
+  }
+
+  /** SPEC 06: 409 al reservar. La hora se tomó: se vuelve a pedir la ocupación. */
+  recargarOcupacion(): void {
+    const sucursalId = this.sucursal()?.id;
+    if (!sucursalId) return;
+    this.reservarService.getOcupacion(sucursalId).subscribe({
+      next: (ocupacion) => this.ocupacion.set(ocupacion),
+      error: () => {
+        // Sin ocupación nueva, la API vuelve a rechazar la hora tomada si se intenta otra vez.
+      },
+    });
   }
 
   formatearDireccion(): string {

@@ -7,7 +7,9 @@ import { ServiciosComponent } from './pages/servicios/servicios.component';
 import { PagosComponent } from './pages/pagos/pagos.component';
 import { BloqueosComponent } from './pages/bloqueos/bloqueos.component';
 import { ConfiguracionComponent } from './pages/configuracion/configuracion.component';
+import { ConfiguracionPagosComponent } from './pages/configuracion-pagos/configuracion-pagos.component';
 import { SucursalesComponent } from './pages/sucursales/sucursales.component';
+import { SuscripcionPagoComponent } from './pages/suscripcion-pago/suscripcion-pago.component';
 
 export const routes: Routes = [
   {
@@ -23,6 +25,13 @@ export const routes: Routes = [
       { path: 'bloqueos', component: BloqueosComponent },
       { path: 'sucursales', component: SucursalesComponent },
       { path: 'configuracion', component: ConfiguracionComponent },
+      { path: 'configuracion/pagos', component: ConfiguracionPagosComponent },
     ],
+  },
+  // SPEC 06: el back redirige aquí al volver de Flow con el pago de la mensualidad.
+  {
+    path: 'suscripcion',
+    component: LayoutComponent,
+    children: [{ path: 'pago', component: SuscripcionPagoComponent }],
   },
 ];

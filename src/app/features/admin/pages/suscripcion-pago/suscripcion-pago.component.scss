@@ -1,0 +1,102 @@
+// Resultado del pago de la mensualidad Pro (SPEC 06). Botones vienen de _admin.scss.
+
+.resultado-pago {
+  display: flex;
+  justify-content: center;
+  padding: 48px 0;
+}
+
+.resultado {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  max-width: 520px;
+  animation: resultado-in 320ms var(--ease-out);
+
+  &__icono {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    margin-bottom: 8px;
+    border-radius: 50%;
+
+    mat-icon {
+      width: 30px;
+      height: 30px;
+      font-size: 30px;
+    }
+
+    &--exito {
+      background: var(--gold);
+      color: var(--on-gold);
+    }
+
+    &--error {
+      background: var(--error-surface);
+      color: var(--error);
+    }
+
+    &--espera {
+      background: var(--warning-surface);
+      color: var(--warning);
+    }
+  }
+
+  &__girando {
+    animation: resultado-giro 1.2s linear infinite;
+  }
+
+  &__titulo {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+  }
+
+  &__texto {
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--text-secondary);
+  }
+
+  &__acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 8px;
+  }
+
+  > .btn {
+    margin-top: 8px;
+  }
+}
+
+@keyframes resultado-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes resultado-giro {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .resultado,
+  .resultado__girando {
+    animation: none;
+  }
+}

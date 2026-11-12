@@ -1,0 +1,8 @@
+@if (esFlow) {
+  <span class="metodo metodo--flow" title="Cobrado online con Flow">
+    <mat-icon class="metodo__icono" aria-hidden="true">bolt</mat-icon>
+    Flow
+  </span>
+} @else {
+  <span class="metodo">{{ metodo || '-' }}</span>
+}

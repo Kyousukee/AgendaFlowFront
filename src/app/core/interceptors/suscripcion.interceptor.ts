@@ -23,7 +23,8 @@ export const suscripcionInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req).pipe(
     catchError((error: unknown) => {
-      if (esLimiteSuscripcion(error)) {
+      // SPEC 06: `pagosOnline` lo muestra Configuración junto al anticipo, con "Pagar Pro".
+      if (esLimiteSuscripcion(error) && error.error.recurso !== 'pagosOnline') {
         snackBar
           .open(error.error.message, 'Ver plan', { duration: 6000 })
           .onAction()

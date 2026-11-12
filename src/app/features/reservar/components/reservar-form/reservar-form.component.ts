@@ -9,14 +9,27 @@ import {
   OnChanges,
   SimpleChanges,
 } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Servicio } from '../../../../core/interfaces/servicio.interface';
 import { Empleado } from '../../../../core/interfaces/empleado.interface';
+import { PagoOnlinePublico } from '../../../../core/interfaces/empresa.interface';
+import { ApiErrorBody } from '../../../../core/interfaces/configuracion-empresa.interface';
 import { HorarioSucursal } from '../../../admin/interfaces/horario-sucursal.interface';
 import { BloqueoAgenda } from '../../../../core/interfaces/bloqueo-agenda.interface';
 import { ServicioEmpleado } from '../../../../core/interfaces/servicio-empleado.interface';
-import { OcupacionReserva, ReservarPublicService } from '../../services/reservar-public.service';
+import {
+  OcupacionReserva,
+  PagoIniciado,
+  ReservarPublicService,
+} from '../../services/reservar-public.service';
 import { ReservaResumen } from '../../interfaces/reserva-resumen.interface';
+
+/** SPEC 06: la reserva quedó retenida y hay que pagar en Flow. */
+export interface ReservaConPago {
+  resumen: ReservaResumen;
+  pago: PagoIniciado;
+}
 
 @Component({
   selector: 'app-reservar-form',
@@ -34,16 +47,26 @@ export class ReservarFormComponent implements OnChanges {
   @Input({ required: true }) bloqueos: BloqueoAgenda[] = [];
   @Input({ required: true }) serviciosEmpleados: ServicioEmpleado[] = [];
   @Input({ required: true }) ocupacion: OcupacionReserva[] = [];
+  /** SPEC 06: configuración de cobro al reservar del negocio. */
+  @Input() pagoOnline: PagoOnlinePublico | null = null;
   // SPEC 04 (TS mínimo autorizado): emite el resumen, no solo el código, para la confirmación.
   @Output() reservaCreada = new EventEmitter<ReservaResumen>();
+  /** SPEC 06: la respuesta trae `pago`; la página redirige a Flow. */
+  @Output() pagoIniciado = new EventEmitter<ReservaConPago>();
+  /** SPEC 06: 409, otra persona tomó la hora. La página recarga la ocupación. */
+  @Output() horaTomada = new EventEmitter<void>();
 
   private fb = inject(FormBuilder);
   private reservarService = inject(ReservarPublicService);
 
   paso = signal(1);
   guardando = signal(false);
-  /** SPEC 04 (TS mínimo autorizado): la falla al confirmar ya no es silenciosa. */
-  errorReserva = signal(false);
+  /** SPEC 04: la falla al confirmar ya no es silenciosa. SPEC 06: con el mensaje del back. */
+  errorReserva = signal<string | null>(null);
+  /** SPEC 06: el cliente elige pagar ahora o en el local (solo si el pago no es obligatorio). */
+  pagarAhora = signal(true);
+  /** SPEC 06: la reserva quedó retenida y el navegador se va a Flow. */
+  redirigiendoAFlow = signal(false);
   servicioSeleccionado = signal<Servicio | null>(null);
   empleadoSeleccionado = signal<Empleado | null>(null);
   fechaSeleccionada = signal('');
@@ -56,6 +79,7 @@ export class ReservarFormComponent implements OnChanges {
     return this.configuracion().permiteSeleccionEmpleado ? 4 : 3;
   });
 
+  // El email ya era obligatorio; con pago online también lo exige Flow (SPEC 06).
   form = this.fb.nonNullable.group({
     nombre: ['', [Validators.required]],
     apellido: ['', [Validators.required]],
@@ -68,6 +92,40 @@ export class ReservarFormComponent implements OnChanges {
     if (changes['serviciosEmpleados']) {
       this.generarFechasDisponibles();
     }
+    // SPEC 06: después de un 409 la página recarga la ocupación y las horas se recalculan.
+    if (changes['ocupacion'] && !changes['ocupacion'].firstChange && this.fechaSeleccionada()) {
+      this.cargarHorasDisponibles();
+    }
+  }
+
+  // ---- SPEC 06: abono ----
+
+  /** Abono del servicio elegido, o null si este servicio no se cobra al reservar. */
+  abono(): number | null {
+    const servicio = this.servicioSeleccionado();
+    if (!this.pagoOnline?.activo || !servicio) return null;
+    return servicio.abono ?? null;
+  }
+
+  /** El cliente puede elegir pagar en el local. */
+  pagoOpcional(): boolean {
+    return this.abono() !== null && !this.pagoOnline?.obligatorio;
+  }
+
+  /** Se cobrará al confirmar, salvo que el back decida otra cosa (su respuesta manda). */
+  aplicaPago(): boolean {
+    return this.abono() !== null && (!!this.pagoOnline?.obligatorio || this.pagarAhora());
+  }
+
+  esPagoCompleto(): boolean {
+    return this.pagoOnline?.tipo === 'Completo';
+  }
+
+  saldoEnLocal(): number {
+    const servicio = this.servicioSeleccionado();
+    const abono = this.abono();
+    if (!servicio || abono === null) return 0;
+    return Math.max(0, servicio.precio - abono);
   }
 
   seleccionarServicio(servicio: Servicio): void {
@@ -78,9 +136,7 @@ export class ReservarFormComponent implements OnChanges {
     this.horasDisponibles.set([]);
 
     const empleadosQueOfrecen = this.empleados.filter((e) =>
-      this.serviciosEmpleados.some(
-        (se) => se.servicioId === servicio.id && se.empleadoId === e.id,
-      ),
+      this.serviciosEmpleados.some((se) => se.servicioId === servicio.id && se.empleadoId === e.id),
     );
 
     if (empleadosQueOfrecen.length === 1) {
@@ -165,39 +221,54 @@ export class ReservarFormComponent implements OnChanges {
     if (this.form.invalid || this.guardando()) return;
 
     this.guardando.set(true);
-    this.errorReserva.set(false);
+    this.errorReserva.set(null);
     const formValue = this.form.getRawValue();
     const servicio = this.servicioSeleccionado()!;
     const empleado = this.empleadoSeleccionado()!;
 
-    this.reservarService.crearReserva({
-      empresaId: this.empresaId,
-      sucursalId: this.sucursalId,
-      servicioId: servicio.id,
-      empleadoId: empleado.id,
-      fecha: this.fechaSeleccionada(),
-      horaInicio: this.horaSeleccionada(),
-      clienteNombre: [formValue.nombre, formValue.apellido].filter(Boolean).join(' '),
-      clienteEmail: formValue.email,
-      clienteTelefono: formValue.telefono,
-      observacion: formValue.observacion,
-    }).subscribe({
-      next: (reserva) => {
-        this.guardando.set(false);
-        this.reservaCreada.emit({
-          codigo: reserva.codigo,
-          servicio: servicio.nombre ?? '',
-          profesional: this.getNombreEmpleado(empleado),
-          fecha: this.formatearFecha(this.fechaSeleccionada()),
-          horaInicio: this.horaSeleccionada(),
-          horaFin: this.calcularHoraFin(),
-        });
-      },
-      error: () => {
-        this.guardando.set(false);
-        this.errorReserva.set(true);
-      },
-    });
+    this.reservarService
+      .crearReserva({
+        empresaId: this.empresaId,
+        sucursalId: this.sucursalId,
+        servicioId: servicio.id,
+        empleadoId: empleado.id,
+        fecha: this.fechaSeleccionada(),
+        horaInicio: this.horaSeleccionada(),
+        clienteNombre: [formValue.nombre, formValue.apellido].filter(Boolean).join(' '),
+        clienteEmail: formValue.email,
+        clienteTelefono: formValue.telefono,
+        observacion: formValue.observacion,
+        ...(this.pagoOpcional() && { pagarAhora: this.pagarAhora() }),
+      })
+      .subscribe({
+        next: (reserva) => {
+          const resumen: ReservaResumen = {
+            codigo: reserva.codigo,
+            servicio: servicio.nombre ?? '',
+            profesional: this.getNombreEmpleado(empleado),
+            fecha: this.formatearFecha(this.fechaSeleccionada()),
+            horaInicio: this.horaSeleccionada(),
+            horaFin: this.calcularHoraFin(),
+          };
+          // SPEC 06: la respuesta es la fuente de verdad. Con `pago` se va a Flow, y `guardando`
+          // sigue en true para que no se pueda reservar dos veces.
+          if (reserva.pago) {
+            this.redirigiendoAFlow.set(true);
+            this.pagoIniciado.emit({ resumen, pago: reserva.pago });
+            return;
+          }
+          this.guardando.set(false);
+          this.reservaCreada.emit(resumen);
+        },
+        error: (error: unknown) => {
+          this.guardando.set(false);
+          this.errorReserva.set(this.mensajeError(error));
+          if (error instanceof HttpErrorResponse && error.status === 409) {
+            this.horaSeleccionada.set('');
+            this.horaTomada.emit();
+          }
+        },
+      });
   }
 
   getNombreEmpleado(e: Empleado): string {
@@ -210,6 +281,23 @@ export class ReservarFormComponent implements OnChanges {
     );
   }
 
+  private mensajeError(error: unknown): string {
+    if (error instanceof HttpErrorResponse) {
+      if (error.status === 409) {
+        return 'La hora ya no está disponible. Vuelve atrás y elige otra.';
+      }
+      if (error.status === 400) {
+        const body = error.error as ApiErrorBody | null;
+        const detalle = Array.isArray(body?.message) ? body.message.join('. ') : body?.message;
+        if (detalle) return detalle;
+      }
+    }
+    return (
+      'No pudimos confirmar tu reserva. Revisa tu conexión e inténtalo de nuevo. Si el problema ' +
+      'sigue, puede que esa hora se haya tomado: vuelve atrás y elige otra.'
+    );
+  }
+
   private generarFechasDisponibles(): void {
     const fechas: string[] = [];
     const hoy = new Date();
@@ -219,9 +307,7 @@ export class ReservarFormComponent implements OnChanges {
       fecha.setDate(hoy.getDate() + i);
       const diaSemana = fecha.getDay() === 0 ? 7 : fecha.getDay();
 
-      const abierto = this.horarios.some(
-        (h) => h.diaSemana === diaSemana && h.abierto,
-      );
+      const abierto = this.horarios.some((h) => h.diaSemana === diaSemana && h.abierto);
 
       if (abierto) {
         const y = fecha.getFullYear();

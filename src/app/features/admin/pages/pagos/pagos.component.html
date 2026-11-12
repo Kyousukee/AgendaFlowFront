@@ -135,7 +135,7 @@
               </td>
               <td class="td-monto">{{ formatearPrecio(pago.monto) }}</td>
               <td>
-                <span class="td-metodo">{{ pago.metodoPago }}</span>
+                <app-metodo-pago class="td-metodo" [metodo]="pago.metodoPago" />
               </td>
               <td>
                 <span class="estado-badge" [attr.data-estado]="getEstadoClase(pago.estado.nombre)">

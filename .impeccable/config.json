@@ -18,6 +18,24 @@
         ],
         "createdAt": "2026-11-05T16:46:55.163Z",
         "reason": "agent verified: <img [src]=empresa()?.logo> is an Angular binding inside @if (empresa()?.logo); static scan cannot see it (SPEC 04 informe, falsos positivos)"
+      },
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": [
+          "src/app/features/admin/components/layout/layout.component.html"
+        ],
+        "createdAt": "2026-11-12T12:13:38.770Z",
+        "reason": "model: pre-existing <img [src]=emp.logo> Angular binding, not an empty src"
+      },
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": [
+          "src/app/features/admin/pages/configuracion/configuracion.component.html"
+        ],
+        "createdAt": "2026-11-12T12:17:32.360Z",
+        "reason": "model: pre-existing <img [src]=src> Angular binding for the logo preview, not an empty src"
       }
     ]
   }

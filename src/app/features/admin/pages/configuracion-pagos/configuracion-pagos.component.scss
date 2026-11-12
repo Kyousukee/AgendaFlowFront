@@ -1,0 +1,159 @@
+// Configuración → Pagos (SPEC 06): cuentas Flow del negocio y de cada sucursal.
+// Secciones, campos y pestañas vienen de configuracion.component.scss.
+
+.flow-ayuda {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 20px;
+  font-size: 0.9375rem;
+  color: var(--text-secondary);
+
+  mat-icon {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    font-size: 18px;
+    color: var(--gold);
+  }
+
+  a {
+    color: var(--gold-light);
+    font-weight: 600;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.flow-estado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.flow-llave {
+  font-size: 0.9375rem;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.flow-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.flow-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+
+  &--confirmar {
+    justify-content: flex-start;
+  }
+
+  &__pregunta {
+    flex: 1 1 260px;
+    font-size: 0.9375rem;
+    color: var(--text-primary);
+  }
+}
+
+.flow-alerta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 24px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: var(--error-surface);
+
+  mat-icon {
+    color: var(--error);
+  }
+
+  &__texto {
+    flex: 1 1 auto;
+  }
+}
+
+.flow-sucursales {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.flow-sucursal {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 14px 0;
+
+  & + & {
+    border-top: 1px solid var(--border); // taste-skill-ignore: filas de sucursales
+  }
+
+  // Activa sin cuenta propia ni del negocio: no puede cobrar al reservar.
+  &--sin-cuenta {
+    margin: 0 -14px;
+    padding: 14px;
+    border-radius: 8px;
+    background: var(--error-surface);
+
+    & + .flow-sucursal {
+      border-top-color: transparent;
+    }
+  }
+
+  &__fila {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px 16px;
+  }
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  &__nombre {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  &__estado {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9375rem;
+    color: var(--text-secondary);
+  }
+
+  &--sin-cuenta &__estado {
+    color: var(--error-text);
+  }
+
+  &__alerta {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+    color: var(--error);
+  }
+}

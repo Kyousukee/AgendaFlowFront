@@ -8,6 +8,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { AuthService } from '../../../../core/services/auth.service';
 import { CuentaService, mensajeErrorCuenta } from '../../../../core/services/cuenta.service';
 import { SuscripcionService } from '../../../../core/services/suscripcion.service';
+import { PagoSuscripcionService } from '../../../../core/services/pago-suscripcion.service';
 
 @Component({
   selector: 'app-admin-layout',
@@ -27,6 +28,7 @@ import { SuscripcionService } from '../../../../core/services/suscripcion.servic
 export class LayoutComponent {
   auth = inject(AuthService);
   suscripcion = inject(SuscripcionService);
+  pagoSuscripcion = inject(PagoSuscripcionService);
   private cuenta = inject(CuentaService);
 
   // Con `undefined` (sesión guardada antes de la verificación de email) no se muestra.

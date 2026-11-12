@@ -1,7 +1,8 @@
 import { Component, DestroyRef, computed, effect, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { RouterLink } from '@angular/router';
+import { ReactiveFormsModule, FormBuilder, Validators, ValidatorFn } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
@@ -9,12 +10,34 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../../../../core/services/auth.service';
 import { SuscripcionService } from '../../../../core/services/suscripcion.service';
-import { RecursoLimitado } from '../../../../core/interfaces/suscripcion.interface';
-import { ApiErrorBody } from '../../../../core/interfaces/configuracion-empresa.interface';
+import {
+  DIAS_POR_PAGO,
+  PRECIO_PRO_TEXTO,
+  PagoSuscripcionService,
+} from '../../../../core/services/pago-suscripcion.service';
+import {
+  PagoMensualidad,
+  RecursoLimitado,
+  SuscripcionLimiteError,
+} from '../../../../core/interfaces/suscripcion.interface';
+import {
+  ApiErrorBody,
+  TipoAnticipo,
+} from '../../../../core/interfaces/configuracion-empresa.interface';
 import { ConfiguracionEmpresaService } from '../../services/configuracion-empresa.service';
 
 const LOGO_TIPOS_PERMITIDOS = ['image/png', 'image/jpeg', 'image/webp'];
 const LOGO_TAMANO_MAXIMO = 2 * 1024 * 1024; // 2 MB
+
+/** SPEC 06: error al guardar el anticipo, mostrado junto a la sección de pagos. */
+interface ErrorAnticipo {
+  mensaje: string;
+  /** 'plan': el plan no incluye pagos online. 'cuentas': faltan cuentas Flow. */
+  tipo: 'plan' | 'cuentas' | 'otro';
+}
+
+const entero: ValidatorFn = (control) =>
+  control.value === null || Number.isInteger(Number(control.value)) ? null : { entero: true };
 
 @Component({
   selector: 'app-configuracion',
@@ -26,6 +49,7 @@ const LOGO_TAMANO_MAXIMO = 2 * 1024 * 1024; // 2 MB
     MatProgressBarModule,
     MatProgressSpinnerModule,
     DatePipe,
+    RouterLink,
   ],
   templateUrl: './configuracion.component.html',
   styleUrl: './configuracion.component.scss',
@@ -36,6 +60,21 @@ export class ConfiguracionComponent {
   private fb = inject(FormBuilder);
   private snackBar = inject(MatSnackBar);
   suscripcion = inject(SuscripcionService);
+  pagoSuscripcion = inject(PagoSuscripcionService);
+
+  // SPEC 06: mensualidad Pro
+  readonly precioPro = PRECIO_PRO_TEXTO;
+  readonly diasPorPago = DIAS_POR_PAGO;
+  pagosMensualidad = signal<PagoMensualidad[]>([]);
+  cargandoPagosMensualidad = signal(true);
+
+  // SPEC 06: anticipo
+  readonly tiposAnticipo: { valor: TipoAnticipo; etiqueta: string }[] = [
+    { valor: 'Monto', etiqueta: 'Monto fijo' },
+    { valor: 'Porcentaje', etiqueta: 'Porcentaje del servicio' },
+    { valor: 'Completo', etiqueta: 'Servicio completo' },
+  ];
+  errorAnticipo = signal<ErrorAnticipo | null>(null);
 
   // Logo de la empresa
   readonly logoAccept = LOGO_TIPOS_PERMITIDOS.join(',');
@@ -71,8 +110,9 @@ export class ConfiguracionComponent {
 
   form = this.fb.nonNullable.group({
     permitePagoAnticipado: [false],
-    tipoAnticipo: ['Porcentaje'],
-    montoAnticipo: [0, [Validators.min(0)]],
+    pagoObligatorio: [true],
+    tipoAnticipo: this.fb.control<TipoAnticipo | null>('Porcentaje'),
+    montoAnticipo: [0],
     tiempoCancelacionHoras: [24, [Validators.min(0)]],
     tiempoReservaMinutos: [30, [Validators.min(5)]],
     permiteSeleccionEmpleado: [true],
@@ -95,17 +135,83 @@ export class ConfiguracionComponent {
       }
     });
 
-    this.form.get('permitePagoAnticipado')?.valueChanges.subscribe((value) => {
-      const montoControl = this.form.get('montoAnticipo');
-      const tipoControl = this.form.get('tipoAnticipo');
-      if (value) {
-        montoControl?.enable();
-        tipoControl?.enable();
-      } else {
-        montoControl?.disable();
-        tipoControl?.disable();
-      }
+    this.form.controls.permitePagoAnticipado.valueChanges.subscribe(() =>
+      this.actualizarControlesAnticipo(),
+    );
+    this.form.controls.tipoAnticipo.valueChanges.subscribe(() =>
+      this.actualizarControlesAnticipo(),
+    );
+
+    this.cargarPagosMensualidad();
+  }
+
+  /** SPEC 06: el monto solo aplica en Monto (CLP entero) y en Porcentaje (1–100). */
+  get muestraMontoAnticipo(): boolean {
+    const tipo = this.form.controls.tipoAnticipo.value;
+    return (
+      this.form.controls.permitePagoAnticipado.value && (tipo === 'Monto' || tipo === 'Porcentaje')
+    );
+  }
+
+  private actualizarControlesAnticipo(): void {
+    const { permitePagoAnticipado, tipoAnticipo, montoAnticipo, pagoObligatorio } =
+      this.form.controls;
+    const activo = permitePagoAnticipado.value;
+    const sinEvento = { emitEvent: false };
+
+    if (activo) {
+      tipoAnticipo.enable(sinEvento);
+      pagoObligatorio.enable(sinEvento);
+      if (!tipoAnticipo.value) tipoAnticipo.setValue('Porcentaje', sinEvento);
+    } else {
+      tipoAnticipo.disable(sinEvento);
+      pagoObligatorio.disable(sinEvento);
+    }
+
+    const tipo = tipoAnticipo.value;
+    if (activo && tipo === 'Monto') {
+      montoAnticipo.setValidators([Validators.required, Validators.min(1), entero]);
+      montoAnticipo.enable(sinEvento);
+    } else if (activo && tipo === 'Porcentaje') {
+      montoAnticipo.setValidators([
+        Validators.required,
+        Validators.min(1),
+        Validators.max(100),
+        entero,
+      ]);
+      montoAnticipo.enable(sinEvento);
+    } else {
+      montoAnticipo.clearValidators();
+      montoAnticipo.disable(sinEvento);
+    }
+    montoAnticipo.updateValueAndValidity(sinEvento);
+    this.errorAnticipo.set(null);
+  }
+
+  private cargarPagosMensualidad(): void {
+    this.cargandoPagosMensualidad.set(true);
+    this.pagoSuscripcion.historial().subscribe({
+      next: (pagos) => {
+        this.pagosMensualidad.set(pagos);
+        this.cargandoPagosMensualidad.set(false);
+      },
+      error: () => {
+        this.pagosMensualidad.set([]);
+        this.cargandoPagosMensualidad.set(false);
+      },
     });
+  }
+
+  claseEstadoPago(pago: PagoMensualidad): string {
+    return (pago.estado?.nombre ?? '').toLowerCase();
+  }
+
+  formatearPrecio(monto: number): string {
+    return new Intl.NumberFormat('es-CL', {
+      style: 'currency',
+      currency: 'CLP',
+      maximumFractionDigits: 0,
+    }).format(monto);
   }
 
   cargarConfiguracion(): void {
@@ -121,7 +227,8 @@ export class ConfiguracionComponent {
         this.configuracionId = config.id;
         this.form.patchValue({
           permitePagoAnticipado: config.permitePagoAnticipado,
-          tipoAnticipo: config.tipoAnticipo,
+          pagoObligatorio: config.pagoObligatorio ?? true,
+          tipoAnticipo: config.tipoAnticipo ?? 'Porcentaje',
           montoAnticipo: config.montoAnticipo,
           tiempoCancelacionHoras: config.tiempoCancelacionHoras,
           tiempoReservaMinutos: config.tiempoReservaMinutos,
@@ -131,11 +238,7 @@ export class ConfiguracionComponent {
           enviarWhatsapp: config.enviarWhatsapp,
         });
 
-        if (!config.permitePagoAnticipado) {
-          this.form.get('montoAnticipo')?.disable();
-          this.form.get('tipoAnticipo')?.disable();
-        }
-
+        this.actualizarControlesAnticipo();
         this.cargando.set(false);
       },
       error: () => {
@@ -145,15 +248,21 @@ export class ConfiguracionComponent {
   }
 
   guardar(): void {
-    if (this.form.invalid || this.guardando()) return;
+    if (this.guardando()) return;
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
 
     this.guardando.set(true);
+    this.errorAnticipo.set(null);
     const formValue = this.form.getRawValue();
 
     const data = {
       permitePagoAnticipado: formValue.permitePagoAnticipado,
+      pagoObligatorio: formValue.pagoObligatorio,
       tipoAnticipo: formValue.tipoAnticipo,
-      montoAnticipo: formValue.montoAnticipo,
+      montoAnticipo: Number(formValue.montoAnticipo) || 0,
       tiempoCancelacionHoras: formValue.tiempoCancelacionHoras,
       tiempoReservaMinutos: formValue.tiempoReservaMinutos,
       permiteSeleccionEmpleado: formValue.permiteSeleccionEmpleado,
@@ -174,11 +283,35 @@ export class ConfiguracionComponent {
         setTimeout(() => this.guardado.set(false), 3000);
       },
       // SPEC 04 (TS mínimo autorizado): el guardado fallido se avisa.
-      error: () => {
+      error: (err: unknown) => {
         this.guardando.set(false);
+        const errorAnticipo = this.leerErrorAnticipo(err);
+        if (errorAnticipo) {
+          this.errorAnticipo.set(errorAnticipo);
+          return;
+        }
         this.snackBar.open('No pudimos guardar la configuración. Tus cambios siguen en pantalla: inténtalo de nuevo.', 'Cerrar', { duration: 8000 });
       },
     });
+  }
+
+  /** SPEC 06: 403 pagosOnline (el plan no lo incluye) y 400 (validación o sucursales sin cuenta). */
+  private leerErrorAnticipo(err: unknown): ErrorAnticipo | null {
+    if (!(err instanceof HttpErrorResponse)) return null;
+    if (err.status === 403 && err.error?.code === 'SUSCRIPCION_LIMITE') {
+      const body = err.error as SuscripcionLimiteError;
+      return { mensaje: body.message, tipo: 'plan' };
+    }
+    if (err.status === 400) {
+      const body = err.error as (ApiErrorBody & { sucursalesSinCuenta?: unknown[] }) | null;
+      const mensaje = Array.isArray(body?.message) ? body.message.join('. ') : body?.message;
+      const faltanCuentas = !!body?.sucursalesSinCuenta || /flow/i.test(mensaje ?? '');
+      return {
+        mensaje: mensaje || 'Revisa la configuración del cobro al reservar.',
+        tipo: faltanCuentas ? 'cuentas' : 'otro',
+      };
+    }
+    return null;
   }
 
   // ---- Logo ----
