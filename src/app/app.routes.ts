@@ -25,6 +25,14 @@ export const routes: Routes = [
         (m) => m.ReservaPagoComponent,
       ),
   },
+  // SPEC 07: enlace "Cancelar mi reserva" del correo de confirmación (público, con ?token=).
+  {
+    path: 'reserva/cancelar',
+    loadComponent: () =>
+      import('./features/reservar/pages/reserva-cancelar/reserva-cancelar.component').then(
+        (m) => m.ReservaCancelarComponent,
+      ),
+  },
   {
     path: '',
     canActivate: [authGuard],

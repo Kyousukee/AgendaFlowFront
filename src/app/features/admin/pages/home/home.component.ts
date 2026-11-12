@@ -23,8 +23,6 @@ import {
   esPagoFlow,
 } from '../../../../shared/components/metodo-pago/metodo-pago.component';
 
-const ESTADO_PAGO_REEMBOLSADO = 'Reembolsado';
-
 interface TimelineItem {
   type: 'reserva' | 'disponible';
   hora: string;
@@ -363,13 +361,11 @@ export class HomeComponent implements OnInit, OnDestroy {
   readonly esPagoFlow = esPagoFlow;
 
   /**
-   * SPEC 06: los pagos de Flow los actualiza Flow; a mano solo se marcan Reembolsado
-   * (el local devuelve el dinero desde su panel de Flow).
+   * SPEC 07: los pagos de Flow los actualiza Flow y se reembolsan desde Pagos
+   * (POST /pagos/:id/reembolso). Solo los pagos manuales cambian de estado a mano.
    */
   estadosPagoEditables(pago: PagoReserva): Estado[] {
-    if (!esPagoFlow(pago.metodoPago)) return this.estadosPago();
-    if (pago.estado?.nombre === ESTADO_PAGO_REEMBOLSADO) return [];
-    return this.estadosPago().filter((e) => e.nombre === ESTADO_PAGO_REEMBOLSADO);
+    return esPagoFlow(pago.metodoPago) ? [] : this.estadosPago();
   }
 
   tienePago(reserva: Reserva): boolean {

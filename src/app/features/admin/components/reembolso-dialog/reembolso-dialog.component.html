@@ -1,0 +1,85 @@
+<div class="dialog">
+  <div class="dialog__header">
+    <h2 class="dialog__title" mat-dialog-title>Reembolsar pago</h2>
+    <button type="button" class="dialog__close" (click)="cerrar()" aria-label="Cerrar">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <form class="dialog__form" [formGroup]="form" (ngSubmit)="enviar()">
+    <dl class="reembolso-resumen">
+      <div class="reembolso-resumen__fila">
+        <dt>Cobrado al cliente</dt>
+        <dd>{{ formatearPesos(pago.monto) }}</dd>
+      </div>
+      @if (pago.montoNeto != null) {
+        <div class="reembolso-resumen__fila">
+          <dt>Recibiste de Flow</dt>
+          <dd>{{ formatearPesos(pago.montoNeto) }}</dd>
+        </div>
+      }
+      @if (pago.montoReembolsado) {
+        <div class="reembolso-resumen__fila">
+          <dt>Ya reembolsado</dt>
+          <dd>{{ formatearPesos(pago.montoReembolsado) }}</dd>
+        </div>
+      }
+    </dl>
+
+    <div class="form-group">
+      <label class="form-label" for="reembolso-monto">Monto a devolver</label>
+      <input
+        id="reembolso-monto"
+        type="number"
+        inputmode="numeric"
+        class="form-input"
+        formControlName="monto"
+        min="1"
+        step="1"
+        [attr.max]="reembolsable"
+        [placeholder]="reembolsable === null ? 'Todo lo disponible' : ''"
+        [class.form-input--error]="montoInvalido"
+        [attr.aria-invalid]="montoInvalido"
+        aria-describedby="reembolso-monto-ayuda"
+      />
+      @if (montoInvalido) {
+        <span class="form-error" id="reembolso-monto-ayuda">
+          @if (reembolsable !== null) {
+            Ingresa un monto entero entre $1 y {{ formatearPesos(reembolsable) }}.
+          } @else {
+            Ingresa un monto entero mayor a $0, o déjalo vacío para devolver todo.
+          }
+        </span>
+      } @else {
+        <span class="reembolso-ayuda" id="reembolso-monto-ayuda">
+          @if (reembolsable !== null) {
+            Máximo {{ formatearPesos(reembolsable) }}.
+          } @else {
+            Déjalo vacío para devolver todo lo disponible.
+          }
+        </span>
+      }
+    </div>
+
+    <label class="reembolso-check">
+      <input type="checkbox" formControlName="cancelarReserva" />
+      <span>Cancelar también la reserva</span>
+    </label>
+
+    <p class="reembolso-nota">
+      <mat-icon aria-hidden="true">info</mat-icon>
+      Se devuelve lo que recibiste de Flow, descontada su comisión.
+    </p>
+
+    @if (error()) {
+      <p class="reembolso-error" role="alert">{{ error() }}</p>
+    }
+
+    <div class="dialog__actions">
+      <button type="button" class="btn btn--secondary" (click)="cerrar()">Cancelar</button>
+      <button type="submit" class="btn btn--primary" [disabled]="enviando()">
+        {{ enviando() ? 'Solicitando...' : 'Reembolsar' }}
+      </button>
+    </div>
+  </form>
+</div>

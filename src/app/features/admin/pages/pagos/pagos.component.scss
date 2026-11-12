@@ -145,6 +145,21 @@
   text-align: right;
 }
 
+// SPEC 07: avance de los reembolsos bajo el monto cobrado.
+.monto-reembolsado {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
 .td-fecha {
   display: flex;
   flex-direction: column;
@@ -188,7 +203,8 @@
       grid-template-areas:
         'cliente monto'
         'servicio estado'
-        'fecha accion';
+        'fecha fecha'
+        'accion accion';
       gap: 4px 12px;
       padding: 14px 0;
       border-top: 1px solid var(--border); // taste-skill-ignore: filas de tabla
@@ -234,7 +250,12 @@
 
       &:nth-child(10) {
         grid-area: accion;
+        padding-top: 6px;
       }
+    }
+
+    .acciones {
+      justify-content: flex-start;
     }
   }
 

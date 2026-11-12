@@ -133,7 +133,15 @@
               <td>
                 <span class="td-sucursal">{{ getNombreSucursal(pago) }}</span>
               </td>
-              <td class="td-monto">{{ formatearPrecio(pago.monto) }}</td>
+              <td class="td-monto">
+                {{ formatearPrecio(pago.monto) }}
+                @if (pago.montoReembolsado && pago.montoReembolsado > 0 && pago.montoNeto != null) {
+                  <span class="monto-reembolsado">
+                    Reembolsado {{ formatearPrecio(pago.montoReembolsado) }} de
+                    {{ formatearPrecio(pago.montoNeto) }}
+                  </span>
+                }
+              </td>
               <td>
                 <app-metodo-pago class="td-metodo" [metodo]="pago.metodoPago" />
               </td>
@@ -143,15 +151,39 @@
                 </span>
               </td>
               <td class="td-acciones">
-                <button
-                  class="btn btn--outline btn--sm"
-                  type="button"
-                  (click)="verReserva(pago)"
-                  [attr.aria-label]="'Ver reserva de ' + getNombreCliente(pago)"
-                >
-                  <mat-icon>visibility</mat-icon>
-                  Ver reserva
-                </button>
+                <div class="acciones">
+                  @if (puedeReembolsar(pago)) {
+                    <button
+                      class="btn btn--outline btn--sm"
+                      type="button"
+                      (click)="reembolsar(pago)"
+                      [attr.aria-label]="'Reembolsar pago de ' + getNombreCliente(pago)"
+                    >
+                      <mat-icon>undo</mat-icon>
+                      Reembolsar
+                    </button>
+                  }
+                  @if (esPagoConFlow(pago)) {
+                    <button
+                      class="btn btn--outline btn--sm"
+                      type="button"
+                      (click)="verReembolsos(pago)"
+                      [attr.aria-label]="'Ver reembolsos del pago de ' + getNombreCliente(pago)"
+                    >
+                      <mat-icon>receipt_long</mat-icon>
+                      Ver reembolsos
+                    </button>
+                  }
+                  <button
+                    class="btn btn--outline btn--sm"
+                    type="button"
+                    (click)="verReserva(pago)"
+                    [attr.aria-label]="'Ver reserva de ' + getNombreCliente(pago)"
+                  >
+                    <mat-icon>visibility</mat-icon>
+                    Ver reserva
+                  </button>
+                </div>
               </td>
             </tr>
           }
