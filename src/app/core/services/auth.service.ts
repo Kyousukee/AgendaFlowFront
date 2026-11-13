@@ -1,4 +1,4 @@
-import { Injectable, signal, inject, PLATFORM_ID } from '@angular/core';
+import { Injectable, signal, computed, inject, PLATFORM_ID } from '@angular/core';
 import { Location, isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
@@ -7,7 +7,7 @@ import { Observable, tap, catchError, throwError, map } from 'rxjs';
 import { Empresa } from '../interfaces/empresa.interface';
 import { Sucursal } from '../interfaces/sucursal.interface';
 import { Empleado } from '../interfaces/empleado.interface';
-import { UserData, LoginApiResponse } from '../interfaces/auth-response.interface';
+import { UserData, LoginApiResponse, JwtPayload } from '../interfaces/auth-response.interface';
 import {
   GoogleAuthResponse,
   GoogleRegistroRequest,
@@ -15,6 +15,7 @@ import {
   requiereRegistroGoogle,
 } from '../interfaces/google-auth.interface';
 import { ErrorAutenticacion } from '../errors/error-autenticacion';
+import { ROL_ADMIN, ROL_RECEPCIONISTA } from '../constants/roles';
 import { RegisterRequest } from '../../features/auth/interfaces/register-request.interface';
 import { environment } from '../../../environments/environment';
 import { SuscripcionService } from './suscripcion.service';
@@ -31,17 +32,24 @@ const PAGINAS_DE_CUENTA = [
   '/verificar-email',
   '/restablecer-contrasena',
   '/registro-google',
+  '/invitacion',
 ];
 
 export const MENSAJE_GOOGLE_INVALIDO = 'No pudimos validar tu cuenta de Google, inténtalo de nuevo';
 export const MENSAJE_DEMASIADOS_INTENTOS =
   'Demasiados intentos. Espera unos minutos y vuelve a intentarlo.';
+/** SPEC 08: `POST /auth/google` con la invitación del recepcionista sin aceptar. */
+export const MENSAJE_INVITACION_PENDIENTE =
+  'Acepta la invitación que llegó a tu correo antes de entrar con Google';
 
 /** Mensaje para un error de `/auth/google` o `/auth/google/registro`. */
 function errorGoogle(error: HttpErrorResponse): ErrorAutenticacion {
   const mensajeApi: unknown = error.error?.message;
   let message = 'No pudimos continuar con Google. Inténtalo de nuevo.';
-  if (error.status === 401) {
+  if (error.status === 401 && mensajeApi === MENSAJE_INVITACION_PENDIENTE) {
+    // SPEC 08: el texto del back ya dice qué hacer; se muestra tal cual.
+    message = MENSAJE_INVITACION_PENDIENTE;
+  } else if (error.status === 401) {
     message = MENSAJE_GOOGLE_INVALIDO;
   } else if (error.status === 409) {
     message = typeof mensajeApi === 'string' ? mensajeApi : 'Ya existe una cuenta con ese correo';
@@ -57,36 +65,15 @@ function errorGoogle(error: HttpErrorResponse): ErrorAutenticacion {
   return new ErrorAutenticacion(error.status, message);
 }
 
-interface ApiEmpresa {
-  id: number;
-  nombre: string;
-  slug: string;
-}
-
-interface ApiSucursal {
-  id: number;
-  nombre: string;
-  direccion: string;
-}
-
-interface ApiEmpleado {
-  id: number;
-  nombre: string;
-  apellido: string;
-  email: string;
-  telefono: string | null;
-  foto: string | null;
-  sucursal: ApiSucursal & { empresa: ApiEmpresa };
-}
-
-interface ApiUser {
-  id: number;
-  nombre: string;
-  apellido: string;
-  email: string;
-  rolId: number;
-  emailVerificado: boolean;
-  empleado: ApiEmpleado;
+/** Lee el payload del JWT (base64url). `null` si no se puede leer. */
+function leerJwt(token: string): JwtPayload | null {
+  try {
+    const parte = token.split('.')[1];
+    if (!parte) return null;
+    return JSON.parse(atob(parte.replace(/-/g, '+').replace(/_/g, '/'))) as JwtPayload;
+  } catch {
+    return null;
+  }
 }
 
 @Injectable({ providedIn: 'root' })
@@ -113,6 +100,8 @@ export class AuthService {
   empleado = signal<Empleado | null>(null);
   /** Cuenta de Google que aún no tiene negocio. Solo en memoria: se pierde al recargar. */
   registroGoogle = signal<RegistroGooglePendiente | null>(null);
+  /** SPEC 08: el recepcionista solo ve la agenda y los pagos de su sucursal. */
+  esRecepcionista = computed(() => this.currentUser()?.rolId === ROL_RECEPCIONISTA);
 
   constructor() {
     if (isPlatformBrowser(this.platformId)) {
@@ -124,14 +113,18 @@ export class AuthService {
       const empleadoJson = localStorage.getItem(this.EMPLEADO_KEY);
 
       if (token && userJson) {
+        const usuario: UserData = JSON.parse(userJson);
         this.isLoggedIn.set(true);
-        this.currentUser.set(JSON.parse(userJson));
-        this.cargarSucursales();
-        // Diferido: authInterceptor inyecta AuthService, que aún se está construyendo.
-        queueMicrotask(() => {
-          this.suscripcionService.cargar();
-          this.cargarEmpresa();
-        });
+        this.currentUser.set(usuario);
+        // SPEC 08: sucursales, suscripción y ficha de la empresa son solo del dueño (403 al rol 2).
+        if (usuario.rolId !== ROL_RECEPCIONISTA) {
+          this.cargarSucursales();
+          // Diferido: authInterceptor inyecta AuthService, que aún se está construyendo.
+          queueMicrotask(() => {
+            this.suscripcionService.cargar();
+            this.cargarEmpresa();
+          });
+        }
       }
       if (empresaJson) {
         this.empresa.set(JSON.parse(empresaJson));
@@ -197,6 +190,16 @@ export class AuthService {
       );
   }
 
+  /** SPEC 08: el recepcionista que acepta la invitación entra directo, como en el login. */
+  aceptarInvitacion(token: string, password: string): Observable<LoginApiResponse> {
+    return this.http
+      .post<LoginApiResponse>(`${environment.apiUrl}/auth/aceptar-invitacion`, {
+        token,
+        password,
+      })
+      .pipe(tap((response) => this.handleLoginResponse(response)));
+  }
+
   private fallaGoogle(error: HttpErrorResponse): Observable<never> {
     // 503: la API tiene deshabilitado el acceso con Google; no tiene sentido seguir ofreciéndolo.
     if (error.status === 503) {
@@ -207,72 +210,104 @@ export class AuthService {
 
   private handleLoginResponse(response: LoginApiResponse): void {
     const { accessToken, user } = response;
-    const apiUser: ApiUser = user as ApiUser;
-    const sucursal = apiUser.empleado.sucursal;
-    const apiEmpresa: ApiEmpresa = sucursal.empresa;
+    const esRecepcionista = user.rolId === ROL_RECEPCIONISTA;
+    const empleado = user.empleado;
+    const sucursalEmpleado = empleado?.sucursal ?? null;
+    const apiEmpresa = sucursalEmpleado?.empresa ?? null;
+    // SPEC 08: el recepcionista no trae la empresa en la respuesta; su id sale del JWT.
+    const empresaId = apiEmpresa?.id ?? leerJwt(accessToken)?.empresaId ?? 0;
+    const ahora = new Date().toISOString();
 
     const userData: UserData = {
-      id: apiUser.id,
-      nombre: apiUser.nombre,
-      apellido: apiUser.apellido,
-      email: apiUser.email,
-      empresaId: apiEmpresa.id,
-      rolId: apiUser.rolId,
-      telefono: apiUser.empleado.telefono ?? undefined,
-      emailVerificado: apiUser.emailVerificado,
+      id: user.id,
+      nombre: user.nombre,
+      apellido: user.apellido,
+      email: user.email,
+      empresaId,
+      rolId: user.rolId,
+      telefono: empleado?.telefono ?? undefined,
+      emailVerificado: user.emailVerificado,
     };
 
     const empresaData: Empresa = {
-      id: apiEmpresa.id,
-      nombre: apiEmpresa.nombre,
-      slug: apiEmpresa.slug,
+      id: empresaId,
+      nombre: apiEmpresa?.nombre ?? '',
+      slug: apiEmpresa?.slug ?? '',
       activo: true,
-      fechaCreacion: new Date().toISOString(),
+      fechaCreacion: ahora,
     };
 
-    const sucursalData: Sucursal = {
-      id: sucursal.id,
-      empresaId: apiEmpresa.id,
-      nombre: sucursal.nombre,
-      direccion: sucursal.direccion,
-      activo: true,
-      fechaCreacion: new Date().toISOString(),
-    };
+    // SPEC 08: la sucursal del recepcionista es la asignada (`user.sucursal`), no la de un
+    // empleado con su email. Es la única que puede ver.
+    let sucursalData: Sucursal | null = null;
+    if (esRecepcionista) {
+      if (user.sucursal) {
+        sucursalData = {
+          id: user.sucursal.id,
+          empresaId,
+          nombre: user.sucursal.nombre ?? undefined,
+          activo: true,
+          fechaCreacion: ahora,
+        };
+      }
+    } else if (sucursalEmpleado) {
+      sucursalData = {
+        id: sucursalEmpleado.id,
+        empresaId,
+        nombre: sucursalEmpleado.nombre,
+        direccion: sucursalEmpleado.direccion,
+        activo: true,
+        fechaCreacion: ahora,
+      };
+    }
+    const sucursales = sucursalData ? [sucursalData] : [];
 
-    const empleadoData: Empleado = {
-      id: apiUser.empleado.id,
-      sucursalId: sucursal.id,
-      nombre: apiUser.empleado.nombre,
-      apellido: apiUser.empleado.apellido,
-      email: apiUser.empleado.email,
-      telefono: apiUser.empleado.telefono ?? undefined,
-      foto: apiUser.empleado.foto ?? undefined,
-      activo: true,
-      fechaCreacion: new Date().toISOString(),
-    };
+    const empleadoData: Empleado | null = empleado
+      ? {
+          id: empleado.id,
+          sucursalId: sucursalEmpleado?.id,
+          nombre: empleado.nombre,
+          apellido: empleado.apellido,
+          email: empleado.email,
+          telefono: empleado.telefono ?? undefined,
+          foto: empleado.foto ?? undefined,
+          activo: true,
+          fechaCreacion: ahora,
+        }
+      : null;
 
     if (isPlatformBrowser(this.platformId)) {
       localStorage.setItem(this.TOKEN_KEY, accessToken);
       localStorage.setItem(this.USER_KEY, JSON.stringify(userData));
       localStorage.setItem(this.EMPRESA_KEY, JSON.stringify(empresaData));
-      localStorage.setItem(this.SUCURSALES_KEY, JSON.stringify([sucursalData]));
-      localStorage.setItem(this.SUCURSAL_ACTUAL_KEY, JSON.stringify(sucursalData));
-      localStorage.setItem(this.EMPLEADO_KEY, JSON.stringify(empleadoData));
+      localStorage.setItem(this.SUCURSALES_KEY, JSON.stringify(sucursales));
+      if (sucursalData) {
+        localStorage.setItem(this.SUCURSAL_ACTUAL_KEY, JSON.stringify(sucursalData));
+      } else {
+        localStorage.removeItem(this.SUCURSAL_ACTUAL_KEY);
+      }
+      if (empleadoData) {
+        localStorage.setItem(this.EMPLEADO_KEY, JSON.stringify(empleadoData));
+      } else {
+        localStorage.removeItem(this.EMPLEADO_KEY);
+      }
     }
 
     this.isLoggedIn.set(true);
     this.currentUser.set(userData);
     this.empresa.set(empresaData);
-    this.sucursales.set([sucursalData]);
+    this.sucursales.set(sucursales);
     this.sucursalActual.set(sucursalData);
     this.empleado.set(empleadoData);
     this.registroGoogle.set(null);
 
     this.router.navigate(['/admin/home']);
-    this.cargarSucursales();
-    this.cargarEmpresa();
     this.suscripcionService.limpiar();
-    this.suscripcionService.cargar();
+    if (!esRecepcionista) {
+      this.cargarSucursales();
+      this.cargarEmpresa();
+      this.suscripcionService.cargar();
+    }
   }
 
   cargarSucursales(): void {
@@ -350,7 +385,7 @@ export class AuthService {
   }
 
   esAdmin(): boolean {
-    return this.currentUser()?.rolId === 1;
+    return this.currentUser()?.rolId === ROL_ADMIN;
   }
 
   getToken(): string | null {
@@ -375,6 +410,18 @@ export class AuthService {
         return throwError(() => new Error(message));
       }),
     );
+  }
+
+  /**
+   * SPEC 08: un 401 de la API (sesión vencida, recepcionista desactivado o movido de sucursal).
+   * Cierra la sesión y, si había una abierta, lo avisa en el login.
+   */
+  cerrarSesionTerminada(): void {
+    const habiaSesion = this.isLoggedIn();
+    const enPaginaDeCuenta = PAGINAS_DE_CUENTA.includes(this.location.path().split(/[?#]/)[0]);
+    this.logout(false);
+    if (enPaginaDeCuenta) return;
+    this.router.navigate(['/login'], habiaSesion ? { queryParams: { sesion: 'terminada' } } : {});
   }
 
   /** @param navegar `false` si quien llama hace su propia navegación después de cerrar la sesión. */

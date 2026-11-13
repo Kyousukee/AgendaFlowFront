@@ -7,6 +7,9 @@ export interface LoginApiResponse {
     email: string;
     rolId: number;
     emailVerificado: boolean;
+    /** SPEC 08: solo el recepcionista (rol 2). Es su única sucursal. */
+    sucursal?: { id: number; nombre: string | null } | null;
+    /** El recepcionista no suele tener empleado: llega `null`. */
     empleado: {
       id: number;
       nombre: string;
@@ -22,10 +25,18 @@ export interface LoginApiResponse {
           id: number;
           nombre: string;
           slug: string;
-        };
-      };
-    };
+        } | null;
+      } | null;
+    } | null;
   };
+}
+
+/** Campos del JWT que usa el front. Solo se leen, nunca se confía en ellos para permisos. */
+export interface JwtPayload {
+  sub: number;
+  rolId: number;
+  empresaId: number;
+  sucursalId?: number;
 }
 
 export interface UserData {

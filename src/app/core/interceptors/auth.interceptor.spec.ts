@@ -9,15 +9,15 @@ import { sessionInterceptor } from './session.interceptor';
 describe('interceptores de sesión', () => {
   let http: HttpClient;
   let controller: HttpTestingController;
-  const logout = vi.fn();
+  const cerrarSesionTerminada = vi.fn();
 
   beforeEach(() => {
-    logout.mockClear();
+    cerrarSesionTerminada.mockClear();
     TestBed.configureTestingModule({
       providers: [
         provideHttpClient(withInterceptors([authInterceptor, sessionInterceptor])),
         provideHttpClientTesting(),
-        { provide: AuthService, useValue: { getToken: () => 'token-secreto', logout } },
+        { provide: AuthService, useValue: { getToken: () => 'token-secreto', cerrarSesionTerminada } },
       ],
     });
     http = TestBed.inject(HttpClient);
@@ -51,13 +51,13 @@ describe('interceptores de sesión', () => {
     controller
       .expectOne(`${environment.apiUrl}/sucursales`)
       .flush(null, { status: 401, statusText: 'Unauthorized' });
-    expect(logout).toHaveBeenCalledTimes(1);
+    expect(cerrarSesionTerminada).toHaveBeenCalledTimes(1);
   });
 
   it('no cierra sesión ante un 401 de un tercero', () => {
     const url = 'https://nominatim.openstreetmap.org/reverse';
     http.get(url).subscribe({ error: () => {} });
     controller.expectOne(url).flush(null, { status: 401, statusText: 'Unauthorized' });
-    expect(logout).not.toHaveBeenCalled();
+    expect(cerrarSesionTerminada).not.toHaveBeenCalled();
   });
 });

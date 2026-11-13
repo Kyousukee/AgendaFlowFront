@@ -312,6 +312,21 @@
     }
   }
 
+  // SPEC 08: agendada desde el panel (cliente en el local o por teléfono).
+  &__presencial {
+    display: inline-flex;
+    align-self: flex-start;
+    align-items: center;
+    margin-top: 4px;
+    margin-right: 6px;
+    padding: 1px 8px;
+    border-radius: 999px;
+    background: var(--neutral-surface);
+    color: var(--text-primary);
+    font-size: 0.8125rem;
+    font-weight: 600;
+  }
+
   &__empleado {
     display: inline-flex;
     align-items: center;

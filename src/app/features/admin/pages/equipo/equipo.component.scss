@@ -1,0 +1,111 @@
+// Equipo (SPEC 08) — lista de recepcionistas. Cabecera, botones, estados y meta-item vienen de
+// features/admin/styles/_admin.scss. Misma lista de filas que Sucursales.
+
+.equipo-page {
+  max-width: 1080px;
+}
+
+.equipo-lista {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  border-radius: 10px;
+  background: var(--bg-surface);
+  list-style: none;
+}
+
+.miembro {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-areas: 'info meta acciones';
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px;
+  transition: background-color var(--duration-fast) var(--ease-out);
+
+  & + & {
+    border-top: 1px solid var(--border); // taste-skill-ignore: filas de una lista
+  }
+
+  &:hover {
+    background: var(--bg-surface-elevated);
+  }
+
+  &--inactivo .miembro__nombre {
+    color: var(--text-secondary);
+  }
+}
+
+.miembro__info {
+  grid-area: info;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.miembro__nombre {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.miembro__email {
+  overflow: hidden;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.miembro__meta {
+  grid-area: meta;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+}
+
+.miembro__estado {
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--neutral-surface);
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 600;
+
+  &[data-estado='activo'] {
+    background: var(--success-surface);
+    color: var(--success);
+  }
+
+  &[data-estado='pendiente'] {
+    background: var(--warning-surface);
+    color: var(--warning);
+  }
+}
+
+.miembro__acciones {
+  grid-area: acciones;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+@media (max-width: 900px) {
+  .miembro {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'info'
+      'meta'
+      'acciones';
+    gap: 10px;
+  }
+
+  .miembro__acciones {
+    justify-content: flex-start;
+  }
+}

@@ -55,7 +55,7 @@
         <div class="plan-uso">
           @for (recurso of recursos; track recurso.clave) {
             @let limite = plan.limites[recurso.clave];
-            @let uso = plan.uso[recurso.clave];
+            @let uso = plan.uso[recurso.clave] ?? 0;
             <div class="plan-uso__fila">
               <div class="plan-uso__texto">
                 <span class="plan-uso__recurso">{{ recurso.etiqueta }}</span>

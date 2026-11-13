@@ -1,0 +1,112 @@
+<div class="equipo-page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Equipo</h1>
+      <p class="page-subtitle">
+        Recepcionistas que agendan clientes y registran pagos en una sucursal
+      </p>
+    </div>
+    <span
+      class="tooltip-wrapper"
+      matTooltip="Tu plan no incluye recepcionistas"
+      [matTooltipDisabled]="!suscripcion.limiteAlcanzado('recepcionistas')"
+    >
+      <button
+        type="button"
+        class="btn btn--primary"
+        [disabled]="suscripcion.limiteAlcanzado('recepcionistas') || sucursales().length === 0"
+        [attr.aria-describedby]="
+          suscripcion.limiteAlcanzado('recepcionistas') ? 'limite-recepcionistas' : null
+        "
+        (click)="invitar()"
+      >
+        <mat-icon>person_add</mat-icon>
+        Invitar recepcionista
+      </button>
+    </span>
+  </div>
+
+  @if (suscripcion.limiteAlcanzado('recepcionistas')) {
+    <p class="limite-nota" id="limite-recepcionistas">
+      <mat-icon>lock</mat-icon>
+      <span
+        >El plan Gratis no incluye recepcionistas. Revisa tu plan en
+        <strong>Configuración</strong>.</span
+      >
+    </p>
+  }
+
+  @if (cargando()) {
+    <div class="loading-state" role="status">
+      <mat-icon class="loading-icon">hourglass_empty</mat-icon>
+      <span>Cargando el equipo...</span>
+    </div>
+  } @else if (miembros().length === 0) {
+    <div class="empty-state">
+      <mat-icon class="empty-icon">badge</mat-icon>
+      <h2 class="empty-title">Aún no tienes recepcionistas</h2>
+      <p class="empty-text">
+        Invita a quien atiende el mesón. Entra con su propia cuenta, ve solo la agenda y los pagos
+        de su sucursal, y no puede tocar reembolsos ni la configuración.
+      </p>
+    </div>
+  } @else {
+    <ul class="equipo-lista">
+      @for (m of miembros(); track m.id) {
+        @let est = estado(m);
+        <li class="miembro" [class.miembro--inactivo]="!m.activo">
+          <div class="miembro__info">
+            <span class="miembro__nombre">{{ nombre(m) }}</span>
+            <span class="miembro__email">{{ m.email }}</span>
+          </div>
+
+          <div class="miembro__meta">
+            <span class="meta-item">
+              <mat-icon>store</mat-icon>
+              <span>{{ m.sucursal?.nombre || 'Sin sucursal' }}</span>
+            </span>
+            <span class="miembro__estado" [attr.data-estado]="est">{{ etiqueta(m) }}</span>
+            @if (est === 'plan') {
+              <app-etiqueta-plan />
+            }
+          </div>
+
+          <div class="miembro__acciones">
+            @if (est === 'pendiente') {
+              <button
+                type="button"
+                class="btn btn--outline btn--sm"
+                [disabled]="ocupado() === m.id"
+                (click)="reenviar(m)"
+              >
+                <mat-icon>forward_to_inbox</mat-icon>
+                Reenviar invitación
+              </button>
+            }
+            @if (m.activo) {
+              <button
+                type="button"
+                class="btn btn--outline btn--sm"
+                [disabled]="ocupado() === m.id"
+                (click)="cambiarSucursal(m)"
+              >
+                <mat-icon>swap_horiz</mat-icon>
+                Cambiar sucursal
+              </button>
+            }
+            <button
+              type="button"
+              class="btn btn--sm"
+              [class.btn--outline]="m.activo"
+              [class.btn--primary]="!m.activo"
+              [disabled]="ocupado() === m.id"
+              (click)="cambiarActivo(m)"
+            >
+              {{ m.activo ? 'Desactivar' : 'Activar' }}
+            </button>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</div>

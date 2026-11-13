@@ -5,6 +5,7 @@ import { OlvideContrasenaComponent } from './pages/olvide-contrasena/olvide-cont
 import { VerificarEmailComponent } from './pages/verificar-email/verificar-email.component';
 import { RestablecerContrasenaComponent } from './pages/restablecer-contrasena/restablecer-contrasena.component';
 import { RegistroGoogleComponent } from './pages/registro-google/registro-google.component';
+import { AceptarInvitacionComponent } from './pages/aceptar-invitacion/aceptar-invitacion.component';
 
 export const routes: Routes = [
   {
@@ -30,5 +31,10 @@ export const routes: Routes = [
   {
     path: 'restablecer-contrasena',
     component: RestablecerContrasenaComponent,
+  },
+  // SPEC 08: enlace del correo de invitación al recepcionista (?token=).
+  {
+    path: 'invitacion',
+    component: AceptarInvitacionComponent,
   },
 ];

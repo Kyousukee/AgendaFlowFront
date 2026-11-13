@@ -31,6 +31,12 @@
         }
       </p>
 
+      @if (sesionTerminada()) {
+        <div class="form-error-banner" role="status">
+          Tu sesión terminó. Vuelve a iniciar sesión.
+        </div>
+      }
+
       @if (contrasenaRestablecida()) {
         <div class="form-success-banner" role="status">
           Tu contraseña cambió. Inicia sesión con la nueva.
