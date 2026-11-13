@@ -4,6 +4,17 @@
       <h1 class="page-title">Pagos</h1>
       <p class="page-subtitle">Historial de pagos y servicios contratados</p>
     </div>
+    <div class="page-actions">
+      <button
+        type="button"
+        class="btn btn--outline"
+        (click)="descargarExcel()"
+        [disabled]="cargando() || descargando() || pagosFiltrados().length === 0"
+      >
+        <mat-icon>download</mat-icon>
+        {{ descargando() ? 'Generando...' : 'Descargar Excel' }}
+      </button>
+    </div>
   </div>
 
   <div class="filters-bar">

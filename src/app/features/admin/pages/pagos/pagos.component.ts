@@ -15,6 +15,7 @@ import {
 import { ReembolsoDialogComponent } from '../../components/reembolso-dialog/reembolso-dialog.component';
 import { ReembolsosHistorialDialogComponent } from '../../components/reembolsos-historial-dialog/reembolsos-historial-dialog.component';
 import { esPagoConFlow, puedeReembolsar } from '../../utils/reembolsos.util';
+import { descargarPagosExcel } from '../../utils/pagos-excel.util';
 
 @Component({
   selector: 'app-pagos',
@@ -31,6 +32,7 @@ export class PagosComponent {
 
   pagos = signal<Pago[]>([]);
   cargando = signal(true);
+  descargando = signal(false);
   busqueda = signal('');
   filtroEstado = signal('');
   filtroFechaDesde = signal('');
@@ -193,6 +195,48 @@ export class PagosComponent {
       panelClass: 'dialog-panel',
       width: '520px',
     });
+  }
+
+  /** Descarga en .xlsx exactamente lo que muestra la tabla (con búsqueda y filtros aplicados). */
+  async descargarExcel(): Promise<void> {
+    const pagos = this.pagosFiltrados();
+    if (pagos.length === 0 || this.descargando()) return;
+
+    this.descargando.set(true);
+    try {
+      await descargarPagosExcel(
+        pagos,
+        (pago) => ({
+          cliente: this.getNombreCliente(pago),
+          servicio: this.getNombreServicio(pago),
+          empleado: this.getNombreEmpleado(pago),
+          sucursal: this.getNombreSucursal(pago),
+        }),
+        this.nombreArchivoExcel(),
+      );
+    } catch {
+      this.snackBar.open('No pudimos generar el Excel. Inténtalo de nuevo.', 'Cerrar', {
+        duration: 5000,
+      });
+    } finally {
+      this.descargando.set(false);
+    }
+  }
+
+  /** pagos-<sucursal>-<desde>_<hasta>.xlsx, o con la fecha de hoy si no hay rango. */
+  private nombreArchivoExcel(): string {
+    const sucursal = (this.authService.sucursalActual()?.nombre ?? '')
+      .normalize('NFD')
+      .replace(/[̀-ͯ]/g, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
+    const hoy = new Date();
+    const fechaHoy = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
+    const desde = this.filtroFechaDesde();
+    const hasta = this.filtroFechaHasta();
+    const rango = desde || hasta ? `${desde || 'inicio'}_${hasta || fechaHoy}` : fechaHoy;
+    return ['pagos', sucursal, rango].filter(Boolean).join('-') + '.xlsx';
   }
 
   limpiarFiltros(): void {

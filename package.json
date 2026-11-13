@@ -26,7 +26,8 @@
     "gsap": "^3.15.1",
     "leaflet": "^1.9.4",
     "rxjs": "~7.8.0",
-    "tslib": "^2.3.0"
+    "tslib": "^2.3.0",
+    "write-excel-file": "^4.1.1"
   },
   "devDependencies": {
     "@angular/build": "^22.0.6",
