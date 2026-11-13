@@ -1,5 +1,10 @@
 // Agendar cliente desde el panel (SPEC 08). Armazón y campos: features/admin/styles/_admin.scss.
 
+// Más ancho que los demás diálogos (480px): la fila del barbero lleva foto, hora y cola.
+.dialog.agendar {
+  width: min(560px, calc(100vw - 32px));
+}
+
 .agendar__modo {
   display: flex;
   gap: 6px;

@@ -319,7 +319,9 @@ export class HomeComponent implements OnInit, OnDestroy {
         {
           data: { empresaId: empresa.id, sucursalId: sucursal.id },
           panelClass: 'dialog-panel',
-          width: '600px',
+          width: '560px',
+          // Con el formulario del cliente es más alto que la pantalla: el diálogo hace scroll.
+          maxHeight: 'calc(100dvh - 32px)',
         },
       )
       .afterClosed()
