@@ -2,7 +2,11 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { EmailVerificadoResponse, MensajeCuentaResponse } from '../interfaces/cuenta.interface';
+import {
+  EmailVerificadoResponse,
+  InvitacionVista,
+  MensajeCuentaResponse,
+} from '../interfaces/cuenta.interface';
 
 /** Mensaje para errores que no son del formulario: límite de peticiones, conexión o servidor. */
 export function mensajeErrorCuenta(error: HttpErrorResponse): string {
@@ -37,5 +41,10 @@ export class CuentaService {
       token,
       password,
     });
+  }
+
+  /** SPEC 08: a quién invitaron y a qué sucursal. `400` si el enlace no sirve. */
+  getInvitacion(token: string): Observable<InvitacionVista> {
+    return this.http.get<InvitacionVista>(`${this.url}/invitacion/${encodeURIComponent(token)}`);
   }
 }

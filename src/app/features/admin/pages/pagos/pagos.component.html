@@ -163,7 +163,8 @@
               </td>
               <td class="td-acciones">
                 <div class="acciones">
-                  @if (puedeReembolsar(pago)) {
+                  <!-- SPEC 08: reembolsos solo para el dueño. -->
+                  @if (!esRecepcionista() && puedeReembolsar(pago)) {
                     <button
                       class="btn btn--outline btn--sm"
                       type="button"
@@ -174,7 +175,7 @@
                       Reembolsar
                     </button>
                   }
-                  @if (esPagoConFlow(pago)) {
+                  @if (!esRecepcionista() && esPagoConFlow(pago)) {
                     <button
                       class="btn btn--outline btn--sm"
                       type="button"

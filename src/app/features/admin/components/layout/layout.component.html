@@ -7,7 +7,7 @@
     </div>
 
     <nav class="sidebar__nav" aria-label="Panel">
-      @for (item of navItems; track item.route) {
+      @for (item of navItems(); track item.route) {
         <a class="sidebar__link" [routerLink]="item.route" routerLinkActive="sidebar__link--active">
           <mat-icon>{{ item.icon }}</mat-icon>
           <span class="sidebar__link-label">{{ item.label }}</span>
@@ -16,7 +16,11 @@
       @if (auth.esAdmin()) {
         <p class="sidebar__group">Administración</p>
         @for (item of adminNavItems; track item.route) {
-          <a class="sidebar__link" [routerLink]="item.route" routerLinkActive="sidebar__link--active">
+          <a
+            class="sidebar__link"
+            [routerLink]="item.route"
+            routerLinkActive="sidebar__link--active"
+          >
             <mat-icon>{{ item.icon }}</mat-icon>
             <span class="sidebar__link-label">{{ item.label }}</span>
           </a>
@@ -48,18 +52,21 @@
 
   <div class="admin-body">
     <header class="topbar">
+      <!-- SPEC 08: el login del recepcionista no trae el nombre del negocio. -->
       @if (auth.empresa(); as emp) {
-        <div class="empresa-brand">
-          @if (emp.logo) {
-            <img
-              class="empresa-brand__logo"
-              [src]="emp.logo"
-              [alt]="emp.nombreComercial || emp.nombre"
-            />
-          } @else {
-            <span class="empresa-brand__nombre">{{ emp.nombreComercial || emp.nombre }}</span>
-          }
-        </div>
+        @if (emp.logo || emp.nombreComercial || emp.nombre) {
+          <div class="empresa-brand">
+            @if (emp.logo) {
+              <img
+                class="empresa-brand__logo"
+                [src]="emp.logo"
+                [alt]="emp.nombreComercial || emp.nombre"
+              />
+            } @else {
+              <span class="empresa-brand__nombre">{{ emp.nombreComercial || emp.nombre }}</span>
+            }
+          </div>
+        }
       }
       @if (auth.sucursales().length > 0) {
         <div class="sucursal-info">
@@ -117,7 +124,9 @@
         <div class="aviso-suscripcion" role="status">
           <mat-icon class="aviso-suscripcion__icon">info</mat-icon>
           <span class="aviso-suscripcion__texto">{{ suscripcion.avisoTexto() }}</span>
-          @if (auth.esAdmin() && suscripcion.puedePagarPro() && pagoSuscripcion.pagosDisponibles()) {
+          @if (
+            auth.esAdmin() && suscripcion.puedePagarPro() && pagoSuscripcion.pagosDisponibles()
+          ) {
             <button
               type="button"
               class="aviso-suscripcion__pagar"

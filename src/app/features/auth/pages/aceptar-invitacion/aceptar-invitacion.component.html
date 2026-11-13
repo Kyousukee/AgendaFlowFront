@@ -1,0 +1,143 @@
+<div class="auth">
+  <div class="auth__left">
+    <div class="auth__brand">
+      <a routerLink="/" class="auth__logo" aria-label="AgendaFlow, ir al inicio">
+        <img src="logo.png" alt="" class="auth__logo-img" />
+      </a>
+    </div>
+    <img
+      class="auth__photo"
+      src="images/landing/barberia-sillon.webp"
+      alt=""
+      width="1600"
+      height="1067"
+    />
+    <div class="auth__promo">
+      <h1 class="auth__promo-title">Te damos la bienvenida al equipo.</h1>
+      <p class="auth__promo-text">
+        Con tu cuenta agendas clientes y registras pagos en tu sucursal.
+      </p>
+    </div>
+  </div>
+
+  <main class="auth__right">
+    <div class="auth__card">
+      @if (cargando()) {
+        <p class="auth__subtitle" role="status">Revisando tu invitación...</p>
+      } @else if (enlaceInvalido()) {
+        <h2 class="auth__title">No pudimos usar este enlace</h2>
+        <div class="form-error-banner" role="alert">{{ enlaceInvalido() }}</div>
+        <a routerLink="/login" class="btn btn--primary btn--full">Ir a iniciar sesión</a>
+      } @else {
+        @if (invitacion(); as inv) {
+          <h2 class="auth__title">Hola {{ inv.nombre }}, te invitaron a {{ destino(inv) }}</h2>
+          <p class="auth__subtitle">
+            Crea tu contraseña para entrar con {{ inv.email }}. Después también podrás entrar con
+            Google.
+          </p>
+        }
+
+        @if (errorMessage()) {
+          <div class="form-error-banner" role="alert">{{ errorMessage() }}</div>
+        }
+
+        @if (invitacion()) {
+          @let password = form.controls.password;
+          @let confirm = form.controls.confirmPassword;
+          @let passwordError = password.invalid && (password.dirty || password.touched);
+          @let confirmError = (confirm.invalid || form.hasError('noCoinciden')) && confirm.touched;
+
+          <form class="auth__form" [formGroup]="form" (ngSubmit)="onSubmit()">
+            <div class="form-group">
+              <label class="form-label" for="password">Contraseña</label>
+              <div class="form-input-wrapper">
+                <input
+                  id="password"
+                  [type]="showPassword() ? 'text' : 'password'"
+                  class="form-input form-input--password"
+                  formControlName="password"
+                  autocomplete="new-password"
+                  [class.form-input--error]="passwordError"
+                  [attr.aria-invalid]="passwordError"
+                  aria-describedby="password-hint"
+                />
+                <button
+                  type="button"
+                  class="form-input-toggle"
+                  (click)="togglePassword()"
+                  [attr.aria-label]="showPassword() ? 'Ocultar contraseñas' : 'Mostrar contraseñas'"
+                  [attr.aria-pressed]="showPassword()"
+                >
+                  @if (showPassword()) {
+                    <svg
+                      aria-hidden="true"
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path
+                        d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"
+                      />
+                      <line x1="1" y1="1" x2="23" y2="23" />
+                    </svg>
+                  } @else {
+                    <svg
+                      aria-hidden="true"
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                  }
+                </button>
+              </div>
+              <span class="form-error" [class.form-hint]="!passwordError" id="password-hint">
+                De 8 a 72 caracteres.
+              </span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="confirmPassword">Repite la contraseña</label>
+              <input
+                id="confirmPassword"
+                [type]="showPassword() ? 'text' : 'password'"
+                class="form-input"
+                formControlName="confirmPassword"
+                autocomplete="new-password"
+                [class.form-input--error]="confirmError"
+                [attr.aria-invalid]="confirmError"
+                [attr.aria-describedby]="confirmError ? 'confirm-error' : null"
+              />
+              @if (confirmError) {
+                <span class="form-error" id="confirm-error">
+                  {{ confirm.invalid ? 'Repite tu contraseña.' : 'Las contraseñas no coinciden.' }}
+                </span>
+              }
+            </div>
+
+            <button
+              type="submit"
+              class="btn btn--primary btn--full"
+              [disabled]="isLoading()"
+              [attr.aria-busy]="isLoading()"
+            >
+              {{ isLoading() ? 'Entrando...' : 'Crear contraseña y entrar' }}
+            </button>
+          </form>
+        }
+      }
+    </div>
+  </main>
+</div>

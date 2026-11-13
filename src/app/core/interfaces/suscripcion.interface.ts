@@ -1,5 +1,6 @@
 export type PlanSuscripcion = 'Prueba' | 'Gratis' | 'Pro';
-export type RecursoLimitado = 'sucursales' | 'empleados' | 'servicios';
+/** SPEC 08: `recepcionistas` (Gratis 0; Prueba y Pro ilimitado). */
+export type RecursoLimitado = 'sucursales' | 'empleados' | 'servicios' | 'recepcionistas';
 
 export interface Suscripcion {
   plan: PlanSuscripcion;

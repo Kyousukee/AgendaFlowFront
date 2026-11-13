@@ -38,6 +38,7 @@ describe('LayoutComponent: aviso de verificación de email', () => {
           useValue: {
             currentUser,
             actualizarEmailVerificado,
+            esRecepcionista: () => false,
             esAdmin: () => false,
             empresa: signal(null),
             sucursales: signal([]),

@@ -29,6 +29,8 @@ export class PagosComponent {
   private pagosService = inject(PagosService);
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
+  /** SPEC 08: el recepcionista no reembolsa ni ve el historial de reembolsos. */
+  readonly esRecepcionista = this.authService.esRecepcionista;
 
   pagos = signal<Pago[]>([]);
   cargando = signal(true);

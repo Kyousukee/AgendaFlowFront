@@ -97,6 +97,8 @@ export class ConfiguracionComponent {
     { clave: 'sucursales', etiqueta: 'Sucursales' },
     { clave: 'empleados', etiqueta: 'Empleados' },
     { clave: 'servicios', etiqueta: 'Servicios' },
+    // SPEC 08: las invitaciones pendientes también cuentan.
+    { clave: 'recepcionistas', etiqueta: 'Recepcionistas' },
   ];
 
   porcentajeUso(uso: number, limite: number): number {

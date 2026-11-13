@@ -1,0 +1,238 @@
+<div class="dialog agendar">
+  <div class="dialog__header">
+    <h2 class="dialog__title" mat-dialog-title>Agendar cliente</h2>
+    <button type="button" class="dialog__close" (click)="cerrar()" aria-label="Cerrar">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="dialog__form">
+    <div class="form-group">
+      <label class="form-label" for="agendar-servicio">Servicio</label>
+      <select
+        id="agendar-servicio"
+        class="form-input"
+        [formControl]="servicioControl"
+        [attr.aria-busy]="cargandoServicios()"
+      >
+        <option [ngValue]="null" disabled>
+          {{ cargandoServicios() ? 'Cargando servicios...' : 'Elige un servicio' }}
+        </option>
+        @for (s of servicios(); track s.id) {
+          <option [ngValue]="s.id">{{ s.nombre }} · {{ s.duracionMinutos }} min</option>
+        }
+      </select>
+    </div>
+
+    <div class="agendar__modo" role="group" aria-label="Cuándo">
+      <button
+        type="button"
+        class="agendar__modo-btn"
+        [class.agendar__modo-btn--activo]="modo() === 'hoy'"
+        [attr.aria-pressed]="modo() === 'hoy'"
+        (click)="cambiarModo('hoy')"
+      >
+        <mat-icon aria-hidden="true">bolt</mat-icon>
+        Lo antes posible
+      </button>
+      <button
+        type="button"
+        class="agendar__modo-btn"
+        [class.agendar__modo-btn--activo]="modo() === 'otra'"
+        [attr.aria-pressed]="modo() === 'otra'"
+        (click)="cambiarModo('otra')"
+      >
+        <mat-icon aria-hidden="true">event</mat-icon>
+        Otra fecha u hora
+      </button>
+    </div>
+
+    @if (modo() === 'otra') {
+      <div class="form-group">
+        <label class="form-label" for="agendar-fecha">Fecha</label>
+        <input
+          id="agendar-fecha"
+          type="date"
+          class="form-input"
+          [min]="hoy"
+          [formControl]="fechaControl"
+        />
+      </div>
+    }
+
+    @if (errorLista()) {
+      <p class="agendar__error" role="alert">{{ errorLista() }}</p>
+    }
+
+    @if (!barbero()) {
+      @if (!servicioControl.value) {
+        <p class="agendar__vacio">Elige el servicio para ver la próxima hora de cada barbero.</p>
+      } @else if (cargandoProxima()) {
+        <p class="agendar__vacio" role="status">Buscando horas libres...</p>
+      } @else if (proxima(); as datos) {
+        @if (datos.empleados.length === 0) {
+          <p class="agendar__vacio">Nadie en esta sucursal ofrece este servicio.</p>
+        } @else {
+          <ul class="barberos" aria-label="Barberos disponibles">
+            @for (b of datos.empleados; track b.empleadoId) {
+              <li>
+                <button
+                  type="button"
+                  class="barbero"
+                  [class.barbero--pronto]="b.empleadoId === masProntoId()"
+                  [disabled]="b.horaInicio === null"
+                  (click)="elegir(b)"
+                >
+                  @if (b.foto) {
+                    <img class="barbero__foto" [src]="b.foto" alt="" width="44" height="44" />
+                  } @else {
+                    <span class="barbero__foto barbero__foto--iniciales" aria-hidden="true">{{
+                      iniciales(b)
+                    }}</span>
+                  }
+                  <span class="barbero__info">
+                    <span class="barbero__nombre">
+                      {{ nombreBarbero(b) }}
+                      @if (b.empleadoId === masProntoId()) {
+                        <span class="barbero__badge">Más pronto</span>
+                      }
+                    </span>
+                    @if (b.horaInicio) {
+                      <span class="barbero__hora">
+                        {{ capitalizar(diaTexto()) }} a las {{ b.horaInicio }}
+                      </span>
+                    } @else {
+                      <span class="barbero__hora barbero__hora--sin-cupo">
+                        {{ esHoy() ? 'Sin cupo hoy' : 'Sin cupo ese día' }}
+                      </span>
+                    }
+                  </span>
+                  @if (b.horaInicio) {
+                    <span class="barbero__cola">
+                      <span>{{ cola(b.reservasAntes) }}</span>
+                      @if (b.esperaMinutos !== null) {
+                        <span class="barbero__espera">{{ espera(b.esperaMinutos) }}</span>
+                      }
+                    </span>
+                  }
+                </button>
+              </li>
+            }
+          </ul>
+        }
+      }
+    } @else {
+      @let b = barbero()!;
+      <div class="agendar__resumen" aria-live="polite">
+        <mat-icon aria-hidden="true">event_available</mat-icon>
+        <p>
+          <strong>{{ servicio()?.nombre }}</strong> con {{ nombreBarbero(b) }} {{ diaTexto() }} a
+          las <strong>{{ horaFinal() }}</strong>
+          @if (colaConocida()) {
+            — {{ b.reservasAntes === 0 ? 'sin espera' : b.reservasAntes + ' antes' }}
+          }
+        </p>
+        <button type="button" class="btn btn--outline btn--sm" (click)="volverALista()">
+          Cambiar
+        </button>
+      </div>
+
+      <form class="agendar__cliente" [formGroup]="clienteForm" (ngSubmit)="confirmar()">
+        @if (modo() === 'otra') {
+          <div class="form-group">
+            <label class="form-label" for="agendar-hora">Hora</label>
+            <select id="agendar-hora" class="form-input" [formControl]="horaControl">
+              @for (h of horasLibres(); track h) {
+                <option [value]="h">{{ h }}</option>
+              }
+            </select>
+          </div>
+        }
+
+        <div class="form-group">
+          <label class="form-label" for="agendar-nombre">Nombre *</label>
+          <input
+            id="agendar-nombre"
+            type="text"
+            class="form-input"
+            formControlName="nombre"
+            autocomplete="off"
+            [class.form-input--error]="campoInvalido('nombre')"
+            [attr.aria-invalid]="campoInvalido('nombre')"
+            [attr.aria-describedby]="campoInvalido('nombre') ? 'agendar-nombre-error' : null"
+          />
+          @if (campoInvalido('nombre')) {
+            <span class="form-error" id="agendar-nombre-error">Escribe el nombre del cliente.</span>
+          }
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="agendar-telefono">Teléfono</label>
+            <input
+              id="agendar-telefono"
+              type="tel"
+              class="form-input"
+              formControlName="telefono"
+              placeholder="Opcional"
+              autocomplete="off"
+              [class.form-input--error]="campoInvalido('telefono')"
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="agendar-email">Email</label>
+            <input
+              id="agendar-email"
+              type="email"
+              class="form-input"
+              formControlName="email"
+              placeholder="Opcional"
+              autocomplete="off"
+              [class.form-input--error]="campoInvalido('email')"
+              [attr.aria-invalid]="campoInvalido('email')"
+              aria-describedby="agendar-email-ayuda"
+            />
+            <span
+              class="form-error"
+              [class.agendar__ayuda]="!campoInvalido('email')"
+              id="agendar-email-ayuda"
+            >
+              {{
+                campoInvalido('email')
+                  ? 'Revisa el email.'
+                  : 'Si lo dejas, le enviamos la confirmación.'
+              }}
+            </span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="agendar-observacion">Observación</label>
+          <textarea
+            id="agendar-observacion"
+            class="form-textarea"
+            rows="2"
+            formControlName="observacion"
+            placeholder="Opcional"
+          ></textarea>
+        </div>
+
+        @if (errorEnvio()) {
+          <p class="agendar__error" role="alert">{{ errorEnvio() }}</p>
+        }
+
+        <div class="dialog__actions">
+          <button type="button" class="btn btn--secondary" (click)="cerrar()">Cancelar</button>
+          <button
+            type="submit"
+            class="btn btn--primary"
+            [disabled]="enviando() || !horaFinal()"
+            [attr.aria-busy]="enviando()"
+          >
+            {{ enviando() ? 'Agendando...' : 'Agendar' }}
+          </button>
+        </div>
+      </form>
+    }
+  </div>
+</div>

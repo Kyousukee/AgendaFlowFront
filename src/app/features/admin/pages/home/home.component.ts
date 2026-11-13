@@ -3,12 +3,21 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { FormsModule } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Observable } from 'rxjs';
 import { A11yModule } from '@angular/cdk/a11y';
 import { AuthService, SUCURSAL_UPDATED } from '../../../../core/services/auth.service';
 import { ServiciosService } from '../../services/servicios.service';
 import { HorariosService } from '../../services/horarios.service';
 import { ReservasService } from '../../services/reservas.service';
 import { PagosService } from '../../services/pagos.service';
+import { ReservarPublicService } from '../../../reservar/services/reservar-public.service';
+import {
+  AgendarClienteDialogComponent,
+  AgendarClienteDialogData,
+  AgendarClienteDialogResult,
+} from '../../components/agendar-cliente-dialog/agendar-cliente-dialog.component';
 import { Estado } from '../../../../core/interfaces/estado.interface';
 import { Servicio } from '../../../../core/interfaces/servicio.interface';
 import { HorarioSucursal } from '../../interfaces/horario-sucursal.interface';
@@ -60,6 +69,11 @@ export class HomeComponent implements OnInit, OnDestroy {
   private horariosService = inject(HorariosService);
   private reservasService = inject(ReservasService);
   private pagosService = inject(PagosService);
+  private reservarPublic = inject(ReservarPublicService);
+  private dialog = inject(MatDialog);
+  private snackBar = inject(MatSnackBar);
+  /** SPEC 08: el recepcionista no ve reembolsos ni los CRUD del dueño. */
+  readonly esRecepcionista = this.authService.esRecepcionista;
 
   selectedDate = signal(new Date());
   servicios = signal<Servicio[]>([]);
@@ -229,9 +243,20 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.cargando.set(true);
     this.errorCarga.set(false);
 
-    this.serviciosService.getByEmpresa(empresa.id).subscribe({
+    // SPEC 08: el rol 2 no puede usar /servicios ni /sucursales/:id/horarios (solo rol 1); usa
+    // los endpoints públicos de /reservar con su sucursal. Esos no traen "activo": ya vienen
+    // solo los activos.
+    const rol2 = this.esRecepcionista();
+    const servicios$: Observable<Servicio[]> = rol2
+      ? this.reservarPublic.getServiciosByEmpresa(empresa.id)
+      : this.serviciosService.getByEmpresa(empresa.id);
+    const horarios$: Observable<HorarioSucursal[]> = rol2
+      ? this.reservarPublic.getHorariosBySucursal(sucursal.id)
+      : this.horariosService.getBySucursal(sucursal.id);
+
+    servicios$.subscribe({
       next: (servicios) => {
-        this.servicios.set(servicios.filter((s) => s.activo));
+        this.servicios.set(servicios.filter((s) => s.activo !== false));
       },
       error: () => {
         this.servicios.set([]);
@@ -239,7 +264,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       },
     });
 
-    this.horariosService.getBySucursal(sucursal.id).subscribe({
+    horarios$.subscribe({
       next: (horarios) => this.horarios.set(horarios),
       error: () => {
         this.horarios.set([]);
@@ -280,10 +305,44 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.selectedDate.set(d);
   }
 
+  /**
+   * SPEC 08: agenda al cliente que está en el local (o al teléfono) en el primer hueco del
+   * barbero que elija. Al terminar recarga la agenda.
+   */
+  abrirAgendar(): void {
+    const empresa = this.authService.empresa();
+    const sucursal = this.authService.sucursalActual();
+    if (!empresa || !sucursal) return;
+    this.dialog
+      .open<AgendarClienteDialogComponent, AgendarClienteDialogData, AgendarClienteDialogResult>(
+        AgendarClienteDialogComponent,
+        {
+          data: { empresaId: empresa.id, sucursalId: sucursal.id },
+          panelClass: 'dialog-panel',
+          width: '600px',
+        },
+      )
+      .afterClosed()
+      .subscribe((resultado) => {
+        if (!resultado) return;
+        const mensaje = resultado.conEmail
+          ? 'Reserva agendada. Le enviamos la confirmación.'
+          : 'Reserva agendada';
+        this.snackBar.open(mensaje, 'Cerrar', { duration: 5000 });
+        this.cargarReservas();
+      });
+  }
+
+  /** SPEC 08: reserva agendada desde el panel (presencial o por teléfono). */
+  esPresencial(reserva: Reserva): boolean {
+    return reserva.origen === 'Panel';
+  }
+
   getLinkReserva(): string {
     const empresa = this.authService.empresa();
     const sucursal = this.authService.sucursalActual();
-    if (!empresa || !sucursal) return '';
+    // El recepcionista no conoce el slug de la empresa (no llega en su login).
+    if (!empresa?.slug || !sucursal) return '';
     const base = typeof window !== 'undefined' ? window.location.origin : '';
     return `${base}/reservar/${empresa.slug}/${sucursal.id}`;
   }

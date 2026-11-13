@@ -5,6 +5,10 @@
       <p class="page-subtitle">Las citas y las horas libres del día que elijas</p>
     </div>
     <div class="page-actions">
+      <button type="button" class="btn btn--primary" (click)="abrirAgendar()">
+        <mat-icon>person_add</mat-icon>
+        Agendar cliente
+      </button>
       <button class="btn btn--outline" (click)="diaAnterior()" aria-label="Día anterior">
         <mat-icon>chevron_left</mat-icon>
       </button>
@@ -119,6 +123,9 @@
                             <div class="slot__item-main">
                               <span class="slot__servicio">{{ item.servicio.nombre }}</span>
                               <span class="slot__cliente">{{ item.cliente }}</span>
+                              @if (item.reserva && esPresencial(item.reserva)) {
+                                <span class="slot__presencial">Presencial</span>
+                              }
                               @if (item.reserva && esperandoPago(item.reserva)) {
                                 <span class="slot__esperando-pago">
                                   <mat-icon aria-hidden="true">hourglass_top</mat-icon>
@@ -207,6 +214,17 @@
                   <span class="modal__resumen-label">Monto</span>
                   <span class="modal__resumen-value modal__resumen-value--gold">{{ formatearPrecio(reserva.precio) }}</span>
                 </div>
+                @if (esPresencial(reserva)) {
+                  <div class="modal__resumen-row">
+                    <span class="modal__resumen-label">Origen</span>
+                    <span class="modal__resumen-value">
+                      <span class="slot__presencial">Presencial</span>
+                      @if (reserva.usuarioCreador) {
+                        Agendó: {{ reserva.usuarioCreador.nombre }}
+                      }
+                    </span>
+                  </div>
+                }
               </div>
 
               @if (tienePago(reserva)) {
@@ -246,8 +264,12 @@
                       @let estadosEditables = estadosPagoEditables(pago);
                       @if (esPagoFlow(pago.metodoPago)) {
                         <p class="modal__nota">
-                          Flow actualiza este pago solo. Para devolverlo, usa "Reembolsar" en
-                          Pagos.
+                          @if (esRecepcionista()) {
+                            Flow actualiza este pago solo. Si hay que devolverlo, avisa al dueño.
+                          } @else {
+                            Flow actualiza este pago solo. Para devolverlo, usa "Reembolsar" en
+                            Pagos.
+                          }
                         </p>
                       }
                       @if (estadosEditables.length > 0) {

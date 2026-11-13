@@ -1,0 +1,206 @@
+// Agendar cliente desde el panel (SPEC 08). Armazón y campos: features/admin/styles/_admin.scss.
+
+.agendar__modo {
+  display: flex;
+  gap: 6px;
+  padding: 4px;
+  border-radius: var(--radius-md);
+  background: var(--bg-surface-elevated);
+}
+
+.agendar__modo-btn {
+  display: inline-flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: var(--target-min);
+  padding: 6px 10px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 1.125rem;
+  }
+
+  &:hover {
+    color: var(--text-primary);
+  }
+
+  &--activo {
+    background: var(--bg-surface);
+    color: var(--text-primary);
+  }
+}
+
+.agendar__vacio {
+  padding: 16px 0;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.agendar__error {
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--error-surface);
+  color: var(--error-text);
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.agendar__ayuda {
+  color: var(--text-muted);
+}
+
+.barberos {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.barbero {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out);
+
+  &:hover:not(:disabled) {
+    border-color: var(--gold);
+    background: var(--bg-surface-hover);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+
+  &--pronto {
+    border-color: var(--gold);
+  }
+}
+
+.barbero__foto {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+
+  &--iniciales {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-surface-elevated);
+    color: var(--gold);
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+}
+
+.barbero__info {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.barbero__nombre {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.barbero__badge {
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--gold);
+  color: var(--on-gold);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.barbero__hora {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+
+  &--sin-cupo {
+    color: var(--text-muted);
+  }
+}
+
+.barbero__cola {
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.barbero__espera {
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.agendar__resumen {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  background: var(--bg-surface-elevated);
+  font-size: 0.9375rem;
+  line-height: 1.45;
+
+  mat-icon {
+    flex-shrink: 0;
+    color: var(--gold);
+  }
+
+  p {
+    flex: 1;
+    margin: 0;
+  }
+}
+
+.agendar__cliente {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}

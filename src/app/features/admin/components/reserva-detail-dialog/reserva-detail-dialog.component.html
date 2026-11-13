@@ -28,6 +28,22 @@
           <span class="detail-value">{{ formatearHora(data.reserva.horaInicio) }} - {{ formatearHora(data.reserva.horaFin) }}</span>
         </div>
       </div>
+      <!-- SPEC 08: reserva agendada desde el panel y quién la agendó. -->
+      @if (data.reserva.origen === 'Panel') {
+        <div class="detail-row">
+          <mat-icon>storefront</mat-icon>
+          <div class="detail-content">
+            <span class="detail-label">Presencial</span>
+            <span class="detail-value">
+              @if (data.reserva.usuarioCreador) {
+                Agendó: {{ data.reserva.usuarioCreador.nombre }}
+              } @else {
+                Agendada desde el panel
+              }
+            </span>
+          </div>
+        </div>
+      }
       @if (data.reserva.observacion) {
         <div class="detail-row">
           <mat-icon>notes</mat-icon>

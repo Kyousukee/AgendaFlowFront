@@ -36,7 +36,7 @@ export class LayoutComponent {
   reenviando = signal(false);
   mensajeReenvio = signal('');
 
-  navItems = [
+  private readonly navDueno = [
     { label: 'Inicio', icon: 'dashboard', route: '/admin/home' },
     { label: 'Horarios', icon: 'schedule', route: '/admin/horarios' },
     { label: 'Empleados', icon: 'people', route: '/admin/empleados' },
@@ -45,8 +45,19 @@ export class LayoutComponent {
     { label: 'Pagos', icon: 'payments', route: '/admin/pagos' },
   ];
 
+  /** SPEC 08: el recepcionista solo opera la agenda y los pagos de su sucursal. */
+  private readonly navRecepcionista = [
+    { label: 'Agenda', icon: 'dashboard', route: '/admin/home' },
+    { label: 'Pagos', icon: 'payments', route: '/admin/pagos' },
+  ];
+
+  navItems = computed(() =>
+    this.auth.esRecepcionista() ? this.navRecepcionista : this.navDueno,
+  );
+
   adminNavItems = [
     { label: 'Sucursales', icon: 'store', route: '/admin/sucursales' },
+    { label: 'Equipo', icon: 'badge', route: '/admin/equipo' },
     { label: 'Configuración', icon: 'settings', route: '/admin/configuracion' },
   ];
 

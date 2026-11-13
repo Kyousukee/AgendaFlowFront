@@ -36,6 +36,15 @@
         ],
         "createdAt": "2026-11-12T12:17:32.360Z",
         "reason": "model: pre-existing <img [src]=src> Angular binding for the logo preview, not an empty src"
+      },
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": [
+          "src/app/features/admin/components/agendar-cliente-dialog/agendar-cliente-dialog.component.html"
+        ],
+        "createdAt": "2026-11-13T13:22:35.095Z",
+        "reason": "model: src is the Angular binding [src]=\"b.foto\", rendered only inside @if (b.foto)"
       }
     ]
   }

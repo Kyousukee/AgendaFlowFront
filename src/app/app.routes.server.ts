@@ -34,6 +34,11 @@ export const serverRoutes: ServerRoute[] = [
     path: 'restablecer-contrasena',
     renderMode: RenderMode.Client,
   },
+  // SPEC 08: invitación del recepcionista, con el token en la URL.
+  {
+    path: 'invitacion',
+    renderMode: RenderMode.Client,
+  },
   // Depende del registro con Google pendiente, que solo existe en la memoria del navegador.
   {
     path: 'registro-google',

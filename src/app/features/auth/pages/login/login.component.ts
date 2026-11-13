@@ -25,6 +25,8 @@ export class LoginComponent {
   /** Login normal rechazado: puede ser una cuenta creada con Google, que no tiene contraseña. */
   sugerirAlternativas = signal(false);
   contrasenaRestablecida = signal(this.route.snapshot.queryParamMap.get('restablecida') === '1');
+  /** SPEC 08: la API respondió 401 con la sesión abierta (vencida, desactivada o movida). */
+  sesionTerminada = signal(this.route.snapshot.queryParamMap.get('sesion') === 'terminada');
 
   form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -35,6 +37,7 @@ export class LoginComponent {
     this.errorMessage.set('');
     this.sugerirAlternativas.set(false);
     this.contrasenaRestablecida.set(false);
+    this.sesionTerminada.set(false);
   }
 
   onGoogleError(err: ErrorAutenticacion): void {
